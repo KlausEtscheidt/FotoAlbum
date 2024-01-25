@@ -81,7 +81,7 @@ def run_app():
     # app = wx.App()
     app = myApp()
     #Erzeuge Basis-Frame
-    conf.mainframe = MainFrame(None, title='KE`s Alben-Zerleger', size=(800, 600), pos=(20, 20))
+    conf.mainframe = MainFrame(None, title='KE`s Alben-Zerleger', size=(800, 800), pos=(20, 20))
     conf.mainframe.Show()
     logger.debug('Starte Programm')
 

@@ -6,7 +6,7 @@ import getpass
 import platform
 
 BILD_MIN = 0
-BILD_MAX = 2
+BILD_MAX = 1
 
 pic_type = '.tif'
 pic_subdir = '1960'  

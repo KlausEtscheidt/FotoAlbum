@@ -1,7 +1,12 @@
 import glob 
 import os
+import logging
 
 import wx
+
+import config as conf
+
+logger = logging.getLogger('album')
 
 #######################################################################################
 #
@@ -12,10 +17,20 @@ class Bild():
         self.basename, self.typ = os.path.splitext(self.picname)
         self.__image = None
 
-    def show(self, imagectrl):
+    def show(self):
         myimage = self.image#.Scale(500, 500)
         mybitmap = myimage.ConvertToBitmap()
-        imagectrl.SetBitmap(mybitmap)
+        # imagectrl.SetBitmap(mybitmap)
+        # conf.mainframe.imagepanel.center_bitmap()
+        conf.mainframe.imagepanel.bitmap=mybitmap
+    
+    def scale_percent(self, faktor):
+        myimage = self.image
+        new_w = int(myimage.Width * faktor)
+        new_h = int(myimage.Height * faktor)
+        self.image = myimage.Scale(new_w, new_h)
+        logger.debug(f'\nnew size: br {new_w} h: {new_h}\n')
+
 
     @property
     def image(self):
@@ -23,10 +38,9 @@ class Bild():
             self.__image = wx.Image(self.fullpath2pic, wx.BITMAP_TYPE_ANY)
         return self.__image
         
-    #nur code beispiel hier ohne sinn
-    # @image.setter
-    # def image(self, x):
-    #     self.__image = x
+    @image.setter
+    def image(self, x):
+        self.__image = x
 
 #######################################################################################
 #
