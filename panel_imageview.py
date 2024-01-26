@@ -26,7 +26,7 @@ class ImagePanel(scrolledp.ScrolledPanel):
         self.__bitmap = None
         self.__mouseclicks = 0
         self.__pos = []
-        
+        self.rand = 10  #rand um imagectrl
         # Haupt-Image-control
         self.imagectrl = wx.Panel(self, -1, size=(1500, 3000) )
         self.imagectrl.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
@@ -35,7 +35,7 @@ class ImagePanel(scrolledp.ScrolledPanel):
 
         # Gesamt-Layout (Textctrl und searchbox)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.main_sizer.Add(self.imagectrl, proportion=1, flag=wx.ALL|wx.EXPAND, border=10)
+        self.main_sizer.Add(self.imagectrl, proportion=1, flag=wx.ALL|wx.EXPAND, border=50)
 
         # Sizer für Gesamt-Panel zuteilen
         self.SetSizer(self.main_sizer)
@@ -76,20 +76,20 @@ class ImagePanel(scrolledp.ScrolledPanel):
         # self.status = 'Start'
 
     def rahmen(self):
-        msg = f'x1 { self.__pos[0].x} y1 { self.__pos[0].y} '
-        logger.debug(msg + f'x2 { self.__pos[1].x} y2 { self.__pos[1].y}')
         self.__seite.show_framed(self.__pos[0], self.__pos[1])
         self.__pos = []
+
 
     # ------------------------------------------------------
     # Event handling
     # ------------------------------------------------------
+    
     def OnPaint(self, event=None):
         dc = wx.PaintDC(self.imagectrl)
         dc.Clear()
         dc.SetPen(wx.Pen(wx.RED, 4))
         if self.__bitmap:
-            dc.DrawBitmap ( self.__bitmap, 20, 20, useMask=False)
+            dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
         dc.DrawLine(0,0,1000,1200)        
 
     def OnPressMouse(self, event):
@@ -97,6 +97,7 @@ class ImagePanel(scrolledp.ScrolledPanel):
         self.__pos.append(pos)
         self.__mouseclicks += 1
         conf.mainframe.SetStatusText(f'x:{pos.x} y:{pos.y}')
+        logger.debug(f'Mausklick bei x:{pos.x} y:{pos.y}\n')
 
     def OnMouseEnter(self, evt):
         self.SetFocusIgnoringChildren()

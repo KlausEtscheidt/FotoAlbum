@@ -11,6 +11,7 @@ logger = logging.getLogger('album')
 
 class Seite():
 
+    imagepanel = None
     imagectrl = None
 
     def __init__(self, bild):
@@ -19,26 +20,32 @@ class Seite():
 
     def show_origbild(self):
         bitmap = self.__origbild.scaled_bitmap(0.1)
-        conf.mainframe.imagepanel.show_pic(bitmap)
+        self.imagepanel.show_pic(bitmap)
 
     def show_framed(self, pos1, pos2):
         #Skalierung beachten
-        pos1.x = int(pos1.x  / self.base_scale)
-        pos1.y = int(pos1.y  / self.base_scale)
-        pos2.x = int(pos2.x  / self.base_scale)
-        pos2.y = int(pos2.y  / self.base_scale)
-        bitmap = self.__origbild.crop(pos1, pos2, self.base_scale)
-        conf.mainframe.imagepanel.show_pic(bitmap)
+        p1 = self.koor_trans(pos1)
+        p2 = self.koor_trans(pos2)
+        bitmap = self.__origbild.crop(p1, p2, 10*self.base_scale)
+        self.imagepanel.show_pic(bitmap)
+
+    def koor_trans(self, p):
+        p_trans = wx.Point(0,0)
+        rand = self.imagepanel.rand
+        p_trans.x = int( (p.x - rand) / self.base_scale)
+        p_trans.y = int( (p.y - rand) / self.base_scale)
+        return p_trans
 
 class Seiten(BilderListe):
 
     seiten_nr = 0
 
-    def __init__(self, imagectrl):
+    def __init__(self, imagepanel):
         
         super().__init__(conf.pic_path, conf.pic_type)
 
-        Seite.imagectrl = imagectrl
+        Seite.imagepanel = imagepanel
+        Seite.imagectrl = imagepanel.imagectrl
 
         # self.seiten = BilderListe(conf.pic_path, conf.pic_type)
         msg = f'Liste mit {len(self):d} Bildern geladen.'

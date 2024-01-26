@@ -27,9 +27,12 @@ class Bild():
         return new_image.ConvertToBitmap()
 
     def crop(self, pos1, pos2, faktor):
+        logger.debug(f'crop x1 {pos1.x} y1 {pos1.y} x2 { pos2.x} y2 { pos2.y}')
         w = pos2.x - pos1.x
         h = pos2.y - pos1.y
-        new_image = self.image.Resize( (w,h) , pos1)
+        size = wx.Size(w,h)
+        pkt = wx.Point(-pos1.x, -pos1.y)
+        new_image = self.image.Resize(size, pkt)
         new_w = int(new_image.Width * faktor)
         new_h = int(new_image.Height * faktor)
         new_image = new_image.Scale(new_w, new_h)
