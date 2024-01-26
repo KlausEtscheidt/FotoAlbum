@@ -19,7 +19,7 @@ def init(parent, pMenu):
         parent.Bind(wx.EVT_MENU, mItem[0], m)
 
 def OnStart(_event):
-    seite.main_loop()
+    conf.mainframe.imagepanel.start_bearbeiten()
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()

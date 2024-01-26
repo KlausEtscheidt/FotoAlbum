@@ -6,10 +6,10 @@ import getpass
 import platform
 
 BILD_MIN = 0
-BILD_MAX = 1
+BILD_MAX = 2 #None
 
 pic_type = '.tif'
-pic_subdir = '1960'  
+pic_subdir = 'testpics'  
 
 #Rechnername
 rechner = platform.node()
@@ -19,7 +19,7 @@ print(rechner )
 if rechner == 'PC21-0018':
     pic_basispfad = r'C:\Users\Etscheidt\Pictures'  
 else:
-    pic_basispfad = r'C:\Users\Etscheidt\Pictures'  
+    pic_basispfad = r'C:\Users\Klaus\Pictures'  
 
 pic_path = os.path.join(pic_basispfad,pic_subdir) 
 

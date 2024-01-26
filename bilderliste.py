@@ -16,20 +16,24 @@ class Bild():
         self.path, self.picname = os.path.split(self.fullpath2pic)
         self.basename, self.typ = os.path.splitext(self.picname)
         self.__image = None
+        # self.__bitmap = None
 
-    def show(self):
-        myimage = self.image#.Scale(500, 500)
-        mybitmap = myimage.ConvertToBitmap()
-        # imagectrl.SetBitmap(mybitmap)
-        # conf.mainframe.imagepanel.center_bitmap()
-        conf.mainframe.imagepanel.bitmap=mybitmap
-    
-    def scale_percent(self, faktor):
+    def scaled_bitmap(self, faktor):
         myimage = self.image
         new_w = int(myimage.Width * faktor)
         new_h = int(myimage.Height * faktor)
-        self.image = myimage.Scale(new_w, new_h)
+        new_image = myimage.Scale(new_w, new_h)
         logger.debug(f'\nnew size: br {new_w} h: {new_h}\n')
+        return new_image.ConvertToBitmap()
+
+    def crop(self, pos1, pos2, faktor):
+        w = pos2.x - pos1.x
+        h = pos2.y - pos1.y
+        new_image = self.image.Resize( (w,h) , pos1)
+        new_w = int(new_image.Width * faktor)
+        new_h = int(new_image.Height * faktor)
+        new_image = new_image.Scale(new_w, new_h)
+        return new_image.ConvertToBitmap()
 
 
     @property
@@ -37,7 +41,7 @@ class Bild():
         if not self.__image: 
             self.__image = wx.Image(self.fullpath2pic, wx.BITMAP_TYPE_ANY)
         return self.__image
-        
+
     @image.setter
     def image(self, x):
         self.__image = x
