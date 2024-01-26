@@ -19,8 +19,10 @@ logger = logging.getLogger('album')
 # Ermöglicht Auto-Start bei OnEventLoopEnter, also nach myApp.MainLoop()
 class myApp(wx.App):
     def OnEventLoopEnter(self, loop):
-        # seite.main_loop()
-        conf.mainframe.imagepanel.start_bearbeiten()
+        #Tiff dateien suchen
+        conf.mainframe.imagepanel.dateiliste_erstellen()
+        #Erste Seite bearbeiten
+        conf.mainframe.imagepanel.seite_bearbeiten(0)
         return super().OnEventLoopEnter(loop)
 
 class MainFrame(wx.Frame):

@@ -11,6 +11,8 @@ BILD_MAX = 2 #None
 pic_type = '.tif'
 pic_subdir = 'testpics'  
 
+SCALE_SEITE= 0.1 #Fuer erste Anzeige kompletter Seite
+
 #Rechnername
 rechner = platform.node()
 print(rechner )
@@ -23,6 +25,7 @@ else:
 
 pic_path = os.path.join(pic_basispfad,pic_subdir) 
 
+# ----------------- globals
 #Hauptframe, wird vom Hauptprogramm gefüllt
 mainframe = None
 

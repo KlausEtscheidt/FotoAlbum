@@ -19,7 +19,10 @@ def init(parent, pMenu):
         parent.Bind(wx.EVT_MENU, mItem[0], m)
 
 def OnStart(_event):
-    conf.mainframe.imagepanel.start_bearbeiten()
+    #Tiff dateien suchen
+    conf.mainframe.imagepanel.dateiliste_erstellen()
+    #Erste Seite bearbeiten
+    conf.mainframe.imagepanel.seite_bearbeiten(0)
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()
