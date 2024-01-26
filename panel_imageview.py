@@ -9,10 +9,12 @@ from seite import Seiten, Seite
 
 logger = logging.getLogger('album')
 
-# class ImagePanel(wx.Panel):
+class ImagePanelOuter(scrolledp.ScrolledPanel):
+    def __init__(self, parent, page_id):
+        scrolledp.ScrolledPanel.__init__(self, parent=parent)
+
 class ImagePanel(scrolledp.ScrolledPanel):
     def __init__(self, parent, page_id):
-        # wx.Panel.__init__(self, parent=parent)
         scrolledp.ScrolledPanel.__init__(self, parent=parent)
 
         self.parent = parent
@@ -28,15 +30,29 @@ class ImagePanel(scrolledp.ScrolledPanel):
         self.__mouseclicks = 0
         self.__pos = [] #speichert mausklicks
         self.rand = 10  #rand um imagectrl
+        self.define_ctrls()
+
+    def define_ctrls(self):
+
         # Haupt-Image-control
         self.imagectrl = wx.Window(self, -1, size=(1500, 3000) )
         self.imagectrl.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
-        self.SetFocus() #Einmal Focus auf self, damit key-events empfangen werden
+        self.SetFocus() # Einmal Focus auf self, damit key-events empfangen werden
 
-        #-------------------------------------------------------
-
-        # Gesamt-Layout (Textctrl und searchbox)
+        #-------------------------------------------------------------------
+        # Buttons
+        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_sizer_i = wx.BoxSizer(wx.HORIZONTAL)
+        self.next_btn = wx.Button(self, -1, '>>')
+        self.prev_btn = wx.Button(self, -1, '<<')
+        # self.button_sizer.AddStretchSpacer()
+        self.button_sizer_i.Add(self.prev_btn, flag=wx.LEFT|wx.ALIGN_CENTER, border=5)
+        self.button_sizer_i.Add(self.next_btn, flag=wx.LEFT|wx.ALIGN_CENTER, border=5)
+        self.button_sizer.Add(self.button_sizer_i, flag=wx.LEFT|wx.ALIGN_CENTER, border=100)
+        # self.button_sizer.AddStretchSpacer()
+        # Gesamt-Layout
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer.Add(self.button_sizer, proportion=0, flag=wx.ALL|wx.ALIGN_TOP, border=1)
         self.main_sizer.Add(self.imagectrl, proportion=1, flag=wx.ALL|wx.EXPAND, border=1)
 
         # Sizer für Gesamt-Panel zuteilen
@@ -55,6 +71,7 @@ class ImagePanel(scrolledp.ScrolledPanel):
         #Damit Panel den Fokus bekommt (fuer keypress)
         # self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
 
+        
     def seite_bearbeiten_next(self):
         if self.__seiten_nr < len(self.__seiten)-1:
             self.__seiten_nr += 1
@@ -79,33 +96,49 @@ class ImagePanel(scrolledp.ScrolledPanel):
         self.imagectrl.Refresh()
         wx.Yield()
 
-    #Funktion wird von Key-Event 'space' aufgerufen
+    # Funktion wird von Key-Event 'space' aufgerufen
     # Pruefen, was als naechstes zu tun ist
     def weiter(self):
-        # self.seite_bearbeiten_next()
-        # return
         if self.__status == 'Start Seite':
             # Haben wir zwei Punkte geklickt
             if len(self.__pos) == 2:
-                # Skalierung in der Anzeige beachten
-                p1 = self.koor_trans(self.__pos[0])
-                p2 = self.koor_trans(self.__pos[1])
                 #Foto erzeugen und ablegen
-                self.__seite.foto_dazu(p1, p2)
-                self.__seite.zeige_ecke3()
+                self.__seite.foto_dazu(self.__pos[0], self.__pos[1])
                 # self.__seite.show_origbild()
                 # Mauspunkte loeschen
                 self.__pos = []
                 # Weiter mit exakter Eckendefinition
-                self.__status == '1. Ecke'
+                self.__status = 'Ecke1'
+                self.__seite.zeige_ecke1()
             else:
                 msg = f'Status: {self.__status}. Erst Rahmen klicken.'
                 wx.MessageBox(msg, 'Fehler!', wx.OK|wx.ICON_INFORMATION)
 
+        elif self.__status == 'Ecke1':
+                self.__seite.speichere_ecke1(self.__pos[0])
+                self.__pos = []
+                self.__status = 'Ecke2'
+                self.__seite.zeige_ecke2()
+
+        elif self.__status == 'Ecke2':
+                self.__seite.speichere_ecke2(self.__pos[0])
+                self.__pos = []
+                self.__status = 'Ecke3'
+                self.__seite.zeige_ecke3()
+
+        elif self.__status == 'Ecke3':
+                self.__seite.speichere_ecke3(self.__pos[0])
+                self.__pos = []
+                self.__status = 'Ende Seite'
+                self.__seite.ausgeben()
+
+        elif self.__status == 'Ende Seite':
+            self.seite_bearbeiten_next()
+
     # ------------------------------------------------------
     # Event handling
     # ------------------------------------------------------
-    
+
     def OnPaint(self, event=None):
         dc = wx.PaintDC(self.imagectrl)
         dc.Clear()
@@ -116,6 +149,10 @@ class ImagePanel(scrolledp.ScrolledPanel):
 
     def OnPressMouse(self, event):
         pos = event.GetPosition()
+        # Rand berücksichtigen
+        pos.x -= self.rand
+        pos.y -= self.rand
+        # merken
         self.__pos.append(pos)
         self.__mouseclicks += 1
         conf.mainframe.SetStatusText(f'x:{pos.x} y:{pos.y}')
@@ -135,22 +172,13 @@ class ImagePanel(scrolledp.ScrolledPanel):
             print("you pressed the spacebar!")
             # self.next_bearbeiten()
             self.weiter()
-            
+
         event.Skip()
         conf.mainframe.SetStatusText(str(keycode))
-
-    # def OnRMouseClick(self, event):
-    #     m_pos = event.GetPosition()  # Pixel-Koordinaten
-    #     _p, _x, y = self.txtctrl.HitTest(m_pos) #Text-Koord
-    #     myfilepath = self.txtctrl.GetLineText(y)
-    #     self.selected_file = myfilepath
 
     #     menu = self.MakePopUpMenu()
     #     self.PopupMenu(menu, m_pos)
 
-
-
-        
     # ------------------------------------------------------
     # High-Level Funktionen
     # ------------------------------------------------------
@@ -162,10 +190,4 @@ class ImagePanel(scrolledp.ScrolledPanel):
     #Seite anzeigen
     def Activate(self):
         self.parent.SetSelection(self.id)
-
-    def koor_trans(self, p):
-        p_trans = wx.Point(0,0)
-        p_trans.x = int( (p.x - self.rand) / conf.SCALE_SEITE)
-        p_trans.y = int( (p.y - self.rand) / conf.SCALE_SEITE)
-        return p_trans
 

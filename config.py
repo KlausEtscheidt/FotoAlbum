@@ -9,9 +9,11 @@ BILD_MIN = 0
 BILD_MAX = 2 #None
 
 pic_type = '.tif'
-pic_subdir = 'testpics'  
+pic_subdir = 'testpics'
+pic_output = 'zerlegt'
 
-SCALE_SEITE= 0.1 #Fuer erste Anzeige kompletter Seite
+SCALE_SEITE = 0.1 # Fuer erste Anzeige kompletter Seite
+SCALE_ECKE  = 0.5 #  Fuers Setzen der Ecken
 
 #Rechnername
 rechner = platform.node()
@@ -23,19 +25,11 @@ if rechner == 'PC21-0018':
 else:
     pic_basispfad = r'C:\Users\Klaus\Pictures'  
 
-pic_path = os.path.join(pic_basispfad,pic_subdir) 
+pic_path = os.path.join(pic_basispfad, pic_subdir) 
 
 # ----------------- globals
 #Hauptframe, wird vom Hauptprogramm gefüllt
 mainframe = None
-
-# ----------------ab hier nur beispiel ----------------
-#gueltige extensions
-raw_pic_ext = ('.cr2', '.orf')
-sidecar_ext = ('.pp3', '.xmp')
-jpg_pic_ext = ('.jpg',)
-pic_ext = raw_pic_ext + sidecar_ext + jpg_pic_ext
-#pic_ext = ('.jpg', '.cr2', '.orf', '.pp3')
 
 ##Pfade
 # Basis-Verzeichnis

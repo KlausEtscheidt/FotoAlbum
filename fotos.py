@@ -1,6 +1,7 @@
 import glob 
 import os
 import logging
+import math
 
 import wx
 
@@ -46,6 +47,9 @@ class KEImage():
         copy = self.image.Copy()
         return copy.Resize(size, pkt)
 
+    def rotate(self, winkel, p0, interpol ):
+        return self.image.Rotate(winkel, p0, interpol)
+
     def save(self, fname):
         self.image.SaveFile(fname)
 
@@ -69,9 +73,38 @@ class Foto(KEImage):
         super(Foto,self).__init__(None)
 
         self.parent = parent # umgebenden Seite
-        self.p1 = p1
-        self.p2 = p2
+        self.p1 = p1 # äußerer Rahmen links oben
+        self.p2 = p2 # äußerer Rahmen rechts unten
+        self.ecke1 = None
+        self.ecke2 = None
+        self.ecke3 = None
         self.__image = None
+
+    @property
+    def drehung(self):
+        dy = self.ecke2.y - self.ecke1.y
+        dx = self.ecke2.x - self.ecke1.x
+        return math.atan2(dy, dx)
+
+    @property
+    def breite(self):
+        dy = self.ecke2.y - self.ecke1.y
+        dx = self.ecke2.x - self.ecke1.x
+        return int(math.sqrt(dx*dx + dy*dy))
+
+    @property
+    def hoehe(self):
+        dy = self.ecke2.y - self.ecke3.y
+        dx = self.ecke2.x - self.ecke3.x
+        return int(math.sqrt(dx*dx + dy*dy))
+
+    @property
+    def x0(self):
+        return self.ecke1.x
+
+    @property
+    def y0(self):
+        return self.ecke1.y
 
     @property
     def image(self):
@@ -89,3 +122,9 @@ class Foto(KEImage):
  
     def free_image(self):
         self.image = None
+
+    def __str__(self):
+        txt = f'x0 {self.x0} y0 {self.y0} breit {self.breite} hoch {self.hoehe}'
+        txt += f' winkel {self.drehung:5.4f}'
+        # txt += f'winkel {self.drehung*math.Pi/180.}'
+        return txt
