@@ -9,10 +9,10 @@ import logging
 import alb_logging
 
 from panel_log import LogPanel
-from panel_imageview import ImagePanel
+from panel_imageview import ImagePanelOuter
 import menu_file
 import menu_div
-import seite
+import ablauf
 
 logger = logging.getLogger('album')
 
@@ -20,9 +20,9 @@ logger = logging.getLogger('album')
 class myApp(wx.App):
     def OnEventLoopEnter(self, loop):
         #Tiff dateien suchen
-        conf.mainframe.imagepanel.dateiliste_erstellen()
+        conf.imagepanel.ablauf.dateiliste_erstellen()
         #Erste Seite bearbeiten
-        conf.mainframe.imagepanel.seite_bearbeiten(0)
+        conf.imagepanel.ablauf.seite_bearbeiten(0)
         return super().OnEventLoopEnter(loop)
 
 class MainFrame(wx.Frame):
@@ -36,7 +36,7 @@ class MainFrame(wx.Frame):
         nb = wx.Notebook(p)
 
         # create the page windows as children of the notebook
-        self.imagepanel = ImagePanel(nb, page_id=0)
+        self.imagepanel = ImagePanelOuter(nb, page_id=0)
         self.logpanel = LogPanel(nb, page_id=1)
 
         # add the pages to the notebook with the label to show on the tab
@@ -86,6 +86,8 @@ def run_app():
     #Erzeuge Basis-Frame
     conf.mainframe = MainFrame(None, title='KE`s Alben-Zerleger', size=(800, 800), pos=(20, 20))
     conf.mainframe.Show()
+    conf.mainframe.SetTransparent(254)
+    conf.imagepanel = conf.mainframe.imagepanel.ipanel
     logger.debug('Starte Programm')
 
     #Endlos-Schleife

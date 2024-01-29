@@ -30,6 +30,7 @@ pic_path = os.path.join(pic_basispfad, pic_subdir)
 # ----------------- globals
 #Hauptframe, wird vom Hauptprogramm gefüllt
 mainframe = None
+imagepanel = None
 
 ##Pfade
 # Basis-Verzeichnis

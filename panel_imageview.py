@@ -5,39 +5,18 @@ import wx.lib.scrolledpanel as scrolledp
 
 import config as conf
 import filedrop
-from seite import Seiten, Seite
+from seite import Seiten
+from ablauf import Ablauf
 
 logger = logging.getLogger('album')
 
-class ImagePanelOuter(scrolledp.ScrolledPanel):
-    def __init__(self, parent, page_id):
-        scrolledp.ScrolledPanel.__init__(self, parent=parent)
 
-class ImagePanel(scrolledp.ScrolledPanel):
+class ImagePanelOuter(wx.Window):
     def __init__(self, parent, page_id):
-        scrolledp.ScrolledPanel.__init__(self, parent=parent)
-
+        wx.Window.__init__(self, parent=parent)
+        
         self.parent = parent
         self.id = page_id #id merken zum Umschalten per SetSelection
-
-        #add drop target
-        file_drop_target = filedrop.MyFileDropTarget(self)
-        self.__seiten = None
-        self.__seite = None
-        self.__status = 'Start Seite'
-        self.__seiten_nr = -1
-        self.__bitmap = None
-        self.__mouseclicks = 0
-        self.__pos = [] #speichert mausklicks
-        self.rand = 10  #rand um imagectrl
-        self.define_ctrls()
-
-    def define_ctrls(self):
-
-        # Haupt-Image-control
-        self.imagectrl = wx.Window(self, -1, size=(1500, 3000) )
-        self.imagectrl.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
-        self.SetFocus() # Einmal Focus auf self, damit key-events empfangen werden
 
         #-------------------------------------------------------------------
         # Buttons
@@ -50,131 +29,283 @@ class ImagePanel(scrolledp.ScrolledPanel):
         self.button_sizer_i.Add(self.next_btn, flag=wx.LEFT|wx.ALIGN_CENTER, border=5)
         self.button_sizer.Add(self.button_sizer_i, flag=wx.LEFT|wx.ALIGN_CENTER, border=100)
         # self.button_sizer.AddStretchSpacer()
+
+        # Image Panel
+        self.ipanel = ImagePanel(self)
+
         # Gesamt-Layout
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(self.button_sizer, proportion=0, flag=wx.ALL|wx.ALIGN_TOP, border=1)
+        self.main_sizer.Add(self.ipanel, proportion=1, flag=wx.ALL|wx.EXPAND, border=1)
+
+        # Sizer für Gesamt-Panel zuteilen
+        self.SetSizer(self.main_sizer)
+        self.SetAutoLayout(1)
+        self.main_sizer.Fit(self)
+
+        self.next_btn.Bind(wx.EVT_BUTTON, self.OnNextBtn)
+        self.prev_btn.Bind(wx.EVT_BUTTON, self.OnPrevBtn)
+
+    # diesen Tab anzeigen
+    def Activate(self):
+        self.parent.SetSelection(self.id)
+
+    def OnNextBtn(self, _):
+        self.ipanel.ablauf.seite_bearbeiten_next()
+
+    def OnPrevBtn(self, _):
+        self.ipanel.ablauf.seite_bearbeiten_prev()
+
+##############################################################################################
+#
+class ImagePanel(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent=parent)
+
+        #add drop target
+        file_drop_target = filedrop.MyFileDropTarget(self)
+        self.define_ctrls()
+        self.ablauf = Ablauf(self)
+        self.__bitmap = None
+        self.__zbmp = None
+        self.__mouse1 = wx.Point(0,0) #fuer boxdraw
+        self.mousepos = None
+        self.rand = 0  #rand um imagectrl
+        self.dc_scale = 1.
+        self.dc_matrix = wx.AffineMatrix2D()
+        self.overlay = wx.Overlay()
+
+    def define_ctrls(self):
+        # Haupt-Image-control
+        # self.imagectrl = wx.Window(self, -1, size=(150, 300) )
+        self.imagectrl = wx.Window(self, -1)
+        self.imagectrl.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
+        self.SetFocus() # Einmal Focus auf self, damit key-events empfangen werden
+
+        # Gesamt-Layout
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(self.imagectrl, proportion=1, flag=wx.ALL|wx.EXPAND, border=1)
 
         # Sizer für Gesamt-Panel zuteilen
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(1)
         self.main_sizer.Fit(self)
-        self.SetupScrolling()
+        # self.SetupScrolling()
 
         #Handler binden
+        
         self.imagectrl.Bind(wx.EVT_PAINT, self.OnPaint)
         self.imagectrl.Bind(wx.EVT_LEFT_DOWN, self.OnPressMouse)
-        self.imagectrl.Bind(wx.EVT_LEFT_UP, self.OnReleaseMouse)
-        self.imagectrl.Bind(wx.EVT_KEY_UP, self.OnKeyPress)
-        # self.imagectrl.Bind(wx.EVT_CHAR_HOOK, self.OnKeyPress)
-        
-        #Damit Panel den Fokus bekommt (fuer keypress)
-        # self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
+        # self.imagectrl.Bind(wx.EVT_LEFT_UP, self.OnReleaseMouse)
+        # self.imagectrl.Bind(wx.EVT_KEY_UP, self.OnKeyPress)
+        self.imagectrl.Bind(wx.EVT_CHAR_HOOK, self.OnKeyPress)
+        self.imagectrl.Bind(wx.EVT_MOTION, self.OnMouseMove)
 
-        
-    def seite_bearbeiten_next(self):
-        if self.__seiten_nr < len(self.__seiten)-1:
-            self.__seiten_nr += 1
-            self.seite_bearbeiten(self.__seiten_nr)
-
-    def dateiliste_erstellen(self):
-        # Filenamen der Seiten-Tiffs einlesen
-        # Seiten erzeugen (ohne image) und in Liste merken
-        self.__seiten = Seiten(self)
-    
-    def seite_bearbeiten(self, seiten_nr):
-        self.__seiten_nr = seiten_nr # merken f next
-        # Status auf Anfang Seite bearbeiten
-        self.__status = 'Start Seite'
-        # Seite als aktiv merken
-        self.__seite = self.__seiten[seiten_nr]
-        # Anzeigen
-        self.__seite.show_origbild()
-
-    def show_pic(self, bitmap):
+    def show_pic(self, bitmap, scale):
         self.__bitmap = bitmap
+        # self.zeichen_bitmap(0,(0,0))
+        self.overlay.Reset()
+        self.dc_matrix = wx.AffineMatrix2D()
+        dx, dy =self.dc_matrix.TransformPoint(bitmap.Width, bitmap.Height)
+        cs = self.imagectrl.GetClientSize()
+        dx = round((cs.x - bitmap.Width * scale)/2)
+        dy = round((cs.y - bitmap.Height * scale)/2)
+        self.dc_matrix.Translate(dx,dy)
+        self.dc_matrix.Scale(scale, scale)
+        # self.dc = self.fotodraw()
+        # self.imagectrl.SetMaxSize(wx.Size(bitmap.Width + 2*self.rand, bitmap.Height + 2*self.rand))
+        
         self.imagectrl.Refresh()
         wx.Yield()
 
-    # Funktion wird von Key-Event 'space' aufgerufen
-    # Pruefen, was als naechstes zu tun ist
-    def weiter(self):
-        if self.__status == 'Start Seite':
-            # Haben wir zwei Punkte geklickt
-            if len(self.__pos) == 2:
-                #Foto erzeugen und ablegen
-                self.__seite.foto_dazu(self.__pos[0], self.__pos[1])
-                # self.__seite.show_origbild()
-                # Mauspunkte loeschen
-                self.__pos = []
-                # Weiter mit exakter Eckendefinition
-                self.__status = 'Ecke1'
-                self.__seite.zeige_ecke1()
-            else:
-                msg = f'Status: {self.__status}. Erst Rahmen klicken.'
-                wx.MessageBox(msg, 'Fehler!', wx.OK|wx.ICON_INFORMATION)
+    def rescale(self, faktor):
+        #Alte Bildmitte in Bitmap
+        pm_bmp1, xm, ym = self.mitte_anzeige()
+        mat1, tr1 = self.dc_matrix.Get()
 
-        elif self.__status == 'Ecke1':
-                self.__seite.speichere_ecke1(self.__pos[0])
-                self.__pos = []
-                self.__status = 'Ecke2'
-                self.__seite.zeige_ecke2()
+        self.dc_matrix.Scale(faktor, faktor)
+        mat2, tr2 = self.dc_matrix.Get()
 
-        elif self.__status == 'Ecke2':
-                self.__seite.speichere_ecke2(self.__pos[0])
-                self.__pos = []
-                self.__status = 'Ecke3'
-                self.__seite.zeige_ecke3()
+        # Mitte Anzeige-Ist in Bitmap-Koord (pm_bmp1 ist Mitte Anzeige-Soll)
+        pm_bmp2, xm, ym = self.mitte_anzeige()
 
-        elif self.__status == 'Ecke3':
-                self.__seite.speichere_ecke3(self.__pos[0])
-                self.__pos = []
-                self.__status = 'Ende Seite'
-                self.__seite.ausgeben()
+        # Delta in Bitmap
+        dbmp_x = pm_bmp2.x - pm_bmp1.x
+        dbmp_y = pm_bmp2.y - pm_bmp1.y
+        
+        # Delta in Maus
+        dm_x, dm_y =self.dc_matrix.TransformPoint(dbmp_x, dbmp_y)
+        
+        self.dc_matrix.Set(mat2,(dm_x, dm_y))
+        pm_bmp3, xm, ym = self.mitte_anzeige()
+        print(f'Mitte: x {pm_bmp3.x} y {pm_bmp3.y}')
 
-        elif self.__status == 'Ende Seite':
-            self.seite_bearbeiten_next()
-
+        self.overlay.Reset()
+        self.imagectrl.Refresh()
+        wx.Yield()
+        
+    def translate(self, richtung):
+        delta = 25
+        if richtung == 'l':
+            self.dc_matrix.Translate(-delta,0)
+        if richtung == 'r':
+            self.dc_matrix.Translate(delta,0)
+        if richtung == 'h':
+            self.dc_matrix.Translate(0,-delta)
+        if richtung == 't':
+            self.dc_matrix.Translate(0,delta)
+        self.overlay.Reset()
+        self.imagectrl.Refresh()
+        wx.Yield()
+        
     # ------------------------------------------------------
     # Event handling
     # ------------------------------------------------------
-
+    # def fotodraw(self):
+    #     dc = wx.ClientDC(self.imagectrl)
+    #     dc.SetBackground(wx.Brush("light blue"))
+    #     dc.Clear()
+    #     # dc.SetPen(wx.Pen(wx.RED, 4))
+    #     if self.__bitmap:
+    #         dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
+    #     return dc
+        
     def OnPaint(self, event=None):
         dc = wx.PaintDC(self.imagectrl)
+        self.dc = dc
+        # m=wx.AffineMatrix2D()
+        # m.Translate(10,0)
+        erg = dc.SetTransformMatrix(self.dc_matrix)
+        # dc.SetUserScale(self.dc_scale, self.dc_scale)
+        dc.SetBackground(wx.Brush("sky blue"))
         dc.Clear()
         # dc.SetPen(wx.Pen(wx.RED, 4))
         if self.__bitmap:
             dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
-        # dc.DrawLine(0,0,1000,1200)        
+        if self.__zbmp:
+            dc.DrawBitmap ( self.zbmp, self.rand, self.rand, useMask=True)
+
+    def zeichen_bitmap(self,typ,pos):
+        dc = wx.MemoryDC()
+        if self.__bitmap:
+            h = self.__bitmap.Height
+            w = self.__bitmap.Width
+            self.__zbmp = wx.Bitmap(w, h)
+        else:
+            self.__zbmp = wx.EmptyBitmap(500, 500)
+            
+        dc.SelectObject(self.zbmp)
+        dc.SetBackground(wx.Brush('black'))
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+        dc.SetPen(wx.Pen(wx.RED, 1))
+        # dc.DrawLine(0,0,1000,200)
+        # if typ==1:
+        #     dc.CrossHair(pos.x, pos.y)
+        # else:
+        #     x1, y1 = self.__mouse1
+        #     x2, y2 = pos
+        #     dc.DrawRectangle(x1, y1, x2-x1, y2-y1)
+        dc.Clear
+        dc.SelectObject(wx.NullBitmap)
+        self.zbmp.SetMaskColour('black')
+        dc = None
 
     def OnPressMouse(self, event):
-        pos = event.GetPosition()
-        # Rand berücksichtigen
-        pos.x -= self.rand
-        pos.y -= self.rand
-        # merken
-        self.__pos.append(pos)
-        self.__mouseclicks += 1
-        conf.mainframe.SetStatusText(f'x:{pos.x} y:{pos.y}')
-        logger.debug(f'Mausklick bei x:{pos.x} y:{pos.y}\n')
+        act_pos = event.GetPosition()
+        p = self.get_pos_in_bitmap(act_pos)
+        if self.ablauf.status == 'Start Seite':
+            self.__mouse1 = act_pos
+            self.ablauf.rahmen_lo = p
+        elif self.ablauf.status == 'Rahmen ru':
+            self.ablauf.rahmen_ru = p
+            self.ablauf.foto_rahmen_ablegen()
+        elif self.ablauf.status == 'Ecke1':
+            self.ablauf.ecke1(p)
+        elif self.ablauf.status == 'Ecke2':
+            self.ablauf.ecke2(p)
+        elif self.ablauf.status == 'Ecke3':
+            self.ablauf.ecke3(p)
 
-    def OnMouseEnter(self, evt):
-        self.SetFocusIgnoringChildren()
-    
-    def OnReleaseMouse(self, event):
-        self.pos2 = event.GetPosition()
-        self.imagectrl.Refresh()
+        # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')
+        logger.debug(f'Mausklick bei x:{p.x} y:{p.y}\n')
+        
+    def OnMouseMove(self, evt):
+        act_pos = evt.GetPosition()
+        if self.ablauf.status == 'Start Seite':
+            self.maus_zeigt_fadenkreuz(act_pos)
+            # self.zeichen_bitmap(1, act_pos)
+            # self.imagectrl.Refresh()
+        elif self.ablauf.status == 'Rahmen ru':
+            # if evt.Dragging() and evt.LeftIsDown():
+            # self.zeichen_bitmap(2, act_pos)
+            # self.imagectrl.Refresh()
+            self.maus_zeigt_rahmen(act_pos)
+        elif self.ablauf.status in ('Ecke1', 'Ecke2', 'Ecke3'):
+            # self.zeichen_bitmap(1, act_pos)
+            # self.imagectrl.Refresh()
+            self.maus_zeigt_fadenkreuz(act_pos)
+        #     dc.CrossHair(act_pos.x, act_pos.y)
+
+    def maus_zeigt_fadenkreuz(self, pos):
+
+        if not self.dc:
+            return
+        dc=self.dc
+        # # dc.Clear()
+        # # dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
+        dc = wx.ClientDC(self.imagectrl)
+        odc = wx.DCOverlay(self.overlay, dc)
+        odc.Clear()
+        dc.SetPen(wx.Pen("red", 1))
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+        dc.CrossHair(pos.x, pos.y)
+        del odc # work around a bug in the Python wrappers to make
+                # sure the odc is destroyed before the dc is.
+
+    def maus_zeigt_rahmen(self, pos):
+        if not self.dc:
+            return
+        dc=self.dc
+        # dc.Clear()
+        dc = wx.ClientDC(self.imagectrl)
+        # dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
+        odc = wx.DCOverlay(self.overlay, dc)
+        odc.Clear()
+        dc.SetPen(wx.Pen("red", 1))
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+        x1, y1 = self.__mouse1
+        x2, y2 = pos
+        dc.DrawRectangle(x1, y1, x2-x1, y2-y1)
+        del odc # work around a bug in the Python wrappers to make
+                # sure the odc is destroyed before the dc is.
+
+    # def OnReleaseMouse(self, event):
+    #     self.pos2 = event.GetPosition()
+    #     self.imagectrl.Refresh()
 
     def OnKeyPress(self, event):
         keycode = event.GetKeyCode()    
         print(keycode)
+        conf.mainframe.SetStatusText(str(keycode))
+        if keycode == 388:  #num+
+            self.rescale(2.)
+        if keycode == 390:  #num-
+            self.rescale(.5)
+
+        if keycode == 314: #links
+            self.translate('l')
+        if keycode == 316: #rechts
+            self.translate('r')
+        if keycode == 315: #hoch
+            self.translate('h')
+        if keycode == 317: #tief
+            self.translate('t')
+
         if keycode == wx.WXK_SPACE:
             print("you pressed the spacebar!")
             # self.next_bearbeiten()
             self.weiter()
-
-        event.Skip()
-        conf.mainframe.SetStatusText(str(keycode))
+        # event.Skip()
 
     #     menu = self.MakePopUpMenu()
     #     self.PopupMenu(menu, m_pos)
@@ -186,8 +317,24 @@ class ImagePanel(scrolledp.ScrolledPanel):
     # ------------------------------------------------------
     # Basis Funktionen
     # ------------------------------------------------------
+        
+    def get_pos_in_bitmap(self, pos):
+        mat, tr = self.dc_matrix.Get()
+        new = wx.AffineMatrix2D()
+        new.Set(mat, tr)
+        new.Invert()
+        # mat, tr = new.Get()
+        x, y =new.TransformPoint(pos.x,pos.y)
+        p2 =  wx.Point(round(x), round(y))
+        return p2
 
-    #Seite anzeigen
-    def Activate(self):
-        self.parent.SetSelection(self.id)
-
+    # => bildmitte in bmp-koord
+    def mitte_anzeige(self):
+        xmax = self.dc.MaxX()
+        xmin = self.dc.MinX()
+        ymin = self.dc.MinY()
+        ymax = self.dc.MaxY()
+        xmitte = round((xmin+xmax)/2)
+        ymitte = round((ymin+ymax)/2)
+        pmitte = self.get_pos_in_bitmap(wx.Point(xmitte,ymitte))
+        return pmitte, xmitte, ymitte

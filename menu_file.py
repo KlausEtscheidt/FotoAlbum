@@ -20,9 +20,9 @@ def init(parent, pMenu):
 
 def OnStart(_event):
     #Tiff dateien suchen
-    conf.mainframe.imagepanel.dateiliste_erstellen()
+    conf.imagepanel.dateiliste_erstellen()
     #Erste Seite bearbeiten
-    conf.mainframe.imagepanel.seite_bearbeiten(0)
+    conf.imagepanel.seite_bearbeiten(0)
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()
