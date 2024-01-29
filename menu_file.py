@@ -2,7 +2,7 @@ import wx
 # import subprocess
 
 import config as conf
-import seite
+# import seite
 
 # Menu-Items zum Menu erzeugen und Handler registrieren
 def init(parent, pMenu):
@@ -20,9 +20,9 @@ def init(parent, pMenu):
 
 def OnStart(_event):
     #Tiff dateien suchen
-    conf.imagepanel.dateiliste_erstellen()
+    conf.imagepanel.ablauf.dateiliste_erstellen()
     #Erste Seite bearbeiten
-    conf.imagepanel.seite_bearbeiten(0)
+    conf.imagepanel.ablauf.seite_bearbeiten(0)
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()

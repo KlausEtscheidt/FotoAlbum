@@ -225,6 +225,8 @@ class ImagePanel(wx.Panel):
             self.ablauf.ecke2(p)
         elif self.ablauf.status == 'Ecke3':
             self.ablauf.ecke3(p)
+        elif self.ablauf.status == 'Foto definiert':
+            self.ablauf.foto_speichern(p)
 
         # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')
         logger.debug(f'Mausklick bei x:{p.x} y:{p.y}\n')

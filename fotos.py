@@ -18,6 +18,7 @@ class KEImage():
         return wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
 
     def __init__(self, image):
+        # je nach Verwendung: Image der Gesamtseite oder Ausschnitt (Rahmen von Foto)
         self.__image = image
 
     def scaled_bitmap(self, faktor):
@@ -48,7 +49,10 @@ class KEImage():
         return copy.Resize(size, pkt)
 
     def rotate(self, winkel, p0, interpol ):
-        return self.image.Rotate(winkel, p0, interpol)
+        # Bild wird beim Drehen umm offset verschoben => offset zurück liefern und beachten
+        offset = wx.Point()
+        newimg = self.image.Rotate(winkel, p0, interpol, offset)
+        return newimg, offset
 
     def save(self, fname):
         self.image.SaveFile(fname)
@@ -78,21 +82,17 @@ class Foto(KEImage):
         self.ecke1 = None
         self.ecke2 = None
         self.ecke3 = None
+        # Bildausschnitt aus Origbild entsprechend des Grob-Rahmens ums Foto
+        # Wird nach Definition des Rahmens erzeugt und behalten
+        # Muss nach Abspeichern der Seite entfernt werden               
         self.__image = None
-
-    @property
-    def dreh_offset(self):
-        #Bei nach unten gekipptem Bild iste:
-        #   ecke2.y > ecke1.y und ecke2.x > ecke3.x
-        dy = self.ecke2.y - self.ecke1.y
-        dx = self.ecke2.x - self.ecke3.x
-        return dy, dx
 
     @property
     def drehung(self):
         dy = self.ecke2.y - self.ecke1.y
         dx = self.ecke2.x - self.ecke1.x
-        return math.atan2(dy, dx)
+        rad = math.atan2(dy, dx)
+        return rad, math.degrees(rad)
 
     @property
     def breite(self):
@@ -132,7 +132,8 @@ class Foto(KEImage):
         self.image = None
 
     def __str__(self):
+        _, grad = self.drehung
         txt = f'x0 {self.x0} y0 {self.y0} breit {self.breite} hoch {self.hoehe}'
-        txt += f' winkel {self.drehung:5.4f}'
+        txt += f' winkel {grad:5.4f}'
         # txt += f'winkel {self.drehung*math.Pi/180.}'
         return txt
