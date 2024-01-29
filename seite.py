@@ -5,6 +5,9 @@ import os
 
 import wx
 
+from wand.image import Image as wandImage
+from wand.display import display
+
 import config as conf
 
 from fotos import KEImage, Foto
@@ -116,20 +119,45 @@ class Seite():
         # foto.ecke1 = wx.Point(500,2000)
         # foto.ecke2 = wx.Point(2500,2000)
         # foto.ecke3 = wx.Point(2500,5000)
-        if abs(foto.drehung) > 0.1:
+        if abs(foto.drehung) > 0.005:
             neu = orig.rotate(foto.drehung, foto.ecke1, True)
+            dx, dy = foto.dreh_offset
         else:
             neu = orig.image
+            dx, dy = (0, 0)
 
-        # self.save(KEImage(neu), '_100')   
-        p2 = wx.Point(foto.ecke1.x + foto.breite, foto.ecke1.y + foto.hoehe)
-        neu = KEImage(neu).crop(foto.ecke1, p2)
+        self.save(KEImage(neu), '_100')   
+
+        p1 = wx.Point(foto.ecke1.x + dx, foto.ecke1.y - dy)
+        p2 = wx.Point(p1.x + foto.breite, p1.y + foto.hoehe)
+        neu = KEImage(neu).crop(p1, p2)
         self.save(KEImage(neu), f'_{len(self.fotos):02d}')
+
+        with wandImage(filename=self.fullpath2pic) as img:
+            # img.auto_level()
+            # img.negate()
+            # img.threshold(threshold=0.70)
+            img.rotate(foto.drehung)
+            img.crop(left=foto.ecke1.x, top=foto.ecke1.y, width=foto.breite, height=foto.hoehe)
+            tname = self.get_target_w_appendixname('wand')
+            img.save(filename=tname)
+            # display(img)
 
     def unscale(self, p,  scale):
         p.x = int( p.x / scale)
         p.y = int( p.y / scale)
         return(p)
+
+    def get_target_w_appendixname(self, apdx):
+        new_name = self.basename + f'_{len(self.fotos):02d}_{apdx}' + self.typ
+        fname = os.path.join(self.path, conf.pic_output, new_name)
+        return fname
+
+    @property
+    def targetname(self):
+        new_name = self.basename + f'_{len(self.fotos):02d}' + self.typ
+        fname = os.path.join(self.path, conf.pic_output, new_name)
+        return fname
 
     @property
     def origbild(self):

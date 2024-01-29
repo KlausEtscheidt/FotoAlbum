@@ -81,6 +81,14 @@ class Foto(KEImage):
         self.__image = None
 
     @property
+    def dreh_offset(self):
+        #Bei nach unten gekipptem Bild iste:
+        #   ecke2.y > ecke1.y und ecke2.x > ecke3.x
+        dy = self.ecke2.y - self.ecke1.y
+        dx = self.ecke2.x - self.ecke3.x
+        return dy, dx
+
+    @property
     def drehung(self):
         dy = self.ecke2.y - self.ecke1.y
         dx = self.ecke2.x - self.ecke1.x
