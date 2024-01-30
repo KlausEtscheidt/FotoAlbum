@@ -11,22 +11,26 @@ logger = logging.getLogger('album')
 
 #######################################################################################
 #
-class KEImage():
+class KEImage(wx.Image):
     @classmethod
     def load_from_file(cls, fullpath2pic):
         # Image von Platte laden
         return wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
 
-    def __init__(self, image):
-        # je nach Verwendung: Image der Gesamtseite oder Ausschnitt (Rahmen von Foto)
-        self.__image = image
+    def __init__(self, fullpath2pic=None, aKEImage=None):
+        if fullpath2pic:
+            wx.Image.__init__(self, fullpath2pic, wx.BITMAP_TYPE_ANY)
+        elif aKEImage:
+            wx.Image.__init__(self,aKEImage)
+            # self = aKEImage.Copy()
+        else:
+            wx.Image.__init__(self)
 
     def scaled_bitmap(self, faktor):
-        myimage = self.image
-        new_w = int(myimage.Width * faktor)
-        new_h = int(myimage.Height * faktor)
+        new_w = int(self.Width * faktor)
+        new_h = int(self.Height * faktor)
         # copy = self.image.Copy()
-        new_image = self.image.Scale(new_w, new_h)
+        new_image = self.Scale(new_w, new_h)
         logger.debug(f'\nnew size: br {new_w} h: {new_h}\n')
         return new_image.ConvertToBitmap()
 
@@ -45,36 +49,27 @@ class KEImage():
         h = pos2.y - pos1.y
         size = wx.Size(w,h)
         pkt = wx.Point(-pos1.x, -pos1.y)
-        copy = self.image.Copy()
+        # copy = self.Copy()
+        copy = KEImage(aKEImage=self.Copy())
+
         return copy.Resize(size, pkt)
 
     def rotate(self, winkel, p0, interpol ):
         # Bild wird beim Drehen umm offset verschoben => offset zurück liefern und beachten
         offset = wx.Point()
-        newimg = self.image.Rotate(winkel, p0, interpol, offset)
-        return newimg, offset
-
-    def save(self, fname):
-        self.image.SaveFile(fname)
-
+        newimg = self.Rotate(winkel, p0, interpol, offset)
+        return KEImage(aKEImage=newimg), offset
+    
     @property
-    def image(self):
-        return self.__image
+    def bitmap(self):
+        return self.ConvertToBitmap()
 
-    @image.setter
-    def image(self, x):
-        self.__image = x
-
-    #Behelf, weil image.setter aus abgeleiteten Klassen nicht geht
-    def set_image(self, x):
-        self.__image = x
 
 #######################################################################################
 #
-class Foto(KEImage):
+class Foto():
     
     def __init__(self, parent, p1, p2):
-        super(Foto,self).__init__(None)
 
         self.parent = parent # umgebenden Seite
         self.p1 = p1 # äußerer Rahmen links oben
@@ -85,7 +80,7 @@ class Foto(KEImage):
         # Bildausschnitt aus Origbild entsprechend des Grob-Rahmens ums Foto
         # Wird nach Definition des Rahmens erzeugt und behalten
         # Muss nach Abspeichern der Seite entfernt werden               
-        self.__image = None
+        # self.__image = None
 
     @property
     def drehung(self):
@@ -114,26 +109,27 @@ class Foto(KEImage):
     def y0(self):
         return self.ecke1.y
 
-    @property
-    def image(self):
-        if self.__image == None:
-            # Hole Bildausschnitt aus Gesamtseite
-            new_image = self.parent.origbild.crop(self.p1, self.p2)
-            self.image = new_image
-        return self.__image
+    # @property
+    # def image(self):
+    #     # if self.__image == None:
+    #     #     # Hole Bildausschnitt aus Gesamtseite
+    #     #     new_image = self.parent.origbild.crop(self.p1, self.p2)
+    #     #     self.image = new_image
+    #     # return self.__image
 
-    @image.setter
-    def image(self, x):
-        self.__image = x
-        # super(Foto,self).image = x
-        super(Foto,self).set_image(x)
+    #     # Hole Bildausschnitt aus Gesamtseite
+    #     new_image = self.parent.origbild.crop(self.p1, self.p2)
+    #     return new_image
+
+    # @image.setter
+    # def image(self, x):
+    #     self.__image = x
  
-    def free_image(self):
-        self.image = None
+    # def free_image(self):
+    #     self.image = None
 
     def __str__(self):
         _, grad = self.drehung
         txt = f'x0 {self.x0} y0 {self.y0} breit {self.breite} hoch {self.hoehe}'
         txt += f' winkel {grad:5.4f}°'
-        # txt += f'winkel {self.drehung*math.Pi/180.}'
         return txt

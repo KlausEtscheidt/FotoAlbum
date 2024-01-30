@@ -5,8 +5,7 @@ import wx.lib.scrolledpanel as scrolledp
 
 import config as conf
 import filedrop
-from seite import Seiten
-from ablauf import Ablauf
+from seiten import Seiten
 
 logger = logging.getLogger('album')
 
@@ -21,27 +20,33 @@ class ImagePanelOuter(wx.Window):
         #-------------------------------------------------------------------
         # Buttons
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.button_sizer_i = wx.BoxSizer(wx.HORIZONTAL)
+
+        # self.label_li = wx.StaticText(self, -1, size=(300,20), label='links')
+        self.label_li = wx.StaticText(self, -1, size=(200,15), style = wx.ALIGN_LEFT)
         self.next_btn = wx.Button(self, -1, '>>')
         self.prev_btn = wx.Button(self, -1, '<<')
+        self.label_re = wx.StaticText(self, -1, size=(200,15), style = wx.ALIGN_LEFT)
         # self.button_sizer.AddStretchSpacer()
-        self.button_sizer_i.Add(self.prev_btn, flag=wx.LEFT|wx.ALIGN_CENTER, border=5)
-        self.button_sizer_i.Add(self.next_btn, flag=wx.LEFT|wx.ALIGN_CENTER, border=5)
-        self.button_sizer.Add(self.button_sizer_i, flag=wx.LEFT|wx.ALIGN_CENTER, border=100)
-        # self.button_sizer.AddStretchSpacer()
+        self.button_sizer.Add(self.label_li, flag=wx.TOP, border=5)
+        self.button_sizer.AddSpacer(size=100)
+        self.button_sizer.Add(self.prev_btn)
+        self.button_sizer.Add(self.next_btn, flag=wx.LEFT, border=10)
+        self.button_sizer.Add(self.label_re, flag=wx.LEFT|wx.Top, border=15)
+        
 
         # Image Panel
-        self.ipanel = ImagePanel(self)
+        self.innerpanel = ImagePanel(self)
 
         # Gesamt-Layout
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(self.button_sizer, proportion=0, flag=wx.ALL|wx.ALIGN_TOP, border=1)
-        self.main_sizer.Add(self.ipanel, proportion=1, flag=wx.ALL|wx.EXPAND, border=1)
+        self.main_sizer.Add(self.innerpanel, proportion=1, flag=wx.ALL|wx.EXPAND, border=1)
 
         # Sizer für Gesamt-Panel zuteilen
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(1)
-        self.main_sizer.Fit(self)
+        self.Layout()
+        # self.main_sizer.Fit(self)
 
         self.next_btn.Bind(wx.EVT_BUTTON, self.OnNextBtn)
         self.prev_btn.Bind(wx.EVT_BUTTON, self.OnPrevBtn)
@@ -51,26 +56,27 @@ class ImagePanelOuter(wx.Window):
         self.parent.SetSelection(self.id)
 
     def OnNextBtn(self, _):
-        self.ipanel.ablauf.seite_bearbeiten_next()
+        self.innerpanel.seiten.seite_bearbeiten_next()
 
     def OnPrevBtn(self, _):
-        self.ipanel.ablauf.seite_bearbeiten_prev()
+        self.innerpanel.seiten.seite_bearbeiten_prev()
 
 ##############################################################################################
 #
 class ImagePanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent)
+        self.parent = parent
 
         #add drop target
         file_drop_target = filedrop.MyFileDropTarget(self)
         self.define_ctrls()
-        self.ablauf = Ablauf(self)
+        self.seiten = None
         self.__bitmap = None
         self.__zbmp = None
         self.__mouse1 = wx.Point(0,0) #fuer boxdraw
         self.mousepos = None
-        self.rand = 0  #rand um imagectrl
+        self.dc = None
         self.dc_scale = 1.
         self.dc_matrix = wx.AffineMatrix2D()
         self.overlay = wx.Overlay()
@@ -174,47 +180,40 @@ class ImagePanel(wx.Panel):
         dc.Clear()
         # dc.SetPen(wx.Pen(wx.RED, 4))
         if self.__bitmap:
-            dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
+            dc.DrawBitmap ( self.__bitmap, 0, 0, useMask=False)
         if self.__zbmp:
-            dc.DrawBitmap ( self.__zbmp, self.rand, self.rand, useMask=True)
+            dc.DrawBitmap ( self.__zbmp, 0, 0, useMask=True)
 
     def OnPressMouse(self, event):
         act_pos = event.GetPosition()
         p = self.get_pos_in_bitmap(act_pos)
-        if self.ablauf.status == 'Start Seite':
+        if self.seiten.status == 'Start Seite/Foto':
             self.__mouse1 = act_pos
-            self.ablauf.rahmen_lo = p
-        elif self.ablauf.status == 'Rahmen ru':
-            self.ablauf.rahmen_ru = p
-            self.ablauf.foto_rahmen_ablegen()
-        elif self.ablauf.status == 'Ecke1':
-            self.ablauf.ecke1(p)
-        elif self.ablauf.status == 'Ecke2':
-            self.ablauf.ecke2(p)
-        elif self.ablauf.status == 'Ecke3':
-            self.ablauf.ecke3(p)
-        elif self.ablauf.status == 'Foto definiert':
-            self.ablauf.foto_speichern(p)
+            self.seiten.rahmen_lo = p
+        elif self.seiten.status == 'Rahmen ru':
+            self.seiten.rahmen_ru = p
+            self.seiten.foto_rahmen_ablegen()
+        elif self.seiten.status == 'Ecke1':
+            self.seiten.ecke1(p)
+        elif self.seiten.status == 'Ecke2':
+            self.seiten.ecke2(p)
+        elif self.seiten.status == 'Ecke3':
+            self.seiten.ecke3(p)
+        elif self.seiten.status == 'Foto definiert':
+            self.seiten.foto_speichern(p)
 
         # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')
         logger.debug(f'Mausklick bei x:{p.x} y:{p.y}\n')
         
     def OnMouseMove(self, evt):
         act_pos = evt.GetPosition()
-        if self.ablauf.status == 'Start Seite':
+        if self.seiten.status == 'Start Seite/Foto':
             self.maus_zeigt_fadenkreuz(act_pos)
-            # self.zeichen_bitmap(1, act_pos)
-            # self.imagectrl.Refresh()
-        elif self.ablauf.status == 'Rahmen ru':
+        elif self.seiten.status == 'Rahmen ru':
             # if evt.Dragging() and evt.LeftIsDown():
-            # self.zeichen_bitmap(2, act_pos)
-            # self.imagectrl.Refresh()
             self.maus_zeigt_rahmen(act_pos)
-        elif self.ablauf.status in ('Ecke1', 'Ecke2', 'Ecke3'):
-            # self.zeichen_bitmap(1, act_pos)
-            # self.imagectrl.Refresh()
+        elif self.seiten.status in ('Ecke1', 'Ecke2', 'Ecke3'):
             self.maus_zeigt_fadenkreuz(act_pos)
-        #     dc.CrossHair(act_pos.x, act_pos.y)
 
     def maus_zeigt_fadenkreuz(self, pos):
 
@@ -222,7 +221,6 @@ class ImagePanel(wx.Panel):
             return
         dc=self.dc
         # # dc.Clear()
-        # # dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
         dc = wx.ClientDC(self.imagectrl)
         odc = wx.DCOverlay(self.overlay, dc)
         odc.Clear()
@@ -238,7 +236,6 @@ class ImagePanel(wx.Panel):
         dc=self.dc
         # dc.Clear()
         dc = wx.ClientDC(self.imagectrl)
-        # dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
         odc = wx.DCOverlay(self.overlay, dc)
         odc.Clear()
         dc.SetPen(wx.Pen("red", 1))

@@ -12,22 +12,38 @@ from panel_log import LogPanel
 from panel_imageview import ImagePanelOuter
 import menu_file
 import menu_div
-import ablauf
+from seiten import Seiten
 
 logger = logging.getLogger('album')
 
 # Ermöglicht Auto-Start bei OnEventLoopEnter, also nach myApp.MainLoop()
 class myApp(wx.App):
-    leaving = False
-    #!! Wird beim Start und beim Beenden ausgelöst
-    def OnEventLoopEnter(self, loop):
-        if not self.leaving:
-            self.leaving = True
-            #Tiff dateien suchen
-            conf.imagepanel.ablauf.dateiliste_erstellen()
-            #Erste Seite bearbeiten
-            conf.imagepanel.ablauf.seite_bearbeiten(0)
-            return super().OnEventLoopEnter(loop)
+   
+    def OnInit(self):
+        # self.leaving = False
+        #Erzeuge Basis-Frame
+        mainframe = MainFrame(None, title='KE`s Alben-Zerleger', size=(800, 800), pos=(20, 20))
+        mainframe.SetTransparent(254) #Soll flickern verhindern
+        self.mainframe = mainframe
+        conf.mainframe = mainframe
+        conf.imagepanel = mainframe.imagepanel.innerpanel
+        #Noetig ????
+        self.SetTopWindow(mainframe)
+        mainframe.Show()
+        logger.debug('Starte Programm')
+
+        # Tiff dateien suchen
+        self.seiten = Seiten(mainframe.imagepanel.innerpanel)
+        # Erste Seite bearbeiten
+        self.seiten.seite_bearbeiten(0)
+
+        return True
+
+    # #!! Wird beim Start und beim Beenden ausgelöst
+    # def OnEventLoopEnter(self, loop):
+    #     if not self.leaving:
+    #         self.leaving = True
+    #         return super().OnEventLoopEnter(loop)
 
 class MainFrame(wx.Frame):
 
@@ -87,12 +103,6 @@ def run_app():
     alb_logging.init()
     # app = wx.App()
     app = myApp()
-    #Erzeuge Basis-Frame
-    conf.mainframe = MainFrame(None, title='KE`s Alben-Zerleger', size=(800, 800), pos=(20, 20))
-    conf.mainframe.Show()
-    conf.mainframe.SetTransparent(254)
-    conf.imagepanel = conf.mainframe.imagepanel.ipanel
-    logger.debug('Starte Programm')
 
     #Endlos-Schleife
     app.MainLoop()
