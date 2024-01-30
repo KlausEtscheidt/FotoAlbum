@@ -7,6 +7,7 @@ import wx
 
 from wand.image import Image as wandImage
 from wand.display import display
+import zeichenfabrik
 
 import config as conf
 
@@ -28,7 +29,6 @@ class Seite():
 
     d_aussen = 200
     d_innen = 1400
-    shrink = -10 # Box um shrink verkleinern
 
     def __init__(self, fullpath2pic):
         
@@ -73,8 +73,9 @@ class Seite():
     #############################################################################
 
     def show_origbild(self):
-        bitmap = self.origbild.image.ConvertToBitmap()
-        self.imagepanel.show_pic(bitmap, conf.SCALE_SEITE)
+        image_bmp = self.origbild.image.ConvertToBitmap()
+        zeichenfabrik.zeichne_rahmen(image_bmp, self)
+        self.imagepanel.show_pic(image_bmp, zeichenfabrik.zbmp , conf.SCALE_SEITE)
 
     # Teilfoto in Liste aufnehmen
     def foto_dazu(self, p1, p2):
@@ -88,28 +89,40 @@ class Seite():
         y = self.akt_foto.p1.y
         p1 = wx.Point(x - self.d_aussen, y - self.d_aussen)
         p2 = wx.Point(x + self.d_innen, y + self.d_innen)
-        self.__zeige_ecke(p1, p2)
+        self.__zeige_ecke(p1, p2, 1)
 
     def zeige_ecke2(self):
         x = self.akt_foto.p2.x
         y = self.akt_foto.p1.y
         p1 = wx.Point(x - self.d_innen, y - self.d_aussen)
         p2 = wx.Point(x + self.d_aussen, y + self.d_innen)
-        self.__zeige_ecke(p1, p2)
+        # lage von ecke1.y zu p1
+        ecke1_y = self.akt_foto.ecke1.y -y + self.d_aussen
+        
+        self.__zeige_ecke(p1, p2, 2, ecke1_y)
 
     def zeige_ecke3(self):
         x = self.akt_foto.p2.x
         y = self.akt_foto.p2.y
         p1 = wx.Point(x - self.d_innen, y - self.d_innen)
         p2 = wx.Point(x + self.d_aussen, y + self.d_aussen)
-        self.__zeige_ecke(p1, p2)
+        # lage von ecke2.x zu p1
+        ecke2_x = self.akt_foto.ecke2.x -x + self.d_innen
+        self.__zeige_ecke(p1, p2, 3, ecke2_x)
 
-    def __zeige_ecke(self, p1, p2):
+    def __zeige_ecke(self, p1, p2, nr, linie=None):
         new_image = KEImage(self.origbild.crop(p1, p2))
-        # self.save(new_image, '_2')
-        # bitmap = new_image.scaled_bitmap(conf.SCALE_ECKE)
-        bitmap = new_image.image.ConvertToBitmap()
-        self.imagepanel.show_pic(bitmap, conf.SCALE_ECKE)
+        image_bmp = new_image.image.ConvertToBitmap()
+        # self.imagepanel.show_pic(bitmap, scale=conf.SCALE_ECKE)
+        if nr == 1:
+            zbmp = None
+        if nr == 2:
+            zeichenfabrik.zeichne_ecke(image_bmp,  linie, None)
+            zbmp = zeichenfabrik.zbmp
+        if nr == 3:
+            zeichenfabrik.zeichne_ecke(image_bmp, None, linie)
+            zbmp = zeichenfabrik.zbmp
+        self.imagepanel.show_pic(image_bmp, zbmp , scale=conf.SCALE_ECKE)
 
     def speichere_ecke1(self, p):
         # p = self.unscale(p, conf.SCALE_ECKE)
@@ -139,40 +152,35 @@ class Seite():
         logger.debug(f'speichere Ecke 3 x: {x_abs} y: {y_abs}')
 
     def foto_anzeigen(self):
-        shrink = self.shrink
-        
+
         foto = self.akt_foto
         rad, grad = foto.drehung
         orig = self.origbild
         logger.info(f'Foto {foto}')
-        # foto.ecke1 = wx.Point(500,2000)
-        # foto.ecke2 = wx.Point(2500,2000)
-        # foto.ecke3 = wx.Point(2500,5000)
-        if abs(rad) > 0.005:
+
+        if abs(grad) > conf.MIN_WINKEL:
             neu_image, offset = orig.rotate(rad, foto.ecke1, False)
         else:
             neu_image = orig.image
             offset = wx.Point(0, 0)
 
-        p1 = wx.Point(foto.ecke1.x - offset.x + shrink, foto.ecke1.y - offset.y + shrink)
-        p2 = wx.Point(p1.x + foto.breite - 2*shrink, p1.y + foto.hoehe - 2*shrink)
+        p1 = wx.Point(foto.ecke1.x - offset.x + conf.SHRINK, foto.ecke1.y - offset.y + conf.SHRINK)
+        p2 = wx.Point(p1.x + foto.breite - 2*conf.SHRINK, p1.y + foto.hoehe - 2*conf.SHRINK)
         neu_image = KEImage(neu_image).crop(p1, p2)
         self.save(KEImage(neu_image), f'_{len(self.fotos):02d}')
-        
-        bitmap = neu_image.ConvertToBitmap()
-        self.imagepanel.show_pic(bitmap, conf.SCALE_SEITE)
 
+        bitmap = neu_image.ConvertToBitmap()
+        self.imagepanel.show_pic(bitmap, scale=conf.SCALE_KONTROLLBILD)
 
     def foto_speichern(self):
         foto = self.akt_foto
         rad, grad = foto.drehung
-        shrink = self.shrink
 
         with wandImage(filename=self.fullpath2pic) as img:
-            if abs(grad) > 0.1:
+            if abs(grad) > conf.MIN_WINKEL:
                 img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
-            img.crop(left=foto.ecke1.x + shrink, top=foto.ecke1.y + shrink, 
-                     width=foto.breite - 2*shrink, height=foto.hoehe - 2*shrink)
+            img.crop(left=foto.ecke1.x + conf.SHRINK, top=foto.ecke1.y + conf.SHRINK, 
+                     width=foto.breite - 2*conf.SHRINK, height=foto.hoehe - 2*conf.SHRINK)
             tname = self.get_target_w_appendixname('wand')
             img.save(filename=tname)
             # display(img)

@@ -101,15 +101,16 @@ class ImagePanel(wx.Panel):
         self.imagectrl.Bind(wx.EVT_CHAR_HOOK, self.OnKeyPress)
         self.imagectrl.Bind(wx.EVT_MOTION, self.OnMouseMove)
 
-    def show_pic(self, bitmap, scale):
-        self.__bitmap = bitmap
+    def show_pic(self, image_bmp, zeichen_bmp=None, scale=1):
+        self.__bitmap = image_bmp
+        self.__zbmp = zeichen_bmp
         # self.zeichen_bitmap(0,(0,0))
         self.overlay.Reset()
         self.dc_matrix = wx.AffineMatrix2D()
-        dx, dy =self.dc_matrix.TransformPoint(bitmap.Width, bitmap.Height)
+        dx, dy =self.dc_matrix.TransformPoint(image_bmp.Width, image_bmp.Height)
         cs = self.imagectrl.GetClientSize()
-        dx = round((cs.x - bitmap.Width * scale)/2)
-        dy = round((cs.y - bitmap.Height * scale)/2)
+        dx = round((cs.x - image_bmp.Width * scale)/2)
+        dy = round((cs.y - image_bmp.Height * scale)/2)
         self.dc_matrix.Translate(dx,dy)
         self.dc_matrix.Scale(scale, scale)
         # self.dc = self.fotodraw()
@@ -161,14 +162,6 @@ class ImagePanel(wx.Panel):
     # ------------------------------------------------------
     # Event handling
     # ------------------------------------------------------
-    # def fotodraw(self):
-    #     dc = wx.ClientDC(self.imagectrl)
-    #     dc.SetBackground(wx.Brush("light blue"))
-    #     dc.Clear()
-    #     # dc.SetPen(wx.Pen(wx.RED, 4))
-    #     if self.__bitmap:
-    #         dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
-    #     return dc
         
     def OnPaint(self, event=None):
         dc = wx.PaintDC(self.imagectrl)
@@ -183,32 +176,7 @@ class ImagePanel(wx.Panel):
         if self.__bitmap:
             dc.DrawBitmap ( self.__bitmap, self.rand, self.rand, useMask=False)
         if self.__zbmp:
-            dc.DrawBitmap ( self.zbmp, self.rand, self.rand, useMask=True)
-
-    def zeichen_bitmap(self,typ,pos):
-        dc = wx.MemoryDC()
-        if self.__bitmap:
-            h = self.__bitmap.Height
-            w = self.__bitmap.Width
-            self.__zbmp = wx.Bitmap(w, h)
-        else:
-            self.__zbmp = wx.EmptyBitmap(500, 500)
-            
-        dc.SelectObject(self.zbmp)
-        dc.SetBackground(wx.Brush('black'))
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
-        dc.SetPen(wx.Pen(wx.RED, 1))
-        # dc.DrawLine(0,0,1000,200)
-        # if typ==1:
-        #     dc.CrossHair(pos.x, pos.y)
-        # else:
-        #     x1, y1 = self.__mouse1
-        #     x2, y2 = pos
-        #     dc.DrawRectangle(x1, y1, x2-x1, y2-y1)
-        dc.Clear
-        dc.SelectObject(wx.NullBitmap)
-        self.zbmp.SetMaskColour('black')
-        dc = None
+            dc.DrawBitmap ( self.__zbmp, self.rand, self.rand, useMask=True)
 
     def OnPressMouse(self, event):
         act_pos = event.GetPosition()

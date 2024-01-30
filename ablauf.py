@@ -88,18 +88,22 @@ class Ablauf:
         self.__seite.show_origbild()
 
     def seite_bearbeiten_next(self):
+        # Speicher freigeben
+        self.__seiten[self.__seiten_nr].free_origbild()
         if self.__seiten_nr < len(self.__seiten)-1:
-            # Speicher freigeben
-            self.__seiten[self.__seiten_nr].free_origbild()
             self.__seiten_nr += 1
-            self.seite_bearbeiten(self.__seiten_nr)
+        else:
+            self.__seiten_nr = 0
+        self.seite_bearbeiten(self.__seiten_nr)
 
     def seite_bearbeiten_prev(self):
+        # Speicher freigeben
+        self.__seiten[self.__seiten_nr].free_origbild()
         if self.__seiten_nr > 0:
-            # Speicher freigeben
-            self.__seiten[self.__seiten_nr].free_origbild()
             self.__seiten_nr -= 1
-            self.seite_bearbeiten(self.__seiten_nr)
+        else:
+            self.__seiten_nr = len(self.__seiten)-1
+        self.seite_bearbeiten(self.__seiten_nr)
 
     ############################################################################
     #

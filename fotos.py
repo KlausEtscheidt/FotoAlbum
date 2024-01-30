@@ -40,7 +40,7 @@ class KEImage():
         :return: gecropptes Image
         :rtype: wx.Image
         """
-        logger.debug(f'crop x1 {pos1.x} y1 {pos1.y} x2 { pos2.x} y2 { pos2.y}')
+        #logger.debug(f'crop x1 {pos1.x} y1 {pos1.y} x2 { pos2.x} y2 { pos2.y}')
         w = pos2.x - pos1.x
         h = pos2.y - pos1.y
         size = wx.Size(w,h)
@@ -134,6 +134,6 @@ class Foto(KEImage):
     def __str__(self):
         _, grad = self.drehung
         txt = f'x0 {self.x0} y0 {self.y0} breit {self.breite} hoch {self.hoehe}'
-        txt += f' winkel {grad:5.4f}'
+        txt += f' winkel {grad:5.4f}°'
         # txt += f'winkel {self.drehung*math.Pi/180.}'
         return txt
