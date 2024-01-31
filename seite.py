@@ -32,17 +32,17 @@ class Seite():
 
     # temp Speicher (KEImage) des gedrehten Fotos mit Zusatzrand
     # dient zur Anzeige beim Verändern des Cipping-Randes in "foto_beschneiden"
-    bild_gedreht = None 
+    bild_gedreht = None
+    # KEImage des Seiten-Tiffs. Da Klassenvariable wird nur einmal Speicher verbraucht.
+    # Wird von seite_laden erzeugt und zugeordnet
+    seitenbild = None
 
     def __init__(self, fullpath2pic):
-        
+
         self.fullpath2pic = fullpath2pic
         self.path, self.picname = os.path.split(self.fullpath2pic)
         self.basename, self.typ = os.path.splitext(self.picname)
 
-        # Origbild wird bei der 1. Verwendung erzeugt und behalten
-        # Muss beim Verlassen der Seite entfernt werden               
-        self.__origbild = None
         self.fotos = [] # Liste der Fotos auf Seite Typ KEImage
         self.akt_foto = None
 
@@ -56,31 +56,39 @@ class Seite():
         fname = os.path.join(self.path, conf.pic_output, new_name)
         return fname
 
-    @property
-    def origbild(self):
-        if not self.__origbild: 
-            # Image von Platte laden
-            # myimage = KEImage.load_from_file(self.fullpath2pic)
-            # Instanz erzeugen
-            self.__origbild = KEImage(self.fullpath2pic)
-        return self.__origbild
-
-    # @origbild.setter
-    # def origbild(self, x):
-    #     self.origbild = x
-
-
     #############################################################################
     #
-    # Ablauf
+    # Allgemeine Funktionen
+
+    def seite_drehen(self):
+        if self.seitenbild:
+            self.seitenbild = KEImage(aKEImage=self.seitenbild.Rotate90())
+            self.seite_anzeigen()
+
+    def seite_speichern(self):
+        if self.seitenbild:
+            thread = Thread(target=self.__seite_speichern)
+            thread.start()
+    
+    def __seite_speichern(self):
+        self.seitenbild.SaveFile(self.fullpath2pic)
+
+    
+    #############################################################################
+    #
+    # Ablauf (Funktionen, die der Reihe nach durch Mausklicks getriggert werden)
     #
     #############################################################################
 
-    def show_origbild(self):
-        image_bmp = self.origbild.bitmap
+    def seite_laden(self):
+        # KEImage des Seiten-Tiffs erzeugen und als Klassenvariable merken
+        self.seitenbild = KEImage(self.fullpath2pic)
+        self.seite_anzeigen()
+
+    def seite_anzeigen(self):
+        image_bmp = self.seitenbild.bitmap
         zeichenfabrik.zeichne_rahmen(image_bmp, self)
         self.imagepanel.show_pic(image_bmp, zeichenfabrik.zbmp , conf.SCALE_SEITE)
-        #self.imagepanel.innerpanel.show_pic
 
     # Teilfoto in Liste aufnehmen
     def foto_dazu(self, p1, p2):
@@ -116,7 +124,7 @@ class Seite():
         self.__zeige_ecke(p1, p2, 3, ecke2_x)
 
     def __zeige_ecke(self, p1, p2, nr, linie=None):
-        new_image = self.origbild.crop(p1, p2)
+        new_image = self.seitenbild.crop(p1, p2)
         image_bmp = new_image.ConvertToBitmap()
         # self.imagepanel.show_pic(bitmap, scale=conf.SCALE_ECKE)
         if nr == 1:
@@ -161,7 +169,7 @@ class Seite():
 
         foto = self.akt_foto
         rad, grad = foto.drehung
-        orig = self.origbild
+        orig = self.seitenbild
         logger.info(f'Foto {foto}')
 
         # Verdrehung korrigieren wenn nötig.
@@ -194,7 +202,7 @@ class Seite():
             foto.rahmen_plus -= 5
         self.foto_anzeigen()
 
-    def foto_speichern_im_thread(self):
+    def __foto_speichern_im_thread(self):
 
         foto = self.akt_foto
         foto.fertig = True
@@ -211,8 +219,8 @@ class Seite():
                 img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
             x0 = max(0, foto.ecke1.x - foto.rahmen_plus)
             y0 = max(0, foto.ecke1.y - foto.rahmen_plus) # nie <0
-            x1 = min(self.origbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
-            y1 = min(self.origbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
+            x1 = min(self.seitenbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
+            y1 = min(self.seitenbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
             img.crop(x0, y0, x1, y1)
             tname = self.get_target_w_appendixname('wand')
             img.save(filename=tname)
@@ -220,7 +228,7 @@ class Seite():
         # foto.free_image()
 
     def foto_speichern(self):
-        thread = Thread(target=self.foto_speichern_im_thread)
+        thread = Thread(target=self.__foto_speichern_im_thread)
         thread.start()
 
 
@@ -229,9 +237,6 @@ class Seite():
     # Helper
     #
     ###################################################################################
-    def free_origbild(self):
-        self.__origbild = None
-
     def save(self, keimage, suffix, typ):
         new_name = self.basename + suffix + typ
         fname = os.path.join(self.path, conf.pic_output, new_name)

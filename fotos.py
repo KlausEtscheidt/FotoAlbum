@@ -117,25 +117,6 @@ class Foto():
     def y0(self):
         return self.ecke1.y
 
-    # @property
-    # def image(self):
-    #     # if self.__image == None:
-    #     #     # Hole Bildausschnitt aus Gesamtseite
-    #     #     new_image = self.parent.origbild.crop(self.p1, self.p2)
-    #     #     self.image = new_image
-    #     # return self.__image
-
-    #     # Hole Bildausschnitt aus Gesamtseite
-    #     new_image = self.parent.origbild.crop(self.p1, self.p2)
-    #     return new_image
-
-    # @image.setter
-    # def image(self, x):
-    #     self.__image = x
- 
-    # def free_image(self):
-    #     self.image = None
-
     def __str__(self):
         _, grad = self.drehung
         txt = f'x0 {self.x0} y0 {self.y0} breit {self.breite} hoch {self.hoehe}'

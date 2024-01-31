@@ -83,7 +83,6 @@ class ImagePanel(wx.Panel):
 
     def define_ctrls(self):
         # Haupt-Image-control
-        # self.imagectrl = wx.Window(self, -1, size=(150, 300) )
         self.imagectrl = wx.Window(self, -1)
         self.imagectrl.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
         self.SetFocus() # Einmal Focus auf self, damit key-events empfangen werden
@@ -96,7 +95,6 @@ class ImagePanel(wx.Panel):
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(1)
         self.main_sizer.Fit(self)
-        # self.SetupScrolling()
 
         #Handler binden
         
@@ -110,7 +108,6 @@ class ImagePanel(wx.Panel):
     def show_pic(self, image_bmp, zeichen_bmp=None, scale=1):
         self.__bitmap = image_bmp
         self.__zbmp = zeichen_bmp
-        # self.zeichen_bitmap(0,(0,0))
         self.overlay.Reset()
         self.dc_matrix = wx.AffineMatrix2D()
         dx, dy =self.dc_matrix.TransformPoint(image_bmp.Width, image_bmp.Height)
@@ -119,8 +116,6 @@ class ImagePanel(wx.Panel):
         dy = round((cs.y - image_bmp.Height * scale)/2)
         self.dc_matrix.Translate(dx,dy)
         self.dc_matrix.Scale(scale, scale)
-        # self.dc = self.fotodraw()
-        # self.imagectrl.SetMaxSize(wx.Size(bitmap.Width + 2*self.rand, bitmap.Height + 2*self.rand))
         
         self.imagectrl.Refresh()
         wx.Yield()
@@ -172,13 +167,9 @@ class ImagePanel(wx.Panel):
     def OnPaint(self, event=None):
         dc = wx.PaintDC(self.imagectrl)
         self.dc = dc
-        # m=wx.AffineMatrix2D()
-        # m.Translate(10,0)
         erg = dc.SetTransformMatrix(self.dc_matrix)
-        # dc.SetUserScale(self.dc_scale, self.dc_scale)
-        dc.SetBackground(wx.Brush("sky blue"))
+        dc.SetBackground(wx.Brush("light blue"))
         dc.Clear()
-        # dc.SetPen(wx.Pen(wx.RED, 4))
         if self.__bitmap:
             dc.DrawBitmap ( self.__bitmap, 0, 0, useMask=False)
         if self.__zbmp:
@@ -204,7 +195,7 @@ class ImagePanel(wx.Panel):
     def OnKeyPress(self, event):
         act_pos = event.GetPosition()
         keycode = event.GetKeyCode()
-        print(keycode)
+        # print(keycode)
         conf.mainframe.SetStatusText(str(keycode))
         if keycode == 388:  #num+
             if event.GetModifiers() == wx.MOD_CONTROL:
@@ -239,6 +230,12 @@ class ImagePanel(wx.Panel):
                 self.translate('t')
             else:
                 self.imagectrl.WarpPointer(act_pos.x, act_pos.y+1)
+
+        if keycode == 82: #'r'
+            self.seiten.akt_seite.seite_drehen()
+
+        if keycode == 83: #'s'
+            self.seiten.akt_seite.seite_speichern()
 
         if keycode == 69: #'e'
             p = self.get_pos_in_bitmap(act_pos)

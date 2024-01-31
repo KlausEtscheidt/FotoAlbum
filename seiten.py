@@ -35,6 +35,10 @@ class Seiten(list):
         self.__rahmen_ru = (0, 0)
     
     @property
+    def akt_seite(self):
+        return self.__seite
+    
+    @property
     def status(self):
         return self.__status
 
@@ -100,7 +104,8 @@ class Seiten(list):
 
         :param seiten_nr: index der zu bearbeitenden Seite in self.__seiten
         :type seiten_nr: int
-        """        
+        """
+
         self.imagectrl.SetFocus()
         self.__seiten_nr = seiten_nr # merken f next
         # Status auf Anfang Seite bearbeiten
@@ -111,11 +116,10 @@ class Seiten(list):
         txt = f'{self.__seite.basename}{self.__seite.typ}   ({seiten_nr+1:d} von {len(self)})'
         self.imagepanel.parent.label_li.SetLabel(txt)
         self.imagepanel.parent.label_re.SetLabel(f'{self.__status}')
-        self.__seite.show_origbild()
+        self.__seite.seite_laden()
 
     def seite_bearbeiten_next(self):
         # Speicher freigeben
-        self[self.__seiten_nr].free_origbild()
         if self.__seiten_nr < len(self)-1:
             self.__seiten_nr += 1
         else:
@@ -124,7 +128,6 @@ class Seiten(list):
 
     def seite_bearbeiten_prev(self):
         # Speicher freigeben
-        self[self.__seiten_nr].free_origbild()
         if self.__seiten_nr > 0:
             self.__seiten_nr -= 1
         else:
