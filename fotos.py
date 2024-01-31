@@ -17,12 +17,14 @@ class KEImage(wx.Image):
         # Image von Platte laden
         return wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
 
-    def __init__(self, fullpath2pic=None, aKEImage=None):
+    def __init__(self, fullpath2pic=None, aKEImage=None, aBitmap=None):
         if fullpath2pic:
             wx.Image.__init__(self, fullpath2pic, wx.BITMAP_TYPE_ANY)
         elif aKEImage:
             wx.Image.__init__(self,aKEImage)
             # self = aKEImage.Copy()
+        elif aBitmap:
+            wx.Image.__init__(self, aBitmap.ConvertToImage())    
         else:
             wx.Image.__init__(self)
 

@@ -1,7 +1,6 @@
 import logging
-#import time
-#import glob 
 import os
+from threading import Thread
 
 import wx
 
@@ -178,7 +177,6 @@ class Seite():
         p2 = wx.Point(p1.x + foto.breite + 2*conf.RAND, p1.y + foto.hoehe + 2*conf.RAND)
         self.bild_gedreht = neu_image.crop(p1, p2)
 
-        self.save(self.bild_gedreht, f'_{len(self.fotos):02d}')
         self.foto_anzeigen()
 
     def foto_anzeigen(self):
@@ -196,9 +194,16 @@ class Seite():
             foto.rahmen_plus -= 5
         self.foto_anzeigen()
 
-    def foto_speichern(self):
+    def foto_speichern_im_thread(self):
+
         foto = self.akt_foto
         foto.fertig = True
+
+        # Erst Kontrollbild
+        bmp = zeichenfabrik.zeichne_clip_rahmen_ins_bild(self.bild_gedreht.bitmap, foto, conf.RAND, foto.rahmen_plus)
+        aKEImage = KEImage(aBitmap=bmp)
+        self.save(aKEImage, f'_{len(self.fotos):02d}', '.jpg')
+
         rad, grad = foto.drehung
 
         with wandImage(filename=self.fullpath2pic) as img:
@@ -214,6 +219,11 @@ class Seite():
             # display(img)
         # foto.free_image()
 
+    def foto_speichern(self):
+        thread = Thread(target=self.foto_speichern_im_thread)
+        thread.start()
+
+
     ###################################################################################
     #
     # Helper
@@ -222,10 +232,13 @@ class Seite():
     def free_origbild(self):
         self.__origbild = None
 
-    def save(self, keimage, suffix):
-        new_name = self.basename + suffix + self.typ
+    def save(self, keimage, suffix, typ):
+        new_name = self.basename + suffix + typ
         fname = os.path.join(self.path, conf.pic_output, new_name)
-        keimage.SaveFile(fname)
+        if typ == '.tif':
+            keimage.SaveFile(fname)
+        if typ == '.jpg':
+            keimage.bitmap.SaveFile (fname, wx.BITMAP_TYPE_JPEG)
 
     def get_target_w_appendixname(self, apdx):
         new_name = self.basename + f'_{len(self.fotos):02d}_{apdx}' + self.typ

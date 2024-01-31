@@ -9,6 +9,11 @@ logger = logging.getLogger('album')
 dc = None #device context
 zbmp = None #Zeichenbitmap
 
+# Alle folgenden Bitmaps dienen als transparente Overlays über das Originalbild
+# ------------------------------------------------------------------------------
+#
+#
+
 # Durchkreuzter Rahmen über die gewählten Ecken aller definierten Fotos der Seite
 def zeichne_rahmen(image_bmp, akt_seite):
     __prepare_dc(image_bmp)
@@ -30,7 +35,7 @@ def zeichne_ecke(image_bmp, linie_hor=None, linie_vert=None):
     __release_dc()
 
 # Rahmen in gedrehtem Bild entsprechend Ecke1, Breite und Höhe
-# zur Korrektur des Clippings
+# zur Korrektur des Clippings einzeichnen
 def zeichne_clip_rahmen(image_bmp, foto, rand, rahmen_plus):
     p1 = wx.Point(rand - rahmen_plus, rand - rahmen_plus)
     p2 = wx.Point(p1.x + foto.breite + 2*rahmen_plus, p1.y)
@@ -41,6 +46,27 @@ def zeichne_clip_rahmen(image_bmp, foto, rand, rahmen_plus):
     punkte = [p1, p2, p3, p4]
     dc.DrawPolygon(punkte)
     __release_dc()
+
+# Hier wird ins Bild gezeichnet
+# ------------------------------------------------------------------------------
+#
+def zeichne_clip_rahmen_ins_bild(image_bmp, foto, rand, rahmen_plus):
+    p1 = wx.Point(rand - rahmen_plus, rand - rahmen_plus)
+    p2 = wx.Point(p1.x + foto.breite + 2*rahmen_plus, p1.y)
+    p3 = wx.Point(p2.x, p1.y + foto.hoehe + 2*rahmen_plus)
+    p4 = wx.Point(p1.x, p3.y)
+
+    dc = wx.MemoryDC()
+    dc.SelectObject(image_bmp)
+    dc.SetBrush(wx.TRANSPARENT_BRUSH)
+    dc.SetPen(wx.Pen(wx.RED, 5))
+    punkte = [p1, p2, p3, p4]
+    dc.DrawPolygon(punkte)
+    dc.SelectObject(wx.NullBitmap)
+    dc = None
+    return image_bmp
+
+
 ####################################################################################
 # Helper
 
