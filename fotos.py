@@ -77,11 +77,17 @@ class Foto():
         self.ecke1 = None
         self.ecke2 = None
         self.ecke3 = None
+        self.rahmen_plus = -5 # Rahmen gegenüber Daten aus Ecken 1-3 vergrössern (wenn >0)
+        self.fertig = False # wird True wenn Foto vollständig definiert
+
         # Bildausschnitt aus Origbild entsprechend des Grob-Rahmens ums Foto
         # Wird nach Definition des Rahmens erzeugt und behalten
         # Muss nach Abspeichern der Seite entfernt werden               
         # self.__image = None
 
+    def pos_ist_innen(self, x, y):
+        return x>=self.p1.x and x<=self.p2.x and y>=self.p1.y and y<=self.p2.y
+    
     @property
     def drehung(self):
         dy = self.ecke2.y - self.ecke1.y
@@ -131,5 +137,5 @@ class Foto():
     def __str__(self):
         _, grad = self.drehung
         txt = f'x0 {self.x0} y0 {self.y0} breit {self.breite} hoch {self.hoehe}'
-        txt += f' winkel {grad:5.4f}°'
+        txt += f' winkel {grad:5.4f}° rahmen plus {self.rahmen_plus}'
         return txt

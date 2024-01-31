@@ -14,9 +14,9 @@ pic_output = 'zerlegt'
 
 SCALE_SEITE = 0.1 # Fuer erste Anzeige kompletter Seite
 SCALE_ECKE  = 0.5 #  Fuers Setzen der Ecken
-SCALE_KONTROLLBILD  = 0.25 #  Fuer finale Kontrollanzeige
+SCALE_KONTROLLBILD  = 0.2 #  Fuer finale Kontrollanzeige
 MIN_WINKEL = .25
-SHRINK = -10
+RAND = 20
 
 #Rechnername
 rechner = platform.node()

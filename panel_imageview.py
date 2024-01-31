@@ -207,9 +207,17 @@ class ImagePanel(wx.Panel):
         print(keycode)
         conf.mainframe.SetStatusText(str(keycode))
         if keycode == 388:  #num+
-            self.rescale(2.)
+            if event.GetModifiers() == wx.MOD_CONTROL:
+                if self.seiten.status == 'Foto Kontrolle':
+                    self.seiten.foto_beschneiden('+')
+            else:
+                self.rescale(2.)
         if keycode == 390:  #num-
-            self.rescale(.5)
+            if event.GetModifiers() == wx.MOD_CONTROL:
+                if self.seiten.status == 'Foto Kontrolle':
+                    self.seiten.foto_beschneiden('-')
+            else:
+                self.rescale(.5)
 
         if keycode == 314: #links
             if event.GetModifiers() == wx.MOD_CONTROL:
@@ -233,7 +241,11 @@ class ImagePanel(wx.Panel):
                 self.imagectrl.WarpPointer(act_pos.x, act_pos.y+1)
 
         if keycode == 69: #'e'
-            self.seiten.erase_foto(p)
+            p = self.get_pos_in_bitmap(act_pos)
+            self.seiten.foto_entfernen(p)
+
+        if keycode == 27: #'esc'
+            self.seiten.reset()
 
         if keycode == wx.WXK_SPACE:
             # print("you pressed the spacebar!")
@@ -262,7 +274,7 @@ class ImagePanel(wx.Panel):
             self.seiten.ecke2(p)
         elif self.seiten.status == 'Ecke3':
             self.seiten.ecke3(p)
-        elif self.seiten.status == 'Foto definiert':
+        elif self.seiten.status == 'Foto Kontrolle':
             self.seiten.foto_speichern(p)
 
         # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')

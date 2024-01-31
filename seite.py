@@ -28,8 +28,12 @@ class Seite():
     
     base_scale = conf.SCALE_SEITE
 
-    d_aussen = 200
+    d_aussen = 200 # Rand zum Anzeigen der Ecken
     d_innen = 1400
+
+    # temp Speicher (KEImage) des gedrehten Fotos mit Zusatzrand
+    # dient zur Anzeige beim Verändern des Cipping-Randes in "foto_beschneiden"
+    bild_gedreht = None 
 
     def __init__(self, fullpath2pic):
         
@@ -153,38 +157,57 @@ class Seite():
         self.akt_foto.ecke3 = wx.Point(x_abs, y_abs)
         logger.debug(f'speichere Ecke 3 x: {x_abs} y: {y_abs}')
 
-    def foto_anzeigen(self):
+    # def foto_anzeigen(self):
+    def foto_drehen(self):
 
         foto = self.akt_foto
         rad, grad = foto.drehung
         orig = self.origbild
         logger.info(f'Foto {foto}')
 
+        # Verdrehung korrigieren wenn nötig.
+        # Funktion verschiebt Bild um offset 0 => korrigieren
         if abs(grad) > conf.MIN_WINKEL:
             neu_image, offset = orig.rotate(rad, foto.ecke1, False)
         else:
             neu_image = orig
             offset = wx.Point(0, 0)
 
-        p1 = wx.Point(foto.ecke1.x - offset.x + conf.SHRINK, foto.ecke1.y - offset.y + conf.SHRINK)
-        p2 = wx.Point(p1.x + foto.breite - 2*conf.SHRINK, p1.y + foto.hoehe - 2*conf.SHRINK)
-        neu_image = neu_image.crop(p1, p2)
-        self.save(neu_image, f'_{len(self.fotos):02d}')
+        # Korrektur des Offsets und Rand dazu
+        p1 = wx.Point(foto.ecke1.x - offset.x - conf.RAND, foto.ecke1.y - offset.y - conf.RAND)
+        p2 = wx.Point(p1.x + foto.breite + 2*conf.RAND, p1.y + foto.hoehe + 2*conf.RAND)
+        self.bild_gedreht = neu_image.crop(p1, p2)
 
-        bitmap = neu_image.bitmap
-        self.imagepanel.show_pic(bitmap, scale=conf.SCALE_KONTROLLBILD)
+        self.save(self.bild_gedreht, f'_{len(self.fotos):02d}')
+        self.foto_anzeigen()
+
+    def foto_anzeigen(self):
+        # Anzeige
+        foto = self.akt_foto
+        image_bmp = self.bild_gedreht.bitmap
+        zeichenfabrik.zeichne_clip_rahmen(image_bmp, foto, conf.RAND, foto.rahmen_plus)
+        self.imagepanel.show_pic(image_bmp, zeichenfabrik.zbmp , scale=conf.SCALE_KONTROLLBILD)
+
+    def foto_beschneiden(self, plusminus):
+        foto = self.akt_foto
+        if plusminus == '+':
+            foto.rahmen_plus += 5
+        else:
+            foto.rahmen_plus -= 5
+        self.foto_anzeigen()
 
     def foto_speichern(self):
         foto = self.akt_foto
+        foto.fertig = True
         rad, grad = foto.drehung
 
         with wandImage(filename=self.fullpath2pic) as img:
             if abs(grad) > conf.MIN_WINKEL:
                 img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
-            x0 = max(0, foto.ecke1.x + conf.SHRINK)
-            y0 = max(0, foto.ecke1.y + conf.SHRINK) # nie <0
-            x1 = min(self.origbild.Width, x0 + foto.breite - 2*conf.SHRINK)
-            y1 = min(self.origbild.Height, y0 + foto.hoehe - 2*conf.SHRINK)
+            x0 = max(0, foto.ecke1.x - foto.rahmen_plus)
+            y0 = max(0, foto.ecke1.y - foto.rahmen_plus) # nie <0
+            x1 = min(self.origbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
+            y1 = min(self.origbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
             img.crop(x0, y0, x1, y1)
             tname = self.get_target_w_appendixname('wand')
             img.save(filename=tname)
@@ -209,31 +232,3 @@ class Seite():
         fname = os.path.join(self.path, conf.pic_output, new_name)
         return fname
 
-#####################################################################################
-#
-# Seiten
-#
-#####################################################################################
-
-class Seiten(list):
-
-    seiten_nr = 0
-
-    def __init__(self):
-        
-        super().__init__()
-
-
-        # Suche Bilder    
-        self.myFileList = glob.glob(conf.pic_path + "\*" + conf.pic_type)
-        
-        # Fuer jeden gefundenen Pfad, Seitenobjekt erzeugen und merken
-        for fullpath in self.myFileList:
-            seite = Seite(fullpath)
-            self.append(seite)
-        
-        msg = f'Liste mit {len(self):d} Bildern geladen.'
-        if conf.mainframe:
-            conf.mainframe.SetStatusText(msg)
-        logger.debug(msg + f'\nVerzeichnis: {conf.pic_path} Endung: {conf.pic_type}\n')
-    

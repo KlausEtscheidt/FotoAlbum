@@ -131,6 +131,7 @@ class Seiten(list):
             self.__seiten_nr = len(self)-1
         self.seite_bearbeiten(self.__seiten_nr)
 
+
     ############################################################################
     #
     # Aktionen je Foto
@@ -166,14 +167,49 @@ class Seiten(list):
     # Ecke 3 abspeichern und beschnittenes Foto anzeigen
     def ecke3(self, p):
         self.__seite.speichere_ecke3(p)
-        self.__status = 'Foto definiert'
-        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
-        self.__seite.foto_anzeigen()
+        self.__status = 'Foto Kontrolle'
+        # self.imagepanel.parent.label_re.SetLabel(f' {self.__status}')
+        akt_foto = self.__seite.akt_foto
+        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status} Rahmen: {akt_foto.rahmen_plus}')    
+        self.__seite.foto_drehen()
 
     # 4. Aktion je Foto:
+    # Beschnitt ändern
+    def foto_beschneiden(self, plusminus):
+        self.__seite.foto_beschneiden(plusminus)
+        akt_foto = self.__seite.akt_foto
+        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status} Rahmen: {akt_foto.rahmen_plus}')    
+
+
+    # 5. Aktion je Foto:
     # Beschnittenes Foto speichern und n. Seite bearbeiten
     def foto_speichern(self, p):
         self.__seite.foto_speichern()
         self.__status = 'Foto fertig'
+        self.seite_bearbeiten(self.__seiten_nr)
+
+    def reset(self):
+        """reset Bearbeitung abbrechen
+
+        Status auf Start Seite/Foto setzen
+        Fragmente der Eingabe loeschen
+        """        
+        akt_seite = self[self.__seiten_nr]
+        akt_foto = akt_seite.akt_foto
+        # akt_foto wird beim Klicken des Rahmens l.o gesetzt
+        if akt_foto:
+            # loeschen wenn noch nicht fertig definiert
+            if not akt_foto.fertig:
+                akt_seite.fotos.remove(akt_foto)
+                akt_seite.akt_foto = None
+        #Status reset und weiter
+        self.seite_bearbeiten(self.__seiten_nr)
+
+    def foto_entfernen(self, mauspos):
+        akt_seite = self[self.__seiten_nr]
+        for foto in akt_seite.fotos:
+            if foto.pos_ist_innen(mauspos.x, mauspos.y):
+                akt_seite.fotos.remove(foto)
+                break
         self.seite_bearbeiten(self.__seiten_nr)
 
