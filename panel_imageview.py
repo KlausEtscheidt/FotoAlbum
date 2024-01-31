@@ -154,13 +154,13 @@ class ImagePanel(wx.Panel):
     def translate(self, richtung):
         delta = 25
         if richtung == 'l':
-            self.dc_matrix.Translate(-delta,0)
-        if richtung == 'r':
             self.dc_matrix.Translate(delta,0)
+        if richtung == 'r':
+            self.dc_matrix.Translate(-delta,0)
         if richtung == 'h':
-            self.dc_matrix.Translate(0,-delta)
-        if richtung == 't':
             self.dc_matrix.Translate(0,delta)
+        if richtung == 't':
+            self.dc_matrix.Translate(0,-delta)
         self.overlay.Reset()
         self.imagectrl.Refresh()
         wx.Yield()
@@ -186,6 +186,69 @@ class ImagePanel(wx.Panel):
 
     def OnPressMouse(self, event):
         act_pos = event.GetPosition()
+        self.MausKlickAktionen(act_pos)
+        
+    def OnMouseMove(self, evt):
+        act_pos = evt.GetPosition()
+        if self.seiten.status == 'Start Seite/Foto':
+            self.maus_zeigt_fadenkreuz(act_pos)
+        elif self.seiten.status == 'Rahmen ru':
+            # if evt.Dragging() and evt.LeftIsDown():
+            self.maus_zeigt_rahmen(act_pos)
+        elif self.seiten.status in ('Ecke1', 'Ecke2', 'Ecke3'):
+            self.maus_zeigt_fadenkreuz(act_pos)
+    # def OnReleaseMouse(self, event):
+    #     self.pos2 = event.GetPosition()
+    #     self.imagectrl.Refresh()
+
+    def OnKeyPress(self, event):
+        act_pos = event.GetPosition()
+        keycode = event.GetKeyCode()
+        print(keycode)
+        conf.mainframe.SetStatusText(str(keycode))
+        if keycode == 388:  #num+
+            self.rescale(2.)
+        if keycode == 390:  #num-
+            self.rescale(.5)
+
+        if keycode == 314: #links
+            if event.GetModifiers() == wx.MOD_CONTROL:
+                self.translate('l')
+            else:
+                self.imagectrl.WarpPointer(act_pos.x-1, act_pos.y)
+        if keycode == 316: #rechts
+            if event.GetModifiers() == wx.MOD_CONTROL:
+                self.translate('r')
+            else:
+                self.imagectrl.WarpPointer(act_pos.x+1, act_pos.y)
+        if keycode == 315: #hoch
+            if event.GetModifiers() == wx.MOD_CONTROL:
+                self.translate('h')
+            else:
+                self.imagectrl.WarpPointer(act_pos.x, act_pos.y-1)
+        if keycode == 317: #tief
+            if event.GetModifiers() == wx.MOD_CONTROL:
+                self.translate('t')
+            else:
+                self.imagectrl.WarpPointer(act_pos.x, act_pos.y+1)
+
+        if keycode == 69: #'e'
+            self.seiten.erase_foto(p)
+
+        if keycode == wx.WXK_SPACE:
+            # print("you pressed the spacebar!")
+            self.MausKlickAktionen(act_pos)
+        # event.Skip()
+
+    # ------------------------------------------------------
+    # High-Level Funktionen
+    # ------------------------------------------------------
+
+    # ------------------------------------------------------
+    # Basis Funktionen
+    # ------------------------------------------------------
+
+    def MausKlickAktionen(self, act_pos):
         p = self.get_pos_in_bitmap(act_pos)
         if self.seiten.status == 'Start Seite/Foto':
             self.__mouse1 = act_pos
@@ -204,16 +267,6 @@ class ImagePanel(wx.Panel):
 
         # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')
         logger.debug(f'Mausklick bei x:{p.x} y:{p.y}\n')
-        
-    def OnMouseMove(self, evt):
-        act_pos = evt.GetPosition()
-        if self.seiten.status == 'Start Seite/Foto':
-            self.maus_zeigt_fadenkreuz(act_pos)
-        elif self.seiten.status == 'Rahmen ru':
-            # if evt.Dragging() and evt.LeftIsDown():
-            self.maus_zeigt_rahmen(act_pos)
-        elif self.seiten.status in ('Ecke1', 'Ecke2', 'Ecke3'):
-            self.maus_zeigt_fadenkreuz(act_pos)
 
     def maus_zeigt_fadenkreuz(self, pos):
 
@@ -246,45 +299,6 @@ class ImagePanel(wx.Panel):
         del odc # work around a bug in the Python wrappers to make
                 # sure the odc is destroyed before the dc is.
 
-    # def OnReleaseMouse(self, event):
-    #     self.pos2 = event.GetPosition()
-    #     self.imagectrl.Refresh()
-
-    def OnKeyPress(self, event):
-        keycode = event.GetKeyCode()    
-        print(keycode)
-        conf.mainframe.SetStatusText(str(keycode))
-        if keycode == 388:  #num+
-            self.rescale(2.)
-        if keycode == 390:  #num-
-            self.rescale(.5)
-
-        if keycode == 314: #links
-            self.translate('l')
-        if keycode == 316: #rechts
-            self.translate('r')
-        if keycode == 315: #hoch
-            self.translate('h')
-        if keycode == 317: #tief
-            self.translate('t')
-
-        if keycode == wx.WXK_SPACE:
-            print("you pressed the spacebar!")
-            # self.next_bearbeiten()
-            self.weiter()
-        # event.Skip()
-
-    #     menu = self.MakePopUpMenu()
-    #     self.PopupMenu(menu, m_pos)
-
-    # ------------------------------------------------------
-    # High-Level Funktionen
-    # ------------------------------------------------------
-
-    # ------------------------------------------------------
-    # Basis Funktionen
-    # ------------------------------------------------------
-        
     def get_pos_in_bitmap(self, pos):
         mat, tr = self.dc_matrix.Get()
         new = wx.AffineMatrix2D()

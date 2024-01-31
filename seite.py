@@ -181,11 +181,11 @@ class Seite():
         with wandImage(filename=self.fullpath2pic) as img:
             if abs(grad) > conf.MIN_WINKEL:
                 img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
-            x0 = foto.ecke1.x + conf.SHRINK
+            x0 = max(0, foto.ecke1.x + conf.SHRINK)
             y0 = max(0, foto.ecke1.y + conf.SHRINK) # nie <0
-            breite = foto.breite - 2*conf.SHRINK
-            hoehe = foto.hoehe - 2*conf.SHRINK
-            img.crop(x0, y0, x0 + breite, y0 + hoehe)
+            x1 = min(self.origbild.Width, x0 + foto.breite - 2*conf.SHRINK)
+            y1 = min(self.origbild.Height, y0 + foto.hoehe - 2*conf.SHRINK)
+            img.crop(x0, y0, x1, y1)
             tname = self.get_target_w_appendixname('wand')
             img.save(filename=tname)
             # display(img)
