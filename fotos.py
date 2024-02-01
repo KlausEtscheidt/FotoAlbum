@@ -79,7 +79,7 @@ class Foto():
         self.ecke1 = None
         self.ecke2 = None
         self.ecke3 = None
-        self.rahmen_plus = -5 # Rahmen gegenüber Daten aus Ecken 1-3 vergrössern (wenn >0)
+        self.rahmen_plus = conf.rahmen_plus # Rahmen gegenüber Daten aus Ecken 1-3 vergrössern (wenn >0)
         self.fertig = False # wird True wenn Foto vollständig definiert
 
         # Bildausschnitt aus Origbild entsprechend des Grob-Rahmens ums Foto

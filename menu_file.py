@@ -10,6 +10,7 @@ def init(parent, pMenu):
     men_items = (
         # (OnRefillTree, "Baum erneuern", "Baum neu lesen"),
         (OnStart, "Start", "Starte Bearbeitung aller Bilder."),
+        (OnSettings, "Einstellungen", "Einstellungen ändern."),
         (OnResetLog, "Lösche Logpanel", "Logpanel leeren"),
         # (OnEdit, "Öffne RawTherapee", "Öffne RawTherapee"),
         (OnExit, "Ende", "Programm beenden"),
@@ -20,6 +21,9 @@ def init(parent, pMenu):
 
 def OnStart(_event):
     conf.thisapp.seiten_laden()
+
+def OnSettings(_event):
+    conf.settings()
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()

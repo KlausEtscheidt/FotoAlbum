@@ -6,6 +6,9 @@ min_winkel = 0.25
 # Rand um Kontrollbilder
 rand = 20
 
+# Eingegebenen Rand um Wert vergrössern
+rahmen_plus = -10
+
 [pfade]
 # Verzeichnis, das nach Seiten eines Fotoalbums (tiff-Dateien) durchsucht wird
 # Dieser Pfad hat Prio1 und wird verwendet, wenn er existiert
@@ -21,7 +24,7 @@ pic_subdir = 'testpics'
 
 # Unterverzeichnis von pic_path, in dem die Ergebnis-Bilder abgelegt werden
 # Wird angelegt, wenn nicht existent
-pic_output = 'zerlegt'
+pic_output = "zerlegt"
 
 # Endung nach der in pic_path gesucht wird
 pic_type = '.tif'

@@ -7,7 +7,9 @@ import tomlkit.toml_file
 #import tomlkit.toml_document
 #https://tomlkit.readthedocs.io/en/latest/
 
+import wx
 
+from settings_dialog import SettingsDlg
 ##Pfade
 # Basis-Verzeichnis
 # my_file = os.path.realpath(__file__) # Welcher File wird gerade durchlaufen
@@ -40,6 +42,9 @@ class Config():
         # Rand um Kontrollbilder
         self.RAND = tml['rand']
 
+        # Definierten Rahmen um Bild um Wert vergrössern
+        self.rahmen_plus =  tml['rahmen_plus']
+
         #Rechnername
         rechner = platform.node()
         # print(rechner )
@@ -70,6 +75,23 @@ class Config():
     def config_write(self):
         self.tml['pfade']['pic_path'] = self.pic_path
         tomlkit.toml_file.TOMLFile(self.tomlfile).write(self.tml)
+    
+    def settings(self):
+        with  SettingsDlg(None, 'Einstellungen', self) as Dlg:
+            if Dlg.ShowModal() == wx.ID_CANCEL:
+                return
+        
+        self.SCALE_SEITE = Dlg.scale_seite
+        self.SCALE_KONTROLLBILD = Dlg.scale_kontrollbild
+        self.MIN_WINKEL = Dlg.min_winkel
+        self.pic_output = Dlg.pic_output
+        self.rahmen_plus = Dlg.rahmen_plus
+        self.tml['scale']['seite'] = self.SCALE_SEITE
+        self.tml['scale']['kontrollbild'] = self.SCALE_KONTROLLBILD
+        self.tml['rahmen_plus'] = self.rahmen_plus
+        self.tml['min_winkel'] = self.MIN_WINKEL
+        self.tml['pfade']['pic_output'] = self.pic_output
+        
 
 # conf als Globale
 conf = Config()
