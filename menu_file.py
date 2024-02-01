@@ -11,6 +11,7 @@ def init(parent, pMenu):
         # (OnRefillTree, "Baum erneuern", "Baum neu lesen"),
         (OnStart, "Start", "Starte Bearbeitung aller Bilder."),
         (OnSettings, "Einstellungen", "Einstellungen ändern."),
+        (OnSaveSettings, "Einstellungen speichern", "Einstellungen speichern."),
         (OnResetLog, "Lösche Logpanel", "Logpanel leeren"),
         # (OnEdit, "Öffne RawTherapee", "Öffne RawTherapee"),
         (OnExit, "Ende", "Programm beenden"),
@@ -24,6 +25,9 @@ def OnStart(_event):
 
 def OnSettings(_event):
     conf.settings()
+
+def OnSaveSettings(_event):
+    conf.savesettings()
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()

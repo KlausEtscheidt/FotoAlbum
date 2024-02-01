@@ -75,7 +75,14 @@ class Config():
     def config_write(self):
         self.tml['pfade']['pic_path'] = self.pic_path
         tomlkit.toml_file.TOMLFile(self.tomlfile).write(self.tml)
-    
+
+    def savesettings(self):
+        self.tml['scale']['seite'] = self.SCALE_SEITE
+        self.tml['scale']['kontrollbild'] = self.SCALE_KONTROLLBILD
+        self.tml['rahmen_plus'] = self.rahmen_plus
+        self.tml['min_winkel'] = self.MIN_WINKEL
+        self.tml['pfade']['pic_output'] = self.pic_output
+
     def settings(self):
         with  SettingsDlg(None, 'Einstellungen', self) as Dlg:
             if Dlg.ShowModal() == wx.ID_CANCEL:
@@ -86,11 +93,6 @@ class Config():
         self.MIN_WINKEL = Dlg.min_winkel
         self.pic_output = Dlg.pic_output
         self.rahmen_plus = Dlg.rahmen_plus
-        self.tml['scale']['seite'] = self.SCALE_SEITE
-        self.tml['scale']['kontrollbild'] = self.SCALE_KONTROLLBILD
-        self.tml['rahmen_plus'] = self.rahmen_plus
-        self.tml['min_winkel'] = self.MIN_WINKEL
-        self.tml['pfade']['pic_output'] = self.pic_output
         
 
 # conf als Globale

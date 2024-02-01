@@ -7,12 +7,12 @@ min_winkel = 0.25
 rand = 20
 
 # Eingegebenen Rand um Wert vergrössern
-rahmen_plus = -10
+rahmen_plus = -7
 
 [pfade]
 # Verzeichnis, das nach Seiten eines Fotoalbums (tiff-Dateien) durchsucht wird
 # Dieser Pfad hat Prio1 und wird verwendet, wenn er existiert
-pic_path = "C:\\Users\\Etscheidt\\Pictures\\testpics"
+pic_path = "C:\\Users\\Klaus\\Pictures\\xalb4"
 
 # Platzhalter, wird von config mit dem User-Bildverzeichnis gefüllt
 pic_basispfad = ''

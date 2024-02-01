@@ -198,9 +198,9 @@ class Seite():
     def foto_beschneiden(self, plusminus):
         foto = self.akt_foto
         if plusminus == '+':
-            foto.rahmen_plus += 5
+            foto.rahmen_plus += conf.rahmen_plus
         else:
-            foto.rahmen_plus -= 5
+            foto.rahmen_plus -= conf.rahmen_plus
         self.foto_anzeigen()
 
     def __foto_speichern_im_thread(self):
