@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
 
-import config
+from config import conf
 
 #Get the root logger (muss in jedes Modul)
 logger = logging.getLogger('album')
@@ -12,7 +12,7 @@ class KE_Handler(logging.Handler):
 
     def emit(self, record):
         msg = self.format(record)
-        config.mainframe.logpanel.Output(msg)
+        conf.mainframe.logpanel.Output(msg)
 
 def init():
     #set level

@@ -1,10 +1,9 @@
 #!/bin/python
-# import sys
-# print(sys.executable)
+import os
 
 import wx
 
-import config as conf
+from config import conf
 import logging
 import alb_logging
 
@@ -37,10 +36,23 @@ class myApp(wx.App):
         return True
 
     def seiten_laden(self):
+
+        # Gibt es das zu durchsuchende Verzeichnis "conf.pic_path"
+        if not os.path.isdir(conf.pic_path):
+            msg = 'Verzeichnis mit Scans wählen'
+            with wx.DirDialog(self.mainframe, message=msg, defaultPath=conf.pic_basispfad) as Dlg:
+                if Dlg.ShowModal() == wx.ID_CANCEL:
+                    return
+                conf.pic_path= Dlg.GetPath()
+                    
         # Tiff dateien suchen
         self.seiten = Seiten(self.mainframe.imagepanel.innerpanel)
         # Erste Seite bearbeiten
         self.seiten.seite_bearbeiten(0)
+    
+    def OnExit(self):
+        conf.config_write()
+        return super().OnExit()
 
 class MainFrame(wx.Frame):
 

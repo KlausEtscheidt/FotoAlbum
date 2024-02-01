@@ -3,7 +3,7 @@ import glob
 
 import wx
 
-import config as conf
+from config import conf
 from seite import Seite
 
 logger = logging.getLogger('album')

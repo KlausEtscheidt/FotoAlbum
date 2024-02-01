@@ -1,0 +1,33 @@
+# Mein Kommentar
+
+[pfade]
+# Platzhalter, wird von config mit dem User-Bildverzeichnis gefüllt
+pic_basispfad = ''
+# Unterverzeichnis von pic_basispfad, das nach Bildern durchsucht wird
+pic_subdir = 'testpics'
+# Platzhalter, wird von config auf pic_basispfad + pic_subdir gesetzt
+# Verzeichnis, das nach Seiten eines Fotoalbums (tiff-Dateien) durchsucht wird
+pic_path = ''
+# Unterverzeichnis von pic_subdir, in dem die Ergebnis-Bilder abgelegt werden
+pic_output = 'zerlegt'
+# Endung nach der in pic_subdir gesucht wird
+pic_type = '.tif'
+
+
+[owner]
+name = "Tom Preston-Werner"
+dob = 1979-05-27T07:32:00Z
+[database]
+server = "192.168.1.1"
+ports = [ 8001, 8001, 8002,]
+connection_max = 5000
+enabled = true
+[clients]
+data = [ [ "gamma", "delta",], [ 1, 2,],]
+hosts = [ "alpha", "omega",]
+[servers.alpha]
+ip = "10.0.0.1"
+dc = "eqdc10"
+[servers.beta]
+ip = "10.0.0.2"
+dc = "eqdc10"

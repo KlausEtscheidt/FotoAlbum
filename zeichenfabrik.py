@@ -2,7 +2,7 @@ import logging
 
 import wx
 
-import config as conf
+from config import conf
 
 logger = logging.getLogger('album')
 

@@ -3,7 +3,7 @@ import logging
 import wx
 import wx.lib.scrolledpanel as scrolledp
 
-import config as conf
+from config import conf
 import filedrop
 from seiten import Seiten
 

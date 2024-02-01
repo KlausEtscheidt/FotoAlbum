@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 from threading import Thread
 
 import wx
@@ -8,7 +9,7 @@ from wand.image import Image as wandImage
 from wand.display import display
 import zeichenfabrik
 
-import config as conf
+from config import conf
 
 from fotos import KEImage, Foto
 
@@ -222,7 +223,7 @@ class Seite():
             x1 = min(self.seitenbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
             y1 = min(self.seitenbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
             img.crop(x0, y0, x1, y1)
-            tname = self.get_target_w_appendixname('wand')
+            tname = self.get_targetname_w_appendix('wand')
             img.save(filename=tname)
             # display(img)
         # foto.free_image()
@@ -239,14 +240,20 @@ class Seite():
     ###################################################################################
     def save(self, keimage, suffix, typ):
         new_name = self.basename + suffix + typ
-        fname = os.path.join(self.path, conf.pic_output, new_name)
+        path = os.path.join(self.path, conf.pic_output)
+        fname = os.path.join(path, new_name)
+        #Pfad anlegen, wenn nicht vorhanden
+        Path(path).mkdir(parents=True, exist_ok=True)
         if typ == '.tif':
             keimage.SaveFile(fname)
         if typ == '.jpg':
             keimage.bitmap.SaveFile (fname, wx.BITMAP_TYPE_JPEG)
 
-    def get_target_w_appendixname(self, apdx):
+    def get_targetname_w_appendix(self, apdx):
         new_name = self.basename + f'_{len(self.fotos):02d}_{apdx}' + self.typ
-        fname = os.path.join(self.path, conf.pic_output, new_name)
+        path = os.path.join(self.path, conf.pic_output)
+        fname = os.path.join(path, new_name)
+        #Pfad anlegen, wenn nicht vorhanden
+        Path(path).mkdir(parents=True, exist_ok=True)
         return fname
 

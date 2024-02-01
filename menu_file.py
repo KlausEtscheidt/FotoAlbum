@@ -1,7 +1,7 @@
 import wx
 # import subprocess
 
-import config as conf
+from config import conf
 # import seite
 
 # Menu-Items zum Menu erzeugen und Handler registrieren

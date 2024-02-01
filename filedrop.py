@@ -1,7 +1,7 @@
 import os
 import wx
 
-import config
+from config import conf
 
 class MyFileDropTarget(wx.FileDropTarget):
     def __init__(self, parent):
@@ -13,7 +13,7 @@ class MyFileDropTarget(wx.FileDropTarget):
         #x,y sind drop-koordinaten, filenames liste der gedroppten files
         myfile = filenames[0]
         if os.path.isdir(myfile):
-            config.pic_path = myfile
-            config.thisapp.seiten_laden()
+            conf.pic_path = myfile
+            conf.thisapp.seiten_laden()
 
         return True

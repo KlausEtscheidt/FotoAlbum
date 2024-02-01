@@ -1,0 +1,37 @@
+# Mein Kommentar
+
+# Ab wieviel Grad Schrägstellung wird ein Bild zurückgedreht
+min_winkel = 0.25
+
+# Rand um Kontrollbilder
+rand = 20
+
+[pfade]
+# Verzeichnis, das nach Seiten eines Fotoalbums (tiff-Dateien) durchsucht wird
+# Dieser Pfad hat Prio1 und wird verwendet, wenn er existiert
+pic_path = "C:\\Users\\Etscheidt\\Pictures\\testpics"
+
+# Platzhalter, wird von config mit dem User-Bildverzeichnis gefüllt
+pic_basispfad = ''
+
+# Unterverzeichnis von pic_basispfad, das nach Bildern durchsucht wird
+# Der Pfad pic_basispfad + pic_subdir hat Prio 2 und wird verwendet, wenn er existiert
+# Wenn auch er nicht existiert, wird der Benutzer per Dialog gefragt 
+pic_subdir = 'testpics'
+
+# Unterverzeichnis von pic_path, in dem die Ergebnis-Bilder abgelegt werden
+# Wird angelegt, wenn nicht existent
+pic_output = 'zerlegt'
+
+# Endung nach der in pic_path gesucht wird
+pic_type = '.tif'
+
+[scale]
+# Fuer erste Anzeige kompletter Seite
+seite = 0.1 
+
+# Fuers Setzen der Ecken
+ecke  = 0.5 
+
+# Fuer finale Kontrollanzeige
+kontrollbild  = 0.2 
