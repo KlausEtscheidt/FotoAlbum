@@ -32,7 +32,7 @@ class myApp(wx.App):
         mainframe.Show()
         logger.debug('Starte Programm')
         self.seiten_laden()
-        conf.settings()
+        # conf.settings()
 
         return True
 

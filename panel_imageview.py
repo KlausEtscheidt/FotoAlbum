@@ -122,26 +122,56 @@ class ImagePanel(wx.Panel):
         wx.Yield()
 
     def rescale(self, faktor):
+        cs = self.imagectrl.GetClientSize()
+        xmax = self.dc.MaxX()
+        xmin = self.dc.MinX()
+        ymin = self.dc.MinY()
+        ymax = self.dc.MaxY()
+
+
         #Alte Bildmitte in Bitmap
         pm_bmp1, xm, ym = self.mitte_anzeige()
         mat1, tr1 = self.dc_matrix.Get()
+
+        # links oben in Maus
+        lo_x1, lo_y1 = self.dc_matrix.TransformPoint(0, 0)
+        # ru in Maus
+        ru_x1, ru_y1 = self.dc_matrix.TransformPoint(self.__bitmap.Width,self.__bitmap.Height)
 
         self.dc_matrix.Scale(faktor, faktor)
         mat2, tr2 = self.dc_matrix.Get()
 
         # Mitte Anzeige-Ist in Bitmap-Koord (pm_bmp1 ist Mitte Anzeige-Soll)
         pm_bmp2, xm, ym = self.mitte_anzeige()
+        
+        # Alte Bildmitte in Maus
+        am_x, am_y = self.dc_matrix.TransformPoint(pm_bmp1.x, pm_bmp1.y)
+        # muss auf Mitte Anzeige (cs/2)
+        dx = round(cs.x/2) - am_x
+        dy = round(cs.y/2) - am_y
+
 
         # Delta in Bitmap
         dbmp_x = pm_bmp2.x - pm_bmp1.x
         dbmp_y = pm_bmp2.y - pm_bmp1.y
         
         # Delta in Maus
-        dm_x, dm_y =self.dc_matrix.TransformPoint(dbmp_x, dbmp_y)
+        dm_x, dm_y = self.dc_matrix.TransformPoint(dbmp_x, dbmp_y)
+
+        # links oben in Maus
+        lo_x2, lo_y2 = self.dc_matrix.TransformPoint(0, 0)
+        # ru in Maus
+        ru_x2, ru_y2 = self.dc_matrix.TransformPoint(self.__bitmap.Width,self.__bitmap.Height)
         
         self.dc_matrix.Set(mat2,(dm_x, dm_y))
+        # self.dc_matrix.Set(mat2,(dx, dy))
         pm_bmp3, xm, ym = self.mitte_anzeige()
         print(f'Mitte: x {pm_bmp3.x} y {pm_bmp3.y}')
+        # links oben in Maus
+        lo_x3, lo_y3 = self.dc_matrix.TransformPoint(0, 0)
+        # ru in Maus
+        ru_x3, ru_y3 = self.dc_matrix.TransformPoint(self.__bitmap.Width,self.__bitmap.Height)
+
 
         self.overlay.Reset()
         self.imagectrl.Refresh()
