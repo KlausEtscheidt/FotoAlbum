@@ -79,7 +79,8 @@ class ImagePanel(wx.Panel):
         self.dc = None
         self.dc_scale = 1.
         self.dc_matrix = wx.AffineMatrix2D()
-        self.overlay = wx.Overlay()
+        self.overlay = wx.Overlay() #zum temp Zeichnen
+        self.imagectrl.SetDropTarget(file_drop_target)
 
     def define_ctrls(self):
         # Haupt-Image-control
@@ -165,6 +166,7 @@ class ImagePanel(wx.Panel):
     # ------------------------------------------------------
         
     def OnPaint(self, event=None):
+        self.overlay.Reset()
         dc = wx.PaintDC(self.imagectrl)
         self.dc = dc
         erg = dc.SetTransformMatrix(self.dc_matrix)
@@ -188,15 +190,13 @@ class ImagePanel(wx.Panel):
             self.maus_zeigt_rahmen(act_pos)
         elif self.seiten.status in ('Ecke1', 'Ecke2', 'Ecke3'):
             self.maus_zeigt_fadenkreuz(act_pos)
-    # def OnReleaseMouse(self, event):
-    #     self.pos2 = event.GetPosition()
-    #     self.imagectrl.Refresh()
 
     def OnKeyPress(self, event):
         act_pos = event.GetPosition()
         keycode = event.GetKeyCode()
         # print(keycode)
-        conf.mainframe.SetStatusText(str(keycode))
+        # conf.mainframe.SetStatusText(str(keycode))
+        
         if keycode == 388:  #num+
             if event.GetModifiers() == wx.MOD_CONTROL:
                 if self.seiten.status == 'Foto Kontrolle':

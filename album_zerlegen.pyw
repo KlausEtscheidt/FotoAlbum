@@ -27,23 +27,20 @@ class myApp(wx.App):
         self.mainframe = mainframe
         conf.mainframe = mainframe
         conf.imagepanel = mainframe.imagepanel.innerpanel
+        conf.thisapp = self
         #Noetig ????
         self.SetTopWindow(mainframe)
         mainframe.Show()
         logger.debug('Starte Programm')
-
-        # Tiff dateien suchen
-        self.seiten = Seiten(mainframe.imagepanel.innerpanel)
-        # Erste Seite bearbeiten
-        self.seiten.seite_bearbeiten(0)
+        self.seiten_laden()
 
         return True
 
-    # #!! Wird beim Start und beim Beenden ausgelöst
-    # def OnEventLoopEnter(self, loop):
-    #     if not self.leaving:
-    #         self.leaving = True
-    #         return super().OnEventLoopEnter(loop)
+    def seiten_laden(self):
+        # Tiff dateien suchen
+        self.seiten = Seiten(self.mainframe.imagepanel.innerpanel)
+        # Erste Seite bearbeiten
+        self.seiten.seite_bearbeiten(0)
 
 class MainFrame(wx.Frame):
 
