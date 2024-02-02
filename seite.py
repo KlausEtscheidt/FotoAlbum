@@ -223,7 +223,8 @@ class Seite():
             x1 = min(self.seitenbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
             y1 = min(self.seitenbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
             img.crop(x0, y0, x1, y1)
-            tname = self.get_targetname_w_appendix('wand')
+            tname = self.get_targetname_w_appendix('')
+            foto.saved_in = tname
             img.save(filename=tname)
             # display(img)
         # foto.free_image()

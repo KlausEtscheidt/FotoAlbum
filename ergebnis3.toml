@@ -1,0 +1,67 @@
+title = "Seitenliste"
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1960_01.tif"
+[[seite.foto]]
+nr = 0
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\zerlegt\\1960_01_01_.tif"
+x1 = 236
+y1 = 12
+x2 = 3030
+y2 = 10
+x3 = 3030
+y3 = 1940
+rahmen_plus = -7
+
+[[seite.foto]]
+nr = 1
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\zerlegt\\1960_01_02_.tif"
+x1 = 624
+y1 = 2200
+x2 = 2560
+y2 = 2184
+x3 = 2584
+y3 = 4996
+rahmen_plus = -7
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1961_25.tif"
+[[seite.foto]]
+nr = 0
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\zerlegt\\1961_25_01_.tif"
+x1 = 72
+y1 = 334
+x2 = 1998
+y2 = 346
+x3 = 1986
+y3 = 3170
+rahmen_plus = -7
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1961_26.tif"
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1961_31.tif"
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1961_32.tif"
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1961_33.tif"
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1961_50.tif"
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1962_01.tif"
+
+[[seite]]
+# ------------------------------------------
+pfad = "C:\\Users\\Klaus\\Pictures\\testpics\\1962_10.tif"

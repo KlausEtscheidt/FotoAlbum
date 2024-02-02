@@ -12,6 +12,7 @@ from panel_imageview import ImagePanelOuter
 import menu_file
 import menu_div
 from seiten import Seiten
+import import_export as impex
 
 logger = logging.getLogger('album')
 
@@ -44,15 +45,20 @@ class myApp(wx.App):
             with wx.DirDialog(self.mainframe, message=msg, defaultPath=conf.pic_basispfad) as Dlg:
                 if Dlg.ShowModal() == wx.ID_CANCEL:
                     return
-                conf.pic_path= Dlg.GetPath()
-                    
+                conf.pic_path = Dlg.GetPath()
+
         # Tiff dateien suchen
         self.seiten = Seiten(self.mainframe.imagepanel.innerpanel)
+
+        # Evtl bereits vorhandene Rahmen aus Toml einlesen
+        impex.einlesen(self.seiten, conf.pic_path)
+        
         # Erste Seite bearbeiten
         self.seiten.seite_bearbeiten(0)
     
     def OnExit(self):
         conf.config_write()
+        impex.ausgeben(self.seiten, conf.pic_path)
         return super().OnExit()
 
 class MainFrame(wx.Frame):
@@ -70,7 +76,7 @@ class MainFrame(wx.Frame):
         self.logpanel = LogPanel(nb, page_id=1)
 
         # add the pages to the notebook with the label to show on the tab
-        nb.AddPage(self.imagepanel, "File")
+        nb.AddPage(self.imagepanel, "Seiten")
         nb.AddPage(self.logpanel, "Log")
 
         self.imagepanel.Activate()
