@@ -3,17 +3,50 @@ import tomlkit.toml_document
 import tomlkit.items
 import os
 
+import wx
+
+from fotos import Foto
 
 def einlesen(seitenliste, pfad):
     tomlfilename = os.path.join(pfad, "ergebnis.toml")
+    if not os.path.isfile(tomlfilename):
+        #keine Datei gefunden
+        return
+    
     # toml_document lesen
     tml = tomlkit.toml_file.TOMLFile(tomlfilename).read()
     for seite in tml['seite']:
         print(seite['pfad'])
         if 'foto' in seite:
-            for foto in seite['foto']:
-                print(foto['pfad'])
-                pass
+
+            # Es gibt schon Fotosdefinitionen für diese Seite
+            # Zum Übertragen Seite in seitenliste suchen
+            found = False
+            for pyseite in seitenliste:
+                if pyseite.fullpath2pic == seite['pfad'] :
+                    found = True
+                    break
+
+            # Nur wenn die Seite in der aktuellen seitenliste noch existiert
+            if found:
+                for foto in seite['foto']:
+                    print(foto['pfad'])
+                    # Foto-Objekt erzeugen und zur Seite dazu
+                    pyseite.foto_dazu( None, None)
+                    # Eigenschaften setzen
+                    pyfoto = pyseite.akt_foto
+                    pyfoto.ecke1 = wx.Point(foto['x1'], foto['y1'])
+                    pyfoto.ecke2 = wx.Point(foto['x2'], foto['y2'])
+                    pyfoto.ecke3 = wx.Point(foto['x3'], foto['y3'])
+                    # pyfoto.ecke1.y = foto['y1']
+                    # pyfoto.ecke2.x = foto['x2']
+                    # pyfoto.ecke2.y = foto['y2']
+                    # pyfoto.ecke3.x = foto['x3']
+                    # pyfoto.ecke3.y = foto['y3']
+                    pyfoto.rahmen_plus = foto['rahmen_plus']
+                    pyfoto.saved_in = foto['pfad']
+                    pyfoto.fertig = True
+
 
 def ausgeben(seitenliste, pfad):
     
