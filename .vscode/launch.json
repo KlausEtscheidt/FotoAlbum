@@ -19,7 +19,8 @@
             "request": "launch",
             "program": "${fileDirname}/album_zerlegen.pyw",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "env": {"PYDEVD_WARN_SLOW_RESOLVE_TIMEOUT": "2"}
         }
     ]
 }

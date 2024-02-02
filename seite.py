@@ -215,21 +215,29 @@ class Seite():
 
         rad, grad = foto.drehung
 
-        with wandImage(filename=self.fullpath2pic) as img:
-            if abs(grad) > conf.MIN_WINKEL:
-                img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
-            x0 = max(0, foto.ecke1.x - foto.rahmen_plus)
-            y0 = max(0, foto.ecke1.y - foto.rahmen_plus) # nie <0
-            x1 = min(self.seitenbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
-            y1 = min(self.seitenbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
-            img.crop(x0, y0, x1, y1)
-            tname = self.get_targetname_w_appendix('')
-            foto.saved_in = tname
-            img.save(filename=tname)
-            # display(img)
-        # foto.free_image()
+        try:
+            with wandImage(filename=self.fullpath2pic) as img:
+                #Falls im Tiff Leerraum ums Bild ist (Kontrolle z.b in Gimp)
+                img.reset_coords()
+                if abs(grad) > conf.MIN_WINKEL:
+                    img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
+                # tname = self.get_targetname_w_appendix('rot')
+                # img.save(filename=tname)
+                x0 = max(0, foto.ecke1.x - foto.rahmen_plus)
+                y0 = max(0, foto.ecke1.y - foto.rahmen_plus) # nie <0
+                x1 = min(self.seitenbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
+                y1 = min(self.seitenbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
+                logger.debug(f'final crop x0: {x0} y0: {y0} x1: {x1} y1: {y1}')
+                img.crop(x0, y0, x1, y1)
+                tname = self.get_targetname_w_appendix('')
+                foto.saved_in = tname
+                img.save(filename=tname)
+                # display(img)
+        except Exception as wand_err:
+            logger.exception('Fehler in wand')
 
     def foto_speichern(self):
+
         thread = Thread(target=self.__foto_speichern_im_thread)
         thread.start()
 

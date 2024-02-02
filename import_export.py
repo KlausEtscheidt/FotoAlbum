@@ -38,11 +38,11 @@ def einlesen(seitenliste, pfad):
                     pyfoto.ecke1 = wx.Point(foto['x1'], foto['y1'])
                     pyfoto.ecke2 = wx.Point(foto['x2'], foto['y2'])
                     pyfoto.ecke3 = wx.Point(foto['x3'], foto['y3'])
-                    # pyfoto.ecke1.y = foto['y1']
-                    # pyfoto.ecke2.x = foto['x2']
-                    # pyfoto.ecke2.y = foto['y2']
-                    # pyfoto.ecke3.x = foto['x3']
-                    # pyfoto.ecke3.y = foto['y3']
+                    # Die ursprünglichen Koordinaten des Grobauswahl-Rahmens 
+                    # wurden nicht in Toml gespeichert
+                    # Wir nehmen stattdessen Ecke 1 und Ecke 3
+                    pyfoto.p1 = pyfoto.ecke1
+                    pyfoto.p2 = pyfoto.ecke3
                     pyfoto.rahmen_plus = foto['rahmen_plus']
                     pyfoto.saved_in = foto['pfad']
                     pyfoto.fertig = True

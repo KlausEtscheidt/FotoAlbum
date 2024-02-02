@@ -16,4 +16,7 @@ class MyFileDropTarget(wx.FileDropTarget):
             conf.pic_path = myfile
             conf.thisapp.seiten_laden()
 
+        if os.path.isfile(myfile):
+            conf.thisapp.seiten.foto_neu_beschneiden(myfile)
+
         return True

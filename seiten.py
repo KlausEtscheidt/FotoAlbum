@@ -87,6 +87,21 @@ class Seiten(list):
         logger.debug(msg + f'\nVerzeichnis: {conf.pic_path} Endung: {conf.pic_type}\n')        
 
         # self.__seiten = Seiten()
+    
+    def foto_neu_beschneiden(self, pfad_zum_foto):
+        # 
+        for i in range(len(self)):
+            seite = self[i]            
+            for foto in seite.fotos:
+                if pfad_zum_foto == foto.saved_in:
+                    # Seite anzeigen
+                    self.seite_bearbeiten(i)
+                    # Zustand nach foto_drehen herstellen
+                    seite.akt_foto = foto
+                    self.__status = 'Foto Kontrolle'
+                    self.__seite.foto_drehen()
+                    # self.foto_beschneiden(foto.rahmen_plus)
+                    # self.bild_gedreht = neu_image.crop(p1, p2)
 
     ############################################################################
     #

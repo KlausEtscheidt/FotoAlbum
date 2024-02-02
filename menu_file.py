@@ -2,7 +2,8 @@ import wx
 # import subprocess
 
 from config import conf
-# import seite
+import import_export as impex
+
 
 # Menu-Items zum Menu erzeugen und Handler registrieren
 def init(parent, pMenu):
@@ -12,6 +13,7 @@ def init(parent, pMenu):
         (OnStart, "Start", "Starte Bearbeitung aller Bilder."),
         (OnSettings, "Einstellungen", "Einstellungen ändern."),
         (OnSaveSettings, "Einstellungen speichern", "Einstellungen speichern."),
+        (OnSaveHistory, "Verlauf speichern", "Bisher definierte Fotos speichern."),
         (OnResetLog, "Lösche Logpanel", "Logpanel leeren"),
         # (OnEdit, "Öffne RawTherapee", "Öffne RawTherapee"),
         (OnExit, "Ende", "Programm beenden"),
@@ -28,6 +30,9 @@ def OnSettings(_event):
 
 def OnSaveSettings(_event):
     conf.savesettings()
+
+def OnSaveHistory(_event):
+    impex.ausgeben(conf.thisapp.seiten, conf.pic_path)
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()
