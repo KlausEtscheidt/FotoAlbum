@@ -235,7 +235,11 @@ class ImagePanel(wx.Panel):
             self.seiten.akt_seite.seite_drehen()
 
         if keycode == 83: #'s'
-            self.seiten.akt_seite.seite_speichern()
+            if event.GetModifiers() == wx.MOD_CONTROL:
+                p = self.get_pos_in_bitmap(act_pos)
+                self.seiten.foto_neu_beschneiden(mauspos=p)
+            else:
+                self.seiten.akt_seite.seite_speichern()
 
         if keycode == 69: #'e'
             p = self.get_pos_in_bitmap(act_pos)

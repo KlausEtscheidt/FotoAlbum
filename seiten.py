@@ -88,21 +88,46 @@ class Seiten(list):
 
         # self.__seiten = Seiten()
     
-    def foto_neu_beschneiden(self, pfad_zum_foto):
-        # 
-        for i in range(len(self)):
-            seite = self[i]            
-            for foto in seite.fotos:
-                if pfad_zum_foto == foto.saved_in:
-                    # Seite anzeigen
-                    self.seite_bearbeiten(i)
-                    # Zustand nach foto_drehen herstellen
-                    seite.akt_foto = foto
-                    self.__status = 'Foto Kontrolle'
-                    self.__seite.foto_drehen()
-                    # self.foto_beschneiden(foto.rahmen_plus)
-                    # self.bild_gedreht = neu_image.crop(p1, p2)
+    def foto_neu_beschneiden(self, pfad_zum_foto=None, mauspos=None):
 
+        foto_zum_schneiden = None
+
+        # Wenn mit mauspos aufgerufen
+        if mauspos:
+            seiten_nr = self.__seiten_nr
+            akt_seite = self[seiten_nr]
+            #Suche ein Foto, das die geklickte Pos umgibt
+            for foto in akt_seite.fotos:
+                if foto.pos_ist_innen(mauspos.x, mauspos.y):
+                    foto_zum_schneiden = foto
+                    break
+                
+        # Wenn mit Pfad aufgerufen
+        if pfad_zum_foto:
+            for seiten_nr in range(len(self)):
+                self.__seite = self[seiten_nr]
+                for foto in self.__seite.fotos:
+                    if pfad_zum_foto == foto.saved_in:
+                        foto_zum_schneiden = foto
+                        break
+                if foto_zum_schneiden:
+                    break
+
+        if foto_zum_schneiden:
+            # Seite anzeigen
+            self.seite_bearbeiten(seiten_nr)
+            # Zustand nach foto_drehen herstellen
+            self.__seite.akt_foto = foto_zum_schneiden
+            self.__status = 'Foto Kontrolle'
+            self.__seite.foto_drehen()
+
+    def alle_speichern(self):
+        for seite in self:
+            for foto in seite.fotos:
+                seite.seite_laden()
+                seite.akt_foto = foto
+                seite.foto_drehen()
+                seite.foto_speichern()
     ############################################################################
     #
     # Aktionen je Seite
@@ -120,6 +145,7 @@ class Seiten(list):
         :param seiten_nr: index der zu bearbeitenden Seite in self.__seiten
         :type seiten_nr: int
         """
+        conf.mainframe.SetStatusText('Foto definieren')
 
         self.imagectrl.SetFocus()
         self.__seiten_nr = seiten_nr # merken f next
@@ -134,7 +160,6 @@ class Seiten(list):
         self.__seite.seite_laden()
 
     def seite_bearbeiten_next(self):
-        # Speicher freigeben
         if self.__seiten_nr < len(self)-1:
             self.__seiten_nr += 1
         else:
@@ -142,7 +167,6 @@ class Seiten(list):
         self.seite_bearbeiten(self.__seiten_nr)
 
     def seite_bearbeiten_prev(self):
-        # Speicher freigeben
         if self.__seiten_nr > 0:
             self.__seiten_nr -= 1
         else:

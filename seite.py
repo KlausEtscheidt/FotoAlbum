@@ -3,6 +3,8 @@ import os
 import shutil
 from pathlib import Path
 from threading import Thread
+import concurrent.futures
+import filesaver
 
 import wx
 
@@ -95,7 +97,7 @@ class Seite():
     # Teilfoto in Liste aufnehmen
     def foto_dazu(self, p1, p2):
         # Erzeuge KEImage und lege in Liste ab
-        foto = Foto(self, p1, p2)
+        foto = Foto(self, len(self.fotos)+1, p1, p2)
         self.fotos.append(foto)
         self.akt_foto = foto
         
@@ -127,7 +129,7 @@ class Seite():
 
     def __zeige_ecke(self, p1, p2, nr, linie=None):
         new_image = self.seitenbild.crop(p1, p2)
-        image_bmp = new_image.ConvertToBitmap()
+        image_bmp = new_image.bitmap
         # self.imagepanel.show_pic(bitmap, scale=conf.SCALE_ECKE)
         if nr == 1:
             zbmp = None
@@ -199,52 +201,17 @@ class Seite():
     def foto_beschneiden(self, plusminus):
         foto = self.akt_foto
         if plusminus == '+':
-            foto.rahmen_plus += conf.rahmen_plus
-        else:
             foto.rahmen_plus -= conf.rahmen_plus
+        else:
+            foto.rahmen_plus += conf.rahmen_plus
         self.foto_anzeigen()
 
-    def __foto_speichern_im_thread(self):
-
+    def foto_speichern(self):
         foto = self.akt_foto
         foto.fertig = True
-
-        # Erst Kontrollbild
-        bmp = zeichenfabrik.zeichne_clip_rahmen_ins_bild(self.bild_gedreht.bitmap, foto, conf.RAND, foto.rahmen_plus)
-        aKEImage = KEImage(aBitmap=bmp)
-        self.save(aKEImage, f'_{len(self.fotos):02d}', '.jpg')
-
-        rad, grad = foto.drehung
-
-        try:
-            imagecopy_fname = self.fullpath2pic+'.tif'
-            shutil.copy(self.fullpath2pic, imagecopy_fname)
-            with wandImage(filename=imagecopy_fname) as img:
-                #Falls im Tiff Leerraum ums Bild ist (Kontrolle z.b in Gimp)
-                img.reset_coords()
-                if abs(grad) > conf.MIN_WINKEL:
-                    img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
-                # tname = self.get_targetname_w_appendix('rot')
-                # img.save(filename=tname)
-                x0 = max(0, foto.ecke1.x - foto.rahmen_plus)
-                y0 = max(0, foto.ecke1.y - foto.rahmen_plus) # nie <0
-                x1 = min(self.seitenbild.Width, x0 + foto.breite + 2*foto.rahmen_plus)
-                y1 = min(self.seitenbild.Height, y0 + foto.hoehe + 2*foto.rahmen_plus)
-                logger.debug(f'final crop x0: {x0} y0: {y0} x1: {x1} y1: {y1}')
-                img.crop(x0, y0, x1, y1)
-                tname = self.get_targetname_w_appendix('')
-                foto.saved_in = tname
-                img.save(filename=tname)
-                os.remove(imagecopy_fname)
-                # display(img)
-        except Exception as wand_err:
-            logger.exception('Fehler in wand')
-            wx.MessageBox('Fehler in wand')
-
-    def foto_speichern(self):
-
-        thread = Thread(target=self.__foto_speichern_im_thread)
-        thread.start()
+        filesaver.WorkerThread(conf.mainframe, foto)
+        # thread = Thread(target=self.__foto_speichern_im_thread)
+        # thread.start()
         # self.__foto_speichern_im_thread()
 
 
@@ -253,22 +220,22 @@ class Seite():
     # Helper
     #
     ###################################################################################
-    def save(self, keimage, suffix, typ):
-        new_name = self.basename + suffix + typ
-        path = os.path.join(self.path, conf.pic_output)
-        fname = os.path.join(path, new_name)
-        #Pfad anlegen, wenn nicht vorhanden
-        Path(path).mkdir(parents=True, exist_ok=True)
-        if typ == '.tif':
-            keimage.SaveFile(fname)
-        if typ == '.jpg':
-            keimage.bitmap.SaveFile (fname, wx.BITMAP_TYPE_JPEG)
+    # def save(self, keimage, suffix, typ):
+    #     new_name = self.basename + suffix + typ
+    #     path = os.path.join(self.path, conf.pic_output)
+    #     fname = os.path.join(path, new_name)
+    #     #Pfad anlegen, wenn nicht vorhanden
+    #     Path(path).mkdir(parents=True, exist_ok=True)
+    #     if typ == '.tif':
+    #         keimage.SaveFile(fname)
+    #     if typ == '.jpg':
+    #         keimage.bitmap.SaveFile (fname, wx.BITMAP_TYPE_JPEG)
 
-    def get_targetname_w_appendix(self, apdx):
-        new_name = self.basename + f'_{len(self.fotos):02d}_{apdx}' + self.typ
-        path = os.path.join(self.path, conf.pic_output)
-        fname = os.path.join(path, new_name)
-        #Pfad anlegen, wenn nicht vorhanden
-        Path(path).mkdir(parents=True, exist_ok=True)
-        return fname
+    # def get_targetname_w_appendix(self, apdx):
+    #     new_name = self.basename + f'_{len(self.fotos):02d}_{apdx}' + self.typ
+    #     path = os.path.join(self.path, conf.pic_output)
+    #     fname = os.path.join(path, new_name)
+    #     #Pfad anlegen, wenn nicht vorhanden
+    #     Path(path).mkdir(parents=True, exist_ok=True)
+    #     return fname
 

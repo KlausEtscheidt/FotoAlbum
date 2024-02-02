@@ -13,7 +13,8 @@ def init(parent, pMenu):
         (OnStart, "Start", "Starte Bearbeitung aller Bilder."),
         (OnSettings, "Einstellungen", "Einstellungen ändern."),
         (OnSaveSettings, "Einstellungen speichern", "Einstellungen speichern."),
-        (OnSaveHistory, "Verlauf speichern", "Bisher definierte Fotos speichern."),
+        (OnSaveHistory, "Verlauf speichern", "Bisher definierte Fotos in Toml speichern."),
+        (OnSaveAll, "Alle Fotos exportieren", "Alle Fotos als JPF und TIFf speichern."),
         (OnResetLog, "Lösche Logpanel", "Logpanel leeren"),
         # (OnEdit, "Öffne RawTherapee", "Öffne RawTherapee"),
         (OnExit, "Ende", "Programm beenden"),
@@ -33,6 +34,9 @@ def OnSaveSettings(_event):
 
 def OnSaveHistory(_event):
     impex.ausgeben(conf.thisapp.seiten, conf.pic_path)
+
+def OnSaveAll(_event):
+    conf.thisapp.seiten.alle_speichern()
 
 def OnResetLog(_event):
     conf.mainframe.logpanel.Clear()

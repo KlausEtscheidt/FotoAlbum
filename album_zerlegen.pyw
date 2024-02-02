@@ -13,6 +13,7 @@ import menu_file
 import menu_div
 from seiten import Seiten
 import import_export as impex
+from filesaver import EVT_RESULT_ID
 
 logger = logging.getLogger('album')
 
@@ -93,6 +94,16 @@ class MainFrame(wx.Frame):
         # and a status bar
         self.CreateStatusBar()
         self.SetStatusText("Willkommen beim Alben-Zerleger !")
+
+        # Set up event handler for any worker thread results
+        self.Connect(-1, -1, EVT_RESULT_ID, self.OnThreadResult)
+
+    def OnThreadResult(self, event):
+        if event.had_err:
+            wx.MessageBox(f'{event.data}','Fehler beim Speichern')
+        else:
+            # Process results here
+            self.SetStatusText(f'{event.data}')
 
 
     def makeMenuBar(self):

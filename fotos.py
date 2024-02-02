@@ -1,7 +1,7 @@
-import glob 
 import os
 import logging
 import math
+from pathlib import Path
 
 import wx
 
@@ -11,30 +11,24 @@ logger = logging.getLogger('album')
 
 #######################################################################################
 #
-class KEImage(wx.Image):
+class KEImage():
     @classmethod
     def load_from_file(cls, fullpath2pic):
         # Image von Platte laden
         return wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
 
-    def __init__(self, fullpath2pic=None, aKEImage=None, aBitmap=None):
+    def __init__(self, fullpath2pic=None, aImage=None, aBitmap=None):
         if fullpath2pic:
-            wx.Image.__init__(self, fullpath2pic, wx.BITMAP_TYPE_ANY)
-        elif aKEImage:
-            wx.Image.__init__(self,aKEImage)
+             self.__image = wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
+        elif aImage:
+            self.__image = aImage
             # self = aKEImage.Copy()
         elif aBitmap:
-            wx.Image.__init__(self, aBitmap.ConvertToImage())    
-        else:
-            wx.Image.__init__(self)
-
-    def scaled_bitmap(self, faktor):
-        new_w = int(self.Width * faktor)
-        new_h = int(self.Height * faktor)
-        # copy = self.image.Copy()
-        new_image = self.Scale(new_w, new_h)
-        logger.debug(f'\nnew size: br {new_w} h: {new_h}\n')
-        return new_image.ConvertToBitmap()
+            self.__image = aBitmap.ConvertToImage()
+        # else:
+        #     wx.Image.__init__(self)
+        if not self.__image.IsOk:
+            raise Exception('image in KEImage fehlerhaft')
 
     def crop(self, pos1, pos2):
         """crop erzeugt Bildausschnitt
@@ -51,29 +45,44 @@ class KEImage(wx.Image):
         h = pos2.y - pos1.y
         size = wx.Size(w,h)
         pkt = wx.Point(-pos1.x, -pos1.y)
-        # copy = self.Copy()
-        copy = KEImage(aKEImage=self.Copy())
+        copy = self.__image.Copy()
+        copy.Resize(size, pkt)
 
-        return copy.Resize(size, pkt)
+        return KEImage(aImage=copy)
 
     def rotate(self, winkel, p0, interpol ):
         # Bild wird beim Drehen umm offset verschoben => offset zurück liefern und beachten
         offset = wx.Point()
-        newimg = self.Rotate(winkel, p0, interpol, offset)
-        return KEImage(aKEImage=newimg), offset
+        newimg = self.__image.Rotate(winkel, p0, interpol, offset)
+        return KEImage(aImage=newimg), offset
+
+    def SaveFile(self, fullpath):
+        self.__image.SaveFile(fullpath)
     
+    def SaveAsJpg(self, fullpath):
+        self.bitmap.SaveFile(fullpath, wx.BITMAP_TYPE_JPEG)
+
     @property
     def bitmap(self):
-        return self.ConvertToBitmap()
+        return self.__image.ConvertToBitmap()
+
+    @property
+    def Width(self):
+        return self.__image.Width
+
+    @property
+    def Height(self):
+        return self.__image.Height
 
 
 #######################################################################################
 #
 class Foto():
     
-    def __init__(self, parent, p1, p2):
+    def __init__(self, parent, nr, p1, p2):
 
         self.parent = parent # umgebenden Seite
+        self.nr = nr # laufende Nr auf der Seite
         self.p1 = p1 # äußerer Rahmen links oben
         self.p2 = p2 # äußerer Rahmen rechts unten
         self.ecke1 = None
@@ -90,7 +99,15 @@ class Foto():
 
     def pos_ist_innen(self, x, y):
         return x>=self.p1.x and x<=self.p2.x and y>=self.p1.y and y<=self.p2.y
-    
+
+    def get_targetname(self, typ, appendix=''):
+        new_name = self.parent.basename + f'_{self.nr:02d}{appendix}' + typ
+        path = os.path.join(self.parent.path, conf.pic_output)
+        fname = os.path.join(path, new_name)
+        #Pfad anlegen, wenn nicht vorhanden
+        Path(path).mkdir(parents=True, exist_ok=True)
+        return fname
+
     @property
     def drehung(self):
         dy = self.ecke2.y - self.ecke1.y
@@ -117,6 +134,14 @@ class Foto():
     @property
     def y0(self):
         return self.ecke1.y
+
+    @property
+    def final_crop(self):
+        x0 = max(0, self.ecke1.x - self.rahmen_plus)
+        y0 = max(0, self.ecke1.y - self.rahmen_plus) # nie <0
+        x1 = min(self.parent.seitenbild.Width, x0 + self.breite + 2*self.rahmen_plus)
+        y1 = min(self.parent.seitenbild.Height, y0 + self.hoehe + 2*self.rahmen_plus)
+        return x0, y0, x1, y1
 
     def __str__(self):
         _, grad = self.drehung
