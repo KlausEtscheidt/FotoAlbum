@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 from pathlib import Path
 from threading import Thread
 
@@ -216,7 +217,9 @@ class Seite():
         rad, grad = foto.drehung
 
         try:
-            with wandImage(filename=self.fullpath2pic) as img:
+            imagecopy_fname = self.fullpath2pic+'.tif'
+            shutil.copy(self.fullpath2pic, imagecopy_fname)
+            with wandImage(filename=imagecopy_fname) as img:
                 #Falls im Tiff Leerraum ums Bild ist (Kontrolle z.b in Gimp)
                 img.reset_coords()
                 if abs(grad) > conf.MIN_WINKEL:
@@ -232,14 +235,17 @@ class Seite():
                 tname = self.get_targetname_w_appendix('')
                 foto.saved_in = tname
                 img.save(filename=tname)
+                os.remove(imagecopy_fname)
                 # display(img)
         except Exception as wand_err:
             logger.exception('Fehler in wand')
+            wx.MessageBox('Fehler in wand')
 
     def foto_speichern(self):
 
         thread = Thread(target=self.__foto_speichern_im_thread)
         thread.start()
+        # self.__foto_speichern_im_thread()
 
 
     ###################################################################################
