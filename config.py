@@ -39,6 +39,8 @@ class Config():
         self.pic_output = tml['pfade']['pic_output']
         self.pic_type = tml['pfade']['pic_type']
 
+        self.help = None
+        
         # Fuer erste Anzeige kompletter Seite
         self.SCALE_SEITE = tml['scale']['seite']
         # Fuers Setzen der Ecken

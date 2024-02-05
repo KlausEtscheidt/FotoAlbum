@@ -24,7 +24,7 @@
             "name": "Python: FotoView",
             "type": "python",
             "request": "launch",
-            "program": "${fileDirname}/album_zerlegen.pyw",
+            "program": "${fileDirname}/FotoAlbum.pyw",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {"PYDEVD_WARN_SLOW_RESOLVE_TIMEOUT": "2"}
