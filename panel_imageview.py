@@ -1,3 +1,10 @@
+'''
+panel_imageview.py
+-------------------
+
+Panel zur Bearbeitung und Anzeige der Seiten (Tiff)
+'''
+
 import logging
 
 import wx

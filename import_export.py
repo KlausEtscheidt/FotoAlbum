@@ -1,3 +1,10 @@
+'''
+import_export.py
+-------------------
+
+Definierte Fotos im Toml-Format speichern oder einlesen.
+'''
+
 import tomlkit.toml_file
 import tomlkit.toml_document
 import tomlkit.items

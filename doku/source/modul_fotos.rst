@@ -1,0 +1,4 @@
+lalalal
+
+.. automodule:: fotos
+    :members:

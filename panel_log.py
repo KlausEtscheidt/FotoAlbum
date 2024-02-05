@@ -1,3 +1,11 @@
+'''
+panel_log.py
+-------------
+
+Panel zum Anzeigen von Log-Meldungen
+
+'''
+
 import wx
 
 

@@ -12,7 +12,7 @@ rahmen_plus = -7
 [pfade]
 # Verzeichnis, das nach Seiten eines Fotoalbums (tiff-Dateien) durchsucht wird
 # Dieser Pfad hat Prio1 und wird verwendet, wenn er existiert
-pic_path = "C:\\Users\\Klaus\\Pictures\\1961"
+pic_path = "C:\\Users\\Klaus\\Pictures\\testpics"
 
 # Platzhalter, wird von config mit dem User-Bildverzeichnis gefüllt
 pic_basispfad = ''
@@ -31,7 +31,7 @@ pic_type = '.tif'
 
 [scale]
 # Fuer erste Anzeige kompletter Seite
-seite = 0.1 
+seite = 0.11 
 
 # Fuers Setzen der Ecken
 ecke  = 0.5 

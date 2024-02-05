@@ -1,3 +1,12 @@
+"""
+filesaver.py
+------------
+Abspeichern von Bild-Dateien im thread.
+
+Im Workerthread werden das Kontrollbild (jpg) und das Tiff abgespeichert.
+Der Thread sendet per Event (ResultEvent) seinen Status und evtl. Fehler ans Hauptprogramm.
+"""
+
 import logging
 import os
 import shutil
@@ -17,14 +26,15 @@ logger = logging.getLogger('album')
 # Define notification event for thread completion
 EVT_RESULT_ID = wx.NewId()
 
-# def EVT_RESULT(win, func):
-#     """Define Result Event."""
-#     win.Connect(-1, -1, EVT_RESULT_ID, func)
-
 class ResultEvent(wx.PyEvent):
-    """Simple event to carry arbitrary result data."""
+    
     def __init__(self, data, had_err = False):
-        """Init Result Event."""
+        '''Event um den Status des Threads an das Hauptprogramm zu melden.
+
+        Args:
+            data (str): Meldung, die zurück gesendet werden soll
+            had_err (bool, optional): True wenn ein Fehler auftrat. Defaults to False.
+        '''
         wx.PyEvent.__init__(self)
         self.SetEventType(EVT_RESULT_ID)
         self.data = data
@@ -32,9 +42,14 @@ class ResultEvent(wx.PyEvent):
 
 # Thread class that executes processing
 class WorkerThread(Thread):
-    """Worker Thread Class."""
+    
     def __init__(self, notify_window, foto):
-        """Init Worker Thread Class."""
+        '''Tread-Klasse zum Abspeichern
+
+        Args:
+            notify_window (wx.window): Window, das die Events erhält.
+            foto (Foto): Foto-Objekt, das gespeichert werden soll.
+        '''
         Thread.__init__(self)
         self._notify_window = notify_window #Fenster das Events bekommt
         self.foto = foto
@@ -44,7 +59,7 @@ class WorkerThread(Thread):
         self.start()
 
     def run(self):
-        """Run Worker Thread."""
+        """Führt das Abspeichern aus."""
 
         foto = self.foto
 
@@ -59,8 +74,6 @@ class WorkerThread(Thread):
 
         wx.PostEvent(self._notify_window, ResultEvent('Speichere Tiff'))
         try:
-            # imagecopy_fname = self.seite.fullpath2pic+'.tif'
-            # shutil.copy(self.seite.fullpath2pic, imagecopy_fname)
             fname = foto.parent.fullpath2pic
             with wandImage(filename=fname) as img:
                 img = wandImage(filename=fname)
@@ -69,18 +82,14 @@ class WorkerThread(Thread):
                 if abs(grad) > conf.MIN_WINKEL:
                     img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
                 x0, y0, x1, y1 = foto.final_crop
-                # logger.debug(f'final crop x0: {x0} y0: {y0} x1: {x1} y1: {y1}')
                 img.crop(x0, y0, x1, y1)
                 fname = foto.get_targetname('.tif')
                 foto.saved_in = fname
                 img.save(filename=fname)
-                # os.remove(imagecopy_fname)
-                # display(img)
                 wx.PostEvent(self._notify_window, ResultEvent('Tiff gespeichert'))
+
         except Exception as wand_err:
             wx.PostEvent(self._notify_window, ResultEvent(str(wand_err), True))
-            # logger.exception('Fehler in wand')
-            # wx.MessageBox('Fehler in wand')
 
     def abort(self):
         """abort worker thread."""

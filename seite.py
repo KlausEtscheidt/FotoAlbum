@@ -1,3 +1,11 @@
+"""
+seite.py
+=====================================================
+Hält die bitmap einer Seite des Fotoalbums.
+
+Dient zur Steuerung des Ablaufs (Div. Funktionen werden von den Evt-Handlern gerufen)
+"""
+
 import logging
 import os
 import shutil
@@ -25,6 +33,12 @@ logger = logging.getLogger('album')
 #####################################################################################
 
 class Seite():
+    '''Verwaltet die Daten einer Seite.
+
+    Speichert das Image der Gesamtseite und des aktuellen Fotos.
+    Bearbeitet 
+
+    '''
 
     #inneres panel
     imagepanel = None
@@ -65,11 +79,15 @@ class Seite():
     # Allgemeine Funktionen
 
     def seite_drehen(self):
+        '''Dreht die Gesamtseite um 90° und zeigt die Seite neu an.
+        '''
         if self.seitenbild:
             self.seitenbild = KEImage(aKEImage=self.seitenbild.Rotate90())
             self.seite_anzeigen()
 
     def seite_speichern(self):
+        '''Speichert die Seite auf Platte.
+        '''
         if self.seitenbild:
             thread = Thread(target=self.__seite_speichern)
             thread.start()
@@ -85,7 +103,11 @@ class Seite():
     #############################################################################
 
     def seite_laden(self):
-        # KEImage des Seiten-Tiffs erzeugen und als Klassenvariable merken
+        '''Lädt Tif einer Seite und zeigt sie an
+
+        KEImage des Seiten-Tiffs erzeugen und als Klassenvariable merken
+        '''
+
         self.seitenbild = KEImage(self.fullpath2pic)
         self.seite_anzeigen()
 

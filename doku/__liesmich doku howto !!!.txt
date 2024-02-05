@@ -1,0 +1,86 @@
+1. Initialisieren
+=================
+
+- Verzeichnis doku anlegen
+- dos box starten (cmd) und nach doku wechseln
+- mit sphinx-quickstart werden alle Verzeichnisse und eine conf.py angelegt
+
+2. Bequemlichkeit
+=================
+
+2.1 MakeHelp.bat
+----------------
+
+Dient zum Erzeugen der Html_Dateien als Grundlage für den Microsoft-Html-Hilfe-Compiler
+Hierzu wird der von sphinx-quickstart erzeugte "make.bat" mit dem Parameter "htmlhelp" aufgerufen.
+
+Im zweiten Schritt wird aus den html-Datein mit hhc.exe eine *.chm-Datei erzeugt.
+
+Hierzu muss der Name einer *.hhp-Datei bekannt sein, die im ersten Schritt
+im Verzeichnis ../build/htmlhelp erzeugt wurde.
+
+Ausganspunkt für diesen Namen ist die in conf.py abgelegte Projektbezeichnung,
+an die 'doc' angehängt wird (Leerzeichen werden entfernt).
+
+Der Name wird jedoch als Parameter von makeall.ps1 übergeben
+
+Die entstehende xxx.cmh wird ins Verzeichnis von MakeHelp.bat kopiert.
+
+Inhalt von MakeHelp.bat wie folgt:
+
+SET projekt=%1
+echo make %projekt%
+call make htmlhelp
+echo compile
+"C:\Program Files (x86)\HTML Help Workshop\hhc.exe" build\htmlhelp\%projekt%.hhp
+echo moving
+rem hhc.exe erzeugt albumzerlegendoc.chm
+copy /Y build\htmlhelp\%projekt%.chm .
+rem move /Y build\htmlhelp\albumzerlegendoc.chm ..\..\Hilfe
+pause
+
+2.2 makeall.ps1
+---------------
+
+Wrapper für MakeHelp.bat um installationsunabhängig MakeHelp.bat aufzurufen.
+Zeigt abschließend die chm-Datei an.
+
+Inhalt wie folgt:
+
+#$projekt aus build/htmlhelp ermitteln: Name der xxx.hhp-Datei $projekt=xxx
+$projekt = "fotoalbumdoc"
+cd $PSScriptRoot
+$cmd = $PSScriptRoot + "\MakeHelp.bat"
+Start-Process -FilePath $cmd  $projekt -Wait #-NoNewWindow
+Start-Process ".\fotoalbumdoc.chm" -Wait #-NoNewWindow
+
+3. weitere Vorabeiten
+=====================
+
+3.1 conf.py ergänzen
+--------------------
+
+Damit die Projketdateien gefunden werden am Anfang dazu:
+
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+#
+import os
+import sys
+# Hier liegt das Python-Basis-Verz FotoAlbum drei Ebenen über conf.py
+my_dir=os.path.abspath(os.path.join('.','..','..','..','FotoAlbum'))
+sys.path.append(my_dir)
+
+(Hier wurde das Verzeichnis FotoAlbum in den Suchpfad eingefügt)
+
+Für autodoc:
+extensions = [
+    'sphinx.ext.autodoc',
+]
+
+
+3.2 index.rst
+-------------
+
+

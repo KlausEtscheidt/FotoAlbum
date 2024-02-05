@@ -1,3 +1,9 @@
+"""
+fotos.py
+====================================
+KEImage und FOTO-Klasse
+"""
+
 import os
 import logging
 import math
@@ -78,6 +84,7 @@ class KEImage():
 #######################################################################################
 #
 class Foto():
+    '''Foto alle Daten um ein Teilfoto zu definieren'''
     
     def __init__(self, parent, nr, p1, p2):
 

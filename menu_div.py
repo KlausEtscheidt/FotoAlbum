@@ -11,7 +11,7 @@ def init(parent, pMenu):
 
 ## Help-Menu
 def OnAbout(_event):
-    """Display an About Dialog"""
+    #Display an About Dialog
     wx.MessageBox("Bedienung des Garten-Programmsystems",
                   "Über Garten-Gui",
                   wx.OK|wx.ICON_INFORMATION)

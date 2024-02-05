@@ -1,3 +1,10 @@
+"""
+zeichenfabrik
+====================================
+Funktionen zum Zeichnen in Bitmaps
+"""
+
+
 import logging
 
 import wx
@@ -16,6 +23,15 @@ zbmp = None #Zeichenbitmap
 
 # Durchkreuzter Rahmen über die gewählten Ecken aller definierten Fotos der Seite
 def zeichne_rahmen(image_bmp, akt_seite):
+    '''Zeichnet Rahmen für alle definierten Fotos einer Seite
+
+    Der Rahmen wird aus den gewählten Ecken der Fotos erzeugt und mit Diagonalen gezeichnet.
+    Die Rahmen dienen zur Kennzeichnung bereits definierter Fotos.
+
+    Args:
+        image_bmp (wx.Bitmap): Bitmap in die gezeichnet wird
+        akt_seite (seite): seite deren Fotos markiert werden sollen
+    '''
     __prepare_dc(image_bmp)
     for foto in akt_seite.fotos:
         p4 = wx.Point(foto.ecke1.x, foto.ecke3.y)

@@ -1,5 +1,9 @@
-## @package config
-# Konfigurationsparameter und globale Variable
+'''
+config.py
+----------------
+
+Konfigurationsparameter und globale Variable speichern
+'''
 
 import os
 import platform
@@ -12,22 +16,28 @@ import wx
 from settings_dialog import SettingsDlg
 ##Pfade
 # Basis-Verzeichnis
-# my_file = os.path.realpath(__file__) # Welcher File wird gerade durchlaufen
-# my_dir = os.path.dirname(my_file)
+my_file = os.path.realpath(__file__) # Welcher File wird gerade durchlaufen
+my_dir = os.path.dirname(my_file)
 
 class Config():
-
-    tomlfile = "album_zerlegen.toml"
+    '''Klasse zum Bereitstellen globaler Daten'''
+    
+    global my_dir
+    tomlfilename = os.path.join(my_dir,"album_zerlegen.toml")
 
     def __init__(self):
-        self.tomlfile = "album_zerlegen.toml"
-        # toml_document lesen
-        tml = tomlkit.toml_file.TOMLFile(self.tomlfile).read()
-        self.tml = tml
+        '''Konstruktor
+
+        Konfigurationsdaten werden z.T. aus einem toml-file eingelesen.
+        Weitere Daten werden hier bestimmt, oder von externen Modulen gesetzt.
+        '''
+        # toml-Struktur aus Datei lesen und merken
+        self.tml = tomlkit.toml_file.TOMLFile(self.tomlfilename).read()
+
+        tml = self.tml
         self.pic_subdir = tml['pfade']['pic_subdir']
         self.pic_output = tml['pfade']['pic_output']
         self.pic_type = tml['pfade']['pic_type']
-
 
         # Fuer erste Anzeige kompletter Seite
         self.SCALE_SEITE = tml['scale']['seite']
@@ -73,10 +83,12 @@ class Config():
         self.imagepanel = None
 
     def config_write(self):
+        '''Speichert wesentliche Konfigurationsdaten im toml-Format in Datei ab.'''
         self.tml['pfade']['pic_path'] = self.pic_path
-        tomlkit.toml_file.TOMLFile(self.tomlfile).write(self.tml)
+        tomlkit.toml_file.TOMLFile(self.tomlfilename).write(self.tml)
 
     def savesettings(self):
+        '''Überträgt Daten in die interne Toml-Struktur der Klasse'''
         self.tml['scale']['seite'] = self.SCALE_SEITE
         self.tml['scale']['kontrollbild'] = self.SCALE_KONTROLLBILD
         self.tml['rahmen_plus'] = self.rahmen_plus
@@ -84,6 +96,7 @@ class Config():
         self.tml['pfade']['pic_output'] = self.pic_output
 
     def settings(self):
+        '''Abfrage von Einstellungen beim Benutzer über Dialog'''
         with  SettingsDlg(None, 'Einstellungen', self) as Dlg:
             if Dlg.ShowModal() == wx.ID_CANCEL:
                 return

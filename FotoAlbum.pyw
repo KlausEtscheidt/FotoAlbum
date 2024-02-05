@@ -1,4 +1,11 @@
 #!/bin/python
+'''
+FotoAlbum.py
+----------------
+
+Hauptprogramm
+'''
+
 import os
 
 import wx

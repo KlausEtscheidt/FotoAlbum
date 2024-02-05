@@ -1,3 +1,12 @@
+"""
+filedrop.py
+-----------
+Ermöglicht drop von Verzeichnissen oder Dateien
+
+Bei Verzeichnissen werden die vorhandenen Tiffs  eingelesen und angezeigt.
+Bei Dateien wird die Ursprungsseite gesucht und das Foto wird zum resize angeboten.
+"""
+
 import os
 import wx
 
@@ -5,7 +14,6 @@ from config import conf
 
 class MyFileDropTarget(wx.FileDropTarget):
     def __init__(self, parent):
-        """Constructor"""
         wx.FileDropTarget.__init__(self)
         self.parent = parent
 

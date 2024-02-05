@@ -1,9 +1,27 @@
+'''
+settings_dialog.py
+=============================
+Dialog zum Abfragen der Einstellungen des Programms
+'''
+
 import wx
 
 #from config import conf
 
 class SettingsDlg(wx.Dialog):
+    '''Dialog'''
+
     def __init__(self, parent, titel, conf):
+        '''
+        Erfragt Einstellungen vom Benutzer
+
+        Speichert die abgefragten Werte im conf-Objekt
+
+        Args:
+            parent (window): Vater-Fenster
+            titel (str): Titel
+            conf (Config): Konfigurations-Objekt
+        '''
         size = (500, 400)
         style = wx.RESIZE_BORDER|wx.MAXIMIZE_BOX|wx.DEFAULT_DIALOG_STYLE
         super(SettingsDlg, self).__init__(parent=parent, size=size, title=titel, style=style)
@@ -96,7 +114,6 @@ class SettingsDlg(wx.Dialog):
         
         self.pic_output = self.pic_output_ctrl.GetValue()
         return True
-
 
     def OnCancel(self, _e):
         self.EndModal(wx.ID_CANCEL)

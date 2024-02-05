@@ -1,3 +1,10 @@
+'''
+menu_file
+----------------
+
+Definiert Untermenues des File-Menu
+'''
+
 import wx
 # import subprocess
 
@@ -48,5 +55,5 @@ def OnResetLog(_event):
 
 ## File-Menu Programm Ende
 def OnExit(_event):
-    """Close the frame, terminating the application."""
+    # Close the frame, terminating the application.
     conf.mainframe.Close(True)

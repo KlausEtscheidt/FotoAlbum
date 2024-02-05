@@ -1,3 +1,10 @@
+"""
+seiten.py
+=====================================================
+Speichert alle Seiten.
+Dient zur Steuerung des Ablaufs (Div. Funktionen werden von den Evt-Handlern gerufen)
+"""
+
 import logging
 import glob
 
@@ -10,12 +17,24 @@ logger = logging.getLogger('album')
 
 
 class Seiten(list):
+    '''Liste aller Seiten eines Fotoalbums (Tiff-Dateien)
+
+    Nimmt alle Seiten auf und wird von Events gesteuert
+
+    Attributes:
+        seiten_nr (int): Index der aktuell bearbeiteten Seite
+    '''    
 
     seiten_nr = 0
 
     def __init__(self, imagepanel):
-        # imagepanel ist Instanz von ImagePanel (Kind v ImagePanelOuter) aus panel_imageview
+        '''Durchsucht Verzeichnis nach tif-Dateien und erzeugt eine Seite je Tiff
+
+        Args:
+            imagepanel (ImagePanel): widget zur Darstellung einer Seite (Bitmap)
+        '''
         # Klassenvar in Seite setzen
+        # imagepanel ist self.mainframe.imagepanel.innerpanel
         Seite.imagepanel = imagepanel
         # imagepanel und imagepanel.imagectrl als Eigenschaft
         self.imagepanel = imagepanel
@@ -26,10 +45,13 @@ class Seiten(list):
         self.myFileList = []
         self.seitenliste_erstellen()
 
+        #: Kontrolliert den Ablauf
         self.__status = 'Start Seite/Foto'
+        
         self.__seiten_nr = -1
-        # self.__seiten = None
+        '''Index der aktuell bearbeiteten Seite'''
         self.__seite = None
+        '''aktuell bearbeitete Seite'''
 
         self.__rahmen_lo = (0, 0)
         self.__rahmen_ru = (0, 0)
@@ -135,12 +157,10 @@ class Seiten(list):
     ############################################################################
 
     def seite_bearbeiten(self, seiten_nr):
-        """seite_bearbeiten Seite eines Fotoalbums bearbeiten
+        """Seite eines Fotoalbums bearbeiten.
 
         Fragt vom Benutzer die Daten (Ecken) aller Fotos auf der Seite ab
         und speichert die Fotos als tiff-Datei.
-        Durch die Anzeige des Original-Bilds wird für dieses ein Image erzeugt.
-        Es sollte beim Verlassen der Seite freigegeben werden.
 
         :param seiten_nr: index der zu bearbeitenden Seite in self.__seiten
         :type seiten_nr: int
@@ -180,34 +200,47 @@ class Seiten(list):
     #
     ############################################################################
 
-    # 1. Aktion je Foto:
-    # Foto anhand Rahmen erzeugen und ablegen
     def foto_rahmen_ablegen(self):
+        '''1. Aktion je Foto
+
+        Foto-Objekt anhand des vom Benutzer aufgezogenen Rahmens erzeugen
+        und im Seiten-Objekt ablegen.
+        Umfeld der linken oberen Ecke des Rahmens (Ecke1) vergrößert anzeigen.
+        Status auf "Ecke1" setzen
+        '''
         self.__seite.foto_dazu(self.rahmen_lo, self.rahmen_ru)
         # Weiter mit exakter Eckendefinition
         self.__status = 'Ecke1'
         self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
         self.__seite.zeige_ecke1()
 
-    # 2. Aktion je Foto:
-    # Ecke 1 abspeichern und Ecke 2 anzeigen
     def ecke1(self, p):
+        '''2. Aktion je Foto: Ecke 1 abspeichern und Ecke 2 anzeigen.
+
+        Ecke 1 im Seiten-Objekt ablegen.
+        Umfeld der rechten oberen Ecke des Rahmens (Ecke2) vergrößert anzeigen.
+        Status auf "Ecke2" setzen
+        '''
         self.__seite.speichere_ecke1(p)
         self.__status = 'Ecke2'
         self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
         self.__seite.zeige_ecke2()
 
-    # 3. Aktion je Foto:
-    # Ecke 2 abspeichern und Ecke 3 anzeigen
     def ecke2(self, p):
+        '''3. Aktion je Foto: Ecke 2 abspeichern und Ecke 3 anzeigen.
+
+        Status auf "Ecke3" setzen
+        '''
         self.__seite.speichere_ecke2(p)
         self.__status = 'Ecke3'
         self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
         self.__seite.zeige_ecke3()
 
-    # 3. Aktion je Foto:
-    # Ecke 3 abspeichern und beschnittenes Foto anzeigen
     def ecke3(self, p):
+        '''3. Aktion je Foto: Ecke 3 abspeichern und beschnittenes Foto anzeigen.
+
+        Status auf "Foto Kontrolle" setzen
+        '''
         self.__seite.speichere_ecke3(p)
         self.__status = 'Foto Kontrolle'
         # self.imagepanel.parent.label_re.SetLabel(f' {self.__status}')
@@ -218,14 +251,17 @@ class Seiten(list):
     # 4. Aktion je Foto:
     # Beschnitt ändern
     def foto_beschneiden(self, plusminus):
+        '''4. Aktion je Foto: Beschnitt ändern und beschnittenes Foto anzeigen.
+        '''
         self.__seite.foto_beschneiden(plusminus)
         akt_foto = self.__seite.akt_foto
         self.imagepanel.parent.label_re.SetLabel(f'   {self.__status} Rahmen: {akt_foto.rahmen_plus}')    
 
-
-    # 5. Aktion je Foto:
-    # Beschnittenes Foto speichern und n. Seite bearbeiten
     def foto_speichern(self, p):
+        '''5. Aktion je Foto: Beschnittenes Foto speichern und n. Seite bearbeiten.
+
+        Status auf "Foto fertig" setzen
+        '''
         self.__seite.foto_speichern()
         self.__status = 'Foto fertig'
         self.seite_bearbeiten(self.__seiten_nr)

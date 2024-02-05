@@ -1,3 +1,9 @@
+"""
+alb_logging.py
+----------------
+Logging in ein wx.Panel
+"""
+
 import logging
 import logging.handlers
 
