@@ -29,11 +29,12 @@ class MainFrame(wx.Frame):
 
         super(MainFrame, self).__init__(*args, **kw)
 
+        self.BackgroundColour = "light blue"
         self.seiten = None
         self.__bitmap = None
         self.__zbmp = None
         self.__mausanker_rechteck = wx.Point(0,0) #fuer boxdraw
-        self.mousepos = None
+        # self.mousepos = None
         self.dc = None
         self.dc_scale = 1.
         self.dc_matrix = wx.AffineMatrix2D()
@@ -64,12 +65,6 @@ class MainFrame(wx.Frame):
         main_sizer.Add(self.imagectrl, proportion=1, flag=wx.ALL|wx.EXPAND, border=1)
 
         self.SetSizer(main_sizer)
-
-        # finally, put the notebook in a sizer for the panel to manage
-        # the layout
-        # sizer = wx.BoxSizer()
-        # sizer.Add(nb, 1, wx.EXPAND)
-        # p.SetSizer(sizer)
 
         # create a menu bar
         self.makeMenuBar()
@@ -114,62 +109,25 @@ class MainFrame(wx.Frame):
     def makeMenuBar(self):
 
         # Make the menu bar
-        menuBar = wx.MenuBar()
+        menubar = wx.MenuBar()
+
+        menubar.BackgroundColour = "light blue"
 
         ## add menus to menu bar.
         #------------------------------------------------------------
         # File menu
-        Menu = wx.Menu()
-        menuBar.Append(Menu, "&File")
-        menu_file.init(self, Menu) # Menu-Items und Handler dazu
+        menu = wx.Menu()
+        menubar.Append(menu, "&File")
+        menu_file.init(self, menu) # Menu-Items und Handler dazu
 
         # help menu
-        Menu = wx.Menu()
-        menuBar.Append(Menu, "&Help")
-        menu_div.init(self, Menu) # Menu-Items und Handler dazu
+        menu = wx.Menu()
+        menubar.Append(menu, "&Help")
+        menu_div.init(self, menu) # Menu-Items und Handler dazu
 
         # Give the menu bar to the frame
-        self.SetMenuBar(menuBar)
+        self.SetMenuBar(menubar)
 
-
-    # ------------------------------------------------------
-    # High-Level Funktionen
-    # ------------------------------------------------------
-
-    # ------------------------------------------------------
-    # Basis Funktionen
-    # ------------------------------------------------------
-
-    def MausKlickAktionen(self, act_pos):
-        p = self.get_pos_in_bitmap(act_pos)
-        if self.seiten.status == 'Start Seite/Foto':
-            self.mausanker_rechteck = act_pos
-            self.seiten.rahmen_lo = p
-        elif self.seiten.status == 'Rahmen ru':
-            self.seiten.rahmen_ru = p
-            self.seiten.foto_rahmen_ablegen()
-        elif self.seiten.status == 'Ecke1':
-            self.seiten.ecke1(p)
-        elif self.seiten.status == 'Ecke2':
-            self.seiten.ecke2(p)
-        elif self.seiten.status == 'Ecke3':
-            self.seiten.ecke3(p)
-        elif self.seiten.status == 'Foto Kontrolle':
-            self.seiten.foto_speichern(p)
-
-        # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')
-        logger.debug(f'Mausklick bei x:{p.x} y:{p.y}\n')
-
-
-    def get_pos_in_bitmap(self, pos):
-        mat, tr = self.dc_matrix.Get()
-        new = wx.AffineMatrix2D()
-        new.Set(mat, tr)
-        new.Invert()
-        # mat, tr = new.Get()
-        x, y =new.TransformPoint(pos.x,pos.y)
-        p2 =  wx.Point(round(x), round(y))
-        return p2
 
     # ------------------------------------------------------
     # Zeichnen und Anzeigen
@@ -193,5 +151,98 @@ class MainFrame(wx.Frame):
         
         self.imagectrl.Refresh()
         wx.Yield()
+
+
+    def rescale(self, faktor):
+        cs = self.imagectrl.GetClientSize()
+        bildmitte_x = round(cs.x/2)
+        bildmitte_y = round(cs.y/2)
+
+        #Alte Bildmitte in Bitmap
+        pm_bmp1 = self.get_pos_in_bitmap(wx.Point(bildmitte_x, bildmitte_y))
+        mat1, tr1 = self.dc_matrix.Get()
+
+        #Abstand zu tr
+        bm_zu_tr_x = bildmitte_x - tr1.x
+        bm_zu_tr_y = bildmitte_y - tr1.y
+
+        self.dc_matrix.Scale(faktor, faktor)
+        mat2, tr2 = self.dc_matrix.Get()
+
+        # Abstand wird mit skaliert => rückgängig machen
+        bm_zu_tr_x *= (1-faktor)
+        bm_zu_tr_y *= (1-faktor)
+        self.dc_matrix.Set(mat2,(tr1.x + bm_zu_tr_x, tr1.y + bm_zu_tr_y))
+
+        self.overlay.Reset()
+        self.imagectrl.Refresh()
+        wx.Yield()
+
+    def translate(self, richtung):
+        delta = 25
+        if richtung == 'l':
+            self.dc_matrix.Translate(delta,0)
+        if richtung == 'r':
+            self.dc_matrix.Translate(-delta,0)
+        if richtung == 'h':
+            self.dc_matrix.Translate(0,delta)
+        if richtung == 't':
+            self.dc_matrix.Translate(0,-delta)
+        self.overlay.Reset()
+        self.imagectrl.Refresh()
+        wx.Yield()
+
+    def zeige_ecke(self, nr):
+        # Koordinaten des Rahmens Ecke in der Bitmap
+        x1, y1 = self.seiten.akt_seite.akt_foto.p1
+        x2, y2 = self.seiten.akt_seite.akt_foto.p2
+
+        # Zuerst die Zielpos der Ecke in Mauskoordinaten und 
+        # die Koordinaten der anzuzeigenden Ecke in der Bitmap ermitteln
+        cs = self.imagectrl.GetClientSize()
+        if nr == 1:
+            x_bmp = x1
+            y_bmp = y1
+            ziel_x = int(cs.x * 0.25)
+            ziel_y = int(cs.y * 0.25)
+        if nr == 2:
+            x_bmp = x2
+            y_bmp = y1
+            ziel_x = int(cs.x * 0.77)
+            ziel_y = int(cs.y * 0.25)
+        if nr == 3:
+            x_bmp = x2
+            y_bmp = y2
+            ziel_x = int(cs.x * 0.75)
+            ziel_y = int(cs.y * 0.75)
+
+        # Einheitsmatrix
+        self.dc_matrix = wx.AffineMatrix2D()
+        # Scale
+        self.dc_matrix.Scale(conf.SCALE_ECKE, conf.SCALE_ECKE)
+        mat2, tr2 = self.dc_matrix.Get()
+
+        # Wo liegt unsere Ecke jetzt (Mauskoord)
+        dx, dy =self.dc_matrix.TransformPoint(x_bmp, y_bmp)
+        self.dc_matrix.Set(mat2,(ziel_x -dx, ziel_y -dy))
+
+        self.overlay.Reset()
+        self.imagectrl.Refresh()
+        wx.Yield()
+
+
+    # ------------------------------------------------------
+    # Basis Funktionen
+    # ------------------------------------------------------
+
+    def get_pos_in_bitmap(self, pos):
+        mat, tr = self.dc_matrix.Get()
+        new = wx.AffineMatrix2D()
+        new.Set(mat, tr)
+        new.Invert()
+        # mat, tr = new.Get()
+        x, y =new.TransformPoint(pos.x,pos.y)
+        p2 =  wx.Point(round(x), round(y))
+        return p2
 
 

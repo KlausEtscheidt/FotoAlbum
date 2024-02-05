@@ -8,16 +8,13 @@ Dient zur Steuerung des Ablaufs (Div. Funktionen werden von den Evt-Handlern ger
 
 import logging
 import os
-import shutil
-from pathlib import Path
 from threading import Thread
-import concurrent.futures
-import filesaver
 
 import wx
 
-from wand.image import Image as wandImage
-from wand.display import display
+import filesaver
+
+
 import zeichenfabrik
 
 from config import conf
@@ -42,8 +39,8 @@ class Seite():
 
     # zum Anzeigen von Bitmaps
     mainframe = None
-    
-    
+
+
     base_scale = conf.SCALE_SEITE
 
     d_aussen = 200 # Rand zum Anzeigen der Ecken
@@ -71,6 +68,7 @@ class Seite():
     #############################################################################
     @property
     def targetname(self):
+        '''Zielpfad zum Speichern eines Bildes'''
         new_name = self.basename + f'_{len(self.fotos):02d}' + self.typ
         fname = os.path.join(self.path, conf.pic_output, new_name)
         return fname
@@ -80,23 +78,22 @@ class Seite():
     # Allgemeine Funktionen
 
     def seite_drehen(self):
-        '''Dreht die Gesamtseite um 90° und zeigt die Seite neu an.
-        '''
+        '''Dreht die Gesamtseite um 90° und zeigt die Seite neu an.'''
         if self.seitenbild:
-            self.seitenbild = KEImage(aKEImage=self.seitenbild.Rotate90())
+            self.seitenbild = KEImage(myimage=self.seitenbild).Rotate90()
             self.seite_anzeigen()
 
     def seite_speichern(self):
-        '''Speichert die Seite auf Platte.
-        '''
+        '''Speichert die Seite auf Platte.'''
         if self.seitenbild:
             thread = Thread(target=self.__seite_speichern)
             thread.start()
-    
+
     def __seite_speichern(self):
+        '''Speichern im thread'''
         self.seitenbild.SaveFile(self.fullpath2pic)
 
-    
+
     #############################################################################
     #
     # Ablauf (Funktionen, die der Reihe nach durch Mausklicks getriggert werden)
@@ -113,91 +110,26 @@ class Seite():
         self.seite_anzeigen()
 
     def seite_anzeigen(self):
+        '''Stellt die Bitmap der Seite im mainframe dar'''
         image_bmp = self.seitenbild.bitmap
         zeichenfabrik.zeichne_rahmen(image_bmp, self)
         self.mainframe.show_pic(image_bmp, zeichenfabrik.zbmp , conf.SCALE_SEITE)
 
-    # Teilfoto in Liste aufnehmen
-    def foto_dazu(self, p1, p2):
-        # Erzeuge KEImage und lege in Liste ab
-        foto = Foto(self, len(self.fotos)+1, p1, p2)
+    def neues_foto_anlegen(self, pos):
+        '''Legt neues unfertiges Foto an und legt es in self.fotos ab.'''
+        foto = Foto(self, len(self.fotos)+1, pos)
         self.fotos.append(foto)
         self.akt_foto = foto
-        
-    def zeige_ecke1(self):
-        x = self.akt_foto.p1.x
-        y = self.akt_foto.p1.y
-        p1 = wx.Point(x - self.d_aussen, y - self.d_aussen)
-        p2 = wx.Point(x + self.d_innen, y + self.d_innen)
-        self.__zeige_ecke(p1, p2, 1)
 
-    def zeige_ecke2(self):
-        x = self.akt_foto.p2.x
-        y = self.akt_foto.p1.y
-        p1 = wx.Point(x - self.d_innen, y - self.d_aussen)
-        p2 = wx.Point(x + self.d_aussen, y + self.d_innen)
-        # lage von ecke1.y zu p1
-        ecke1_y = self.akt_foto.ecke1.y -y + self.d_aussen
-        
-        self.__zeige_ecke(p1, p2, 2, ecke1_y)
-
-    def zeige_ecke3(self):
-        x = self.akt_foto.p2.x
-        y = self.akt_foto.p2.y
-        p1 = wx.Point(x - self.d_innen, y - self.d_innen)
-        p2 = wx.Point(x + self.d_aussen, y + self.d_aussen)
-        # lage von ecke2.x zu p1
-        ecke2_x = self.akt_foto.ecke2.x -x + self.d_innen
-        self.__zeige_ecke(p1, p2, 3, ecke2_x)
-
-    def __zeige_ecke(self, p1, p2, nr, linie=None):
-        new_image = self.seitenbild.crop(p1, p2)
-        image_bmp = new_image.bitmap
-        # self.imagepanel.show_pic(bitmap, scale=conf.SCALE_ECKE)
-        if nr == 1:
-            zbmp = None
-        if nr == 2:
-            zeichenfabrik.zeichne_ecke(image_bmp,  linie, None)
-            zbmp = zeichenfabrik.zbmp
-        if nr == 3:
-            zeichenfabrik.zeichne_ecke(image_bmp, None, linie)
-            zbmp = zeichenfabrik.zbmp
-        self.mainframe.show_pic(image_bmp, zbmp , scale=conf.SCALE_ECKE)
-
-    def speichere_ecke1(self, p):
-        # p = self.unscale(p, conf.SCALE_ECKE)
-        # x0 war p1.x - self.d_aussen => x_absolut
-        x_abs = p.x + self.akt_foto.p1.x - self.d_aussen
-        # y0 war p1.y - self.d_aussen => y_absolut
-        y_abs = p.y + self.akt_foto.p1.y - self.d_aussen
-        self.akt_foto.ecke1 = wx.Point(x_abs, y_abs)
-        logger.debug(f'speichere Ecke 1 x: {x_abs} y: {y_abs}')
-
-    def speichere_ecke2(self, p):
-        # p = self.unscale(p, conf.SCALE_ECKE)
-        # x0 war p2.x - self.d_innen => x_absolut
-        x_abs = p.x + self.akt_foto.p2.x - self.d_innen
-        # y0 war p1.y - self.d_aussen => y_absolut
-        y_abs = p.y + self.akt_foto.p1.y - self.d_aussen
-        self.akt_foto.ecke2 = wx.Point(x_abs, y_abs)
-        logger.debug(f'speichere Ecke 2 x: {x_abs} y: {y_abs}')
-
-    def speichere_ecke3(self, p):
-        # p = self.unscale(p, conf.SCALE_ECKE)
-        # x0 war p2.x - self.d_innen => x_absolut
-        x_abs = p.x + self.akt_foto.p2.x - self.d_innen
-        # y0 war p2.y - self.d_innen => y_absolut
-        y_abs = p.y + self.akt_foto.p2.y - self.d_innen
-        self.akt_foto.ecke3 = wx.Point(x_abs, y_abs)
-        logger.debug(f'speichere Ecke 3 x: {x_abs} y: {y_abs}')
 
     # def foto_anzeigen(self):
     def foto_drehen(self):
+        '''foto drehen, wenn nötig und neue Bitmap self.bild_gedreht erzeugen'''
 
         foto = self.akt_foto
         rad, grad = foto.drehung
         orig = self.seitenbild
-        logger.info(f'Foto {foto}')
+        logger.info('Foto %s', foto)
 
         # Verdrehung korrigieren wenn nötig.
         # Funktion verschiebt Bild um offset 0 => korrigieren
@@ -215,13 +147,14 @@ class Seite():
         self.foto_anzeigen()
 
     def foto_anzeigen(self):
-        # Anzeige
+        '''Anzeige eines beschnittenen und gedrehten Fotos'''
         foto = self.akt_foto
         image_bmp = self.bild_gedreht.bitmap
         zeichenfabrik.zeichne_clip_rahmen(image_bmp, foto, conf.RAND, foto.rahmen_plus)
         self.mainframe.show_pic(image_bmp, zeichenfabrik.zbmp , scale=conf.SCALE_KONTROLLBILD)
 
     def foto_beschneiden(self, plusminus):
+        '''Korrektur des Beschnitts mit neuer Anzeige.'''
         foto = self.akt_foto
         if plusminus == '+':
             foto.rahmen_plus -= conf.rahmen_plus
@@ -230,35 +163,7 @@ class Seite():
         self.foto_anzeigen()
 
     def foto_speichern(self):
+        '''Abspeichern des Ergebnisses im Thread'''
         foto = self.akt_foto
         foto.fertig = True
-        filesaver.WorkerThread(conf.mainframe, foto)
-        # thread = Thread(target=self.__foto_speichern_im_thread)
-        # thread.start()
-        # self.__foto_speichern_im_thread()
-
-
-    ###################################################################################
-    #
-    # Helper
-    #
-    ###################################################################################
-    # def save(self, keimage, suffix, typ):
-    #     new_name = self.basename + suffix + typ
-    #     path = os.path.join(self.path, conf.pic_output)
-    #     fname = os.path.join(path, new_name)
-    #     #Pfad anlegen, wenn nicht vorhanden
-    #     Path(path).mkdir(parents=True, exist_ok=True)
-    #     if typ == '.tif':
-    #         keimage.SaveFile(fname)
-    #     if typ == '.jpg':
-    #         keimage.bitmap.SaveFile (fname, wx.BITMAP_TYPE_JPEG)
-
-    # def get_targetname_w_appendix(self, apdx):
-    #     new_name = self.basename + f'_{len(self.fotos):02d}_{apdx}' + self.typ
-    #     path = os.path.join(self.path, conf.pic_output)
-    #     fname = os.path.join(path, new_name)
-    #     #Pfad anlegen, wenn nicht vorhanden
-    #     Path(path).mkdir(parents=True, exist_ok=True)
-    #     return fname
-
+        filesaver.WorkerThread(self.mainframe, foto)

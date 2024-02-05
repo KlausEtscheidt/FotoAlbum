@@ -39,7 +39,7 @@ def einlesen(seitenliste, pfad):
                 for foto in seite['foto']:
                     print(foto['pfad'])
                     # Foto-Objekt erzeugen und zur Seite dazu
-                    pyseite.foto_dazu( None, None)
+                    pyseite.neues_foto_anlegen( None)
                     # Eigenschaften setzen
                     pyfoto = pyseite.akt_foto
                     pyfoto.ecke1 = wx.Point(foto['x1'], foto['y1'])

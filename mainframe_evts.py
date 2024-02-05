@@ -38,7 +38,7 @@ class EvtHandler():
 
     def OnPressMouse(self, event):
         act_pos = event.GetPosition()
-        self.p.MausKlickAktionen(act_pos)
+        self.mausklick_aktionen(act_pos)
         
     def OnMouseMove(self, evt):
         act_pos = evt.GetPosition()
@@ -59,13 +59,13 @@ class EvtHandler():
         if keycode == 388:  #num+
             if event.GetModifiers() == wx.MOD_CONTROL:
                 if self.p.seiten.status == 'Foto Kontrolle':
-                    self.p.seiten.foto_beschneiden('+')
+                    self.p.seiten.akt_seite.foto_beschneiden('+')
             else:
                 self.p.rescale(2.)
         if keycode == 390:  #num-
             if event.GetModifiers() == wx.MOD_CONTROL:
                 if self.p.seiten.status == 'Foto Kontrolle':
-                    self.p.seiten.foto_beschneiden('-')
+                    self.p.seiten.akt_seite.foto_beschneiden('-')
             else:
                 self.p.rescale(.5)
 
@@ -95,8 +95,8 @@ class EvtHandler():
 
         if keycode == 83: #'s'
             if event.GetModifiers() == wx.MOD_CONTROL:
-                p = self.p.get_pos_in_bitmap(act_pos)
-                self.p.seiten.foto_neu_beschneiden(mauspos=p)
+                pos = self.p.get_pos_in_bitmap(act_pos)
+                self.p.seiten.foto_neu_beschneiden(mauspos=pos)
             else:
                 self.p.seiten.akt_seite.seite_speichern()
 
@@ -109,10 +109,59 @@ class EvtHandler():
 
         if keycode == wx.WXK_SPACE:
             # print("you pressed the spacebar!")
-            self.p.MausKlickAktionen(act_pos)
+            self.mausklick_aktionen(act_pos)
         # event.Skip()
 
 
+    def mausklick_aktionen(self, act_pos):
+        '''Wird durch Klick mit linker Maustaste oder Leertaste ausgelöst'''
+
+        pos = self.p.get_pos_in_bitmap(act_pos)
+        if self.p.seiten.status == 'Start Seite/Foto':
+            self.p.mausanker_rechteck = act_pos
+            self.p.seiten.akt_seite.neues_foto_anlegen(pos)
+            self.p.seiten.status = 'Rahmen ru'
+
+        elif self.p.seiten.status == 'Rahmen ru':
+            self.p.seiten.akt_seite.akt_foto.setze_rahmen_ecke_ru(pos)
+            self.p.seiten.status = 'Ecke1'
+            self.p.label_re.SetLabel(f'   {self.p.seiten.status}')
+            self.p.zeige_ecke(1)
+
+        elif self.p.seiten.status == 'Ecke1':
+            self.p.seiten.akt_seite.akt_foto.ecke1 = pos
+            self.p.seiten.status = 'Ecke2'
+            self.p.label_re.SetLabel(f'   {self.p.seiten.status}')
+            self.p.zeige_ecke(2)
+
+        elif self.p.seiten.status == 'Ecke2':
+            self.p.seiten.akt_seite.akt_foto.ecke2 = pos
+            self.p.seiten.status = 'Ecke3'
+            self.p.label_re.SetLabel(f'   {self.p.seiten.status}')
+            self.p.zeige_ecke(3)
+
+        elif self.p.seiten.status == 'Ecke3':
+            self.p.seiten.akt_seite.akt_foto.ecke3 = pos
+            self.p.seiten.status = 'Foto Kontrolle'
+            msg = f'   {self.p.seiten.status} Rahmen: {self.p.seiten.akt_seite.akt_foto.rahmen_plus}'
+            self.p.label_re.SetLabel(msg)
+            self.p.seiten.akt_seite.foto_drehen()
+            # Hier nach weiter mit keypress + -
+
+        elif self.p.seiten.status == 'Foto Kontrolle':
+            self.p.seiten.akt_seite.foto_speichern()
+            self.p.seiten.status = 'Foto fertig'
+            self.p.label_re.SetLabel('Foto gespeichert')
+            self.p.seiten.seite_bearbeiten(self.p.seiten.id_aktseite)
+
+        # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')
+        #logger.debug(f'Mausklick bei x:{p.x} y:{p.y}\n')
+
+
+    #---------------------------------------------------------------------------
+    # Cursor zeichnen
+    #---------------------------------------------------------------------------
+        
     def maus_zeigt_fadenkreuz(self, pos):
 
         if not self.p.dc:

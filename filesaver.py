@@ -66,7 +66,7 @@ class WorkerThread(Thread):
         # Erst Kontrollbild
         wx.PostEvent(self._notify_window, ResultEvent('Speichere Kontrollbild'))
         bmp = zeichenfabrik.zeichne_clip_rahmen_ins_bild(foto.parent.bild_gedreht.bitmap, foto, conf.RAND, foto.rahmen_plus)
-        aKEImage = KEImage(aBitmap=bmp)
+        aKEImage = KEImage(mybitmap=bmp)
         fname = foto.get_targetname('.jpg')
         aKEImage.SaveAsJpg(fname)
 

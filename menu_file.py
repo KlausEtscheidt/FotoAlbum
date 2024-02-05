@@ -23,9 +23,9 @@ def init(parent, pMenu):
         (OnSaveAll, "Alle Fotos exportieren", "Alle Fotos als JPF und TIFf speichern."),
         (OnExit, "Ende", "Programm beenden")
     )
-    for mItem in men_items:
-        m = pMenu.Append(-1, mItem[1], mItem[2])
-        parent.Bind(wx.EVT_MENU, mItem[0], m)
+    for m_item in men_items:
+        m = pMenu.Append(-1, m_item[1], m_item[2])
+        parent.Bind(wx.EVT_MENU, m_item[0], m)
 
 def OnStart(_event):
     conf.thisapp.seiten_laden()
@@ -37,7 +37,7 @@ def OnSaveSettings(_event):
     conf.savesettings()
 
 def OnSaveHistory(_event):
-    impex.ausgeben(conf.thisapp.seiten, conf.pic_path)
+    impex.ausgeben(conf.thisapp.mainframe.seiten, conf.pic_path)
 
 def OnSaveAll(_event):
     conf.thisapp.seiten.alle_speichern()

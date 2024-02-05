@@ -18,19 +18,21 @@ logger = logging.getLogger('album')
 #######################################################################################
 #
 class KEImage():
+    '''Wrapper um wx.Image'''
+
     @classmethod
     def load_from_file(cls, fullpath2pic):
-        # Image von Platte laden
+        '''Image von Platte laden'''
         return wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
 
-    def __init__(self, fullpath2pic=None, aImage=None, aBitmap=None):
+    def __init__(self, fullpath2pic=None, myimage=None, mybitmap=None):
         if fullpath2pic:
-             self.__image = wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
-        elif aImage:
-            self.__image = aImage
+            self.__image = wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
+        elif myimage:
+            self.__image = myimage
             # self = aKEImage.Copy()
-        elif aBitmap:
-            self.__image = aBitmap.ConvertToImage()
+        elif mybitmap:
+            self.__image = mybitmap.ConvertToImage()
         # else:
         #     wx.Image.__init__(self)
         if not self.__image.IsOk:
@@ -54,30 +56,40 @@ class KEImage():
         copy = self.__image.Copy()
         copy.Resize(size, pkt)
 
-        return KEImage(aImage=copy)
+        return KEImage(myimage=copy)
 
     def rotate(self, winkel, p0, interpol ):
-        # Bild wird beim Drehen umm offset verschoben => offset zurück liefern und beachten
+        ''' Bild wird beim Drehen umm offset verschoben => offset zurück liefern und beachten'''
         offset = wx.Point()
         newimg = self.__image.Rotate(winkel, p0, interpol, offset)
-        return KEImage(aImage=newimg), offset
+        return KEImage(myimage=newimg), offset
+
+    def Rotate90(self):
+        '''Dreht Bild um 90°'''
+        newimg = self.__image.Rotate90()
+        return KEImage(myimage=newimg)
 
     def SaveFile(self, fullpath):
+        '''Speichert Bild'''
         self.__image.SaveFile(fullpath)
     
     def SaveAsJpg(self, fullpath):
+        '''Speichert Bild las JPG'''
         self.bitmap.SaveFile(fullpath, wx.BITMAP_TYPE_JPEG)
 
     @property
     def bitmap(self):
+        '''bitmap zum wx.Image'''
         return self.__image.ConvertToBitmap()
 
     @property
     def Width(self):
+        '''breite des Bildes'''
         return self.__image.Width
 
     @property
     def Height(self):
+        '''Höhe des Bildes'''
         return self.__image.Height
 
 
@@ -85,17 +97,18 @@ class KEImage():
 #
 class Foto():
     '''Foto alle Daten um ein Teilfoto zu definieren'''
-    
-    def __init__(self, parent, nr, p1, p2):
+
+    def __init__(self, parent, nr, p1):
 
         self.parent = parent # umgebenden Seite
         self.nr = nr # laufende Nr auf der Seite
         self.p1 = p1 # äußerer Rahmen links oben
-        self.p2 = p2 # äußerer Rahmen rechts unten
+        self.p2 = None # äußerer Rahmen rechts unten
         self.ecke1 = None
         self.ecke2 = None
         self.ecke3 = None
-        self.rahmen_plus = conf.rahmen_plus # Rahmen gegenüber Daten aus Ecken 1-3 vergrössern (wenn >0)
+        # Rahmen gegenüber Daten aus Ecken 1-3 vergrössern (wenn >0)
+        self.rahmen_plus = conf.rahmen_plus
         self.fertig = False # wird True wenn Foto vollständig definiert
         self.saved_in = '' # Pfad zur Ausgabedatei
 
@@ -104,7 +117,12 @@ class Foto():
         # Muss nach Abspeichern der Seite entfernt werden               
         # self.__image = None
 
+    def setze_rahmen_ecke_ru(self, pos):
+        '''Speichert die rechte untere Ecke des Grobrahmens'''
+        self.p2 = pos
+
     def pos_ist_innen(self, x, y):
+        '''Testet ob ein Punkt innerhalb eines Bildes liegt'''
         return x>=self.p1.x and x<=self.p2.x and y>=self.p1.y and y<=self.p2.y
 
     def get_targetname(self, typ, appendix=''):
