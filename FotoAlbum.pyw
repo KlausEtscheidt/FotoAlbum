@@ -14,13 +14,14 @@ from config import conf
 import logging
 import alb_logging
 
-from panel_log import LogPanel
-from panel_imageview import ImagePanelOuter
-import menu_file
-import menu_div
+from mainframe import MainFrame
+#from panel_log import LogPanel
+# from panel_imageview import ImagePanelOuter
+# import menu_file
+# import menu_div
 from seiten import Seiten
 import import_export as impex
-from filesaver import EVT_RESULT_ID
+# from filesaver import EVT_RESULT_ID
 
 logger = logging.getLogger('album')
 
@@ -34,7 +35,7 @@ class myApp(wx.App):
         mainframe.SetTransparent(254) #Soll flickern verhindern
         self.mainframe = mainframe
         conf.mainframe = mainframe
-        conf.imagepanel = mainframe.imagepanel.innerpanel
+        #conf.imagepanel = mainframe.imagepanel.innerpanel
         conf.thisapp = self
         #Noetig ????
         self.SetTopWindow(mainframe)
@@ -56,82 +57,18 @@ class myApp(wx.App):
                 conf.pic_path = Dlg.GetPath()
 
         # Tiff dateien suchen
-        self.seiten = Seiten(self.mainframe.imagepanel.innerpanel)
+        self.mainframe.seiten = Seiten(self.mainframe)
 
         # Evtl bereits vorhandene Rahmen aus Toml einlesen
-        impex.einlesen(self.seiten, conf.pic_path)
+        impex.einlesen(self.mainframe.seiten, conf.pic_path)
         
         # Erste Seite bearbeiten
-        self.seiten.seite_bearbeiten(0)
+        self.mainframe.seiten.seite_bearbeiten(0)
     
     def OnExit(self):
         conf.config_write()
-        impex.ausgeben(self.seiten, conf.pic_path)
+        impex.ausgeben(self.mainframe.seiten, conf.pic_path)
         return super().OnExit()
-
-class MainFrame(wx.Frame):
-
-    def __init__(self, *args, **kw):
-
-        super(MainFrame, self).__init__(*args, **kw)
-
-        # Here we create a panel and a notebook on the panel
-        p = wx.Panel(self)
-        nb = wx.Notebook(p)
-
-        # create the page windows as children of the notebook
-        self.imagepanel = ImagePanelOuter(nb, page_id=0)
-        self.logpanel = LogPanel(nb, page_id=1)
-
-        # add the pages to the notebook with the label to show on the tab
-        nb.AddPage(self.imagepanel, "Seiten")
-        nb.AddPage(self.logpanel, "Log")
-
-        self.imagepanel.Activate()
-
-        # finally, put the notebook in a sizer for the panel to manage
-        # the layout
-        sizer = wx.BoxSizer()
-        sizer.Add(nb, 1, wx.EXPAND)
-        p.SetSizer(sizer)
-
-        # create a menu bar
-        self.makeMenuBar()
-
-        # and a status bar
-        self.CreateStatusBar()
-        self.SetStatusText("Willkommen beim Alben-Zerleger !")
-
-        # Set up event handler for any worker thread results
-        self.Connect(-1, -1, EVT_RESULT_ID, self.OnThreadResult)
-
-    def OnThreadResult(self, event):
-        if event.had_err:
-            wx.MessageBox(f'{event.data}','Fehler beim Speichern')
-        else:
-            # Process results here
-            self.SetStatusText(f'{event.data}')
-
-
-    def makeMenuBar(self):
-
-        # Make the menu bar
-        menuBar = wx.MenuBar()
-
-        ## add menus to menu bar.
-        #------------------------------------------------------------
-        # File menu
-        Menu = wx.Menu()
-        menuBar.Append(Menu, "&File")
-        menu_file.init(self, Menu) # Menu-Items und Handler dazu
-
-        # help menu
-        Menu = wx.Menu()
-        menuBar.Append(Menu, "&Help")
-        menu_div.init(self, Menu) # Menu-Items und Handler dazu
-
-        # Give the menu bar to the frame
-        self.SetMenuBar(menuBar)
 
 def run_app():
     alb_logging.init()

@@ -75,8 +75,6 @@ class ImagePanel(wx.Panel):
         wx.Panel.__init__(self, parent=parent)
         self.parent = parent
 
-        #add drop target
-        file_drop_target = filedrop.MyFileDropTarget(self)
         self.define_ctrls()
         self.seiten = None
         self.__bitmap = None
@@ -87,6 +85,8 @@ class ImagePanel(wx.Panel):
         self.dc_scale = 1.
         self.dc_matrix = wx.AffineMatrix2D()
         self.overlay = wx.Overlay() #zum temp Zeichnen
+        #add drop target
+        file_drop_target = filedrop.MyFileDropTarget(self)
         self.imagectrl.SetDropTarget(file_drop_target)
 
     def define_ctrls(self):
@@ -114,6 +114,10 @@ class ImagePanel(wx.Panel):
         self.imagectrl.Bind(wx.EVT_MOTION, self.OnMouseMove)
 
     def show_pic(self, image_bmp, zeichen_bmp=None, scale=1):
+        ''' Zeigt eine image_bmp evtl mit überlagerter zeichen_bmp an. 
+
+        Das Zeichnen wird vom OnPaint-Event erledigt 
+        '''
         self.__bitmap = image_bmp
         self.__zbmp = zeichen_bmp
         self.overlay.Reset()

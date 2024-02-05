@@ -27,20 +27,21 @@ class Seiten(list):
 
     seiten_nr = 0
 
-    def __init__(self, imagepanel):
+    def __init__(self, parent):
         '''Durchsucht Verzeichnis nach tif-Dateien und erzeugt eine Seite je Tiff
 
         Args:
             imagepanel (ImagePanel): widget zur Darstellung einer Seite (Bitmap)
         '''
+        self.parent = parent
+        self.imagectrl = parent.imagectrl
+
         # Klassenvar in Seite setzen
         # imagepanel ist self.mainframe.imagepanel.innerpanel
-        Seite.imagepanel = imagepanel
+        Seite.mainframe = parent
         # imagepanel und imagepanel.imagectrl als Eigenschaft
-        self.imagepanel = imagepanel
-        self.imagectrl = imagepanel.imagectrl
         # Rueckverweis Seiten <-> imagepanel
-        imagepanel.seiten = self
+        #---------------- imagepanel.seiten = self
         
         self.myFileList = []
         self.seitenliste_erstellen()
@@ -175,8 +176,8 @@ class Seiten(list):
         self.__seite = self[seiten_nr]
         # Anzeigen
         txt = f'{self.__seite.basename}{self.__seite.typ}   ({seiten_nr+1:d} von {len(self)})'
-        self.imagepanel.parent.label_li.SetLabel(txt)
-        self.imagepanel.parent.label_re.SetLabel(f'{self.__status}')
+        # self.parent.label_li.SetLabel(txt)
+        # self.parent.label_re.SetLabel(f'{self.__status}')
         self.__seite.seite_laden()
 
     def seite_bearbeiten_next(self):
@@ -211,7 +212,7 @@ class Seiten(list):
         self.__seite.foto_dazu(self.rahmen_lo, self.rahmen_ru)
         # Weiter mit exakter Eckendefinition
         self.__status = 'Ecke1'
-        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
+        # self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
         self.__seite.zeige_ecke1()
 
     def ecke1(self, p):
@@ -223,7 +224,7 @@ class Seiten(list):
         '''
         self.__seite.speichere_ecke1(p)
         self.__status = 'Ecke2'
-        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
+        # self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
         self.__seite.zeige_ecke2()
 
     def ecke2(self, p):
@@ -233,7 +234,7 @@ class Seiten(list):
         '''
         self.__seite.speichere_ecke2(p)
         self.__status = 'Ecke3'
-        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
+        # self.imagepanel.parent.label_re.SetLabel(f'   {self.__status}')
         self.__seite.zeige_ecke3()
 
     def ecke3(self, p):
@@ -245,7 +246,7 @@ class Seiten(list):
         self.__status = 'Foto Kontrolle'
         # self.imagepanel.parent.label_re.SetLabel(f' {self.__status}')
         akt_foto = self.__seite.akt_foto
-        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status} Rahmen: {akt_foto.rahmen_plus}')    
+        # self.imagepanel.parent.label_re.SetLabel(f'   {self.__status} Rahmen: {akt_foto.rahmen_plus}')    
         self.__seite.foto_drehen()
 
     # 4. Aktion je Foto:
@@ -255,7 +256,7 @@ class Seiten(list):
         '''
         self.__seite.foto_beschneiden(plusminus)
         akt_foto = self.__seite.akt_foto
-        self.imagepanel.parent.label_re.SetLabel(f'   {self.__status} Rahmen: {akt_foto.rahmen_plus}')    
+        # self.imagepanel.parent.label_re.SetLabel(f'   {self.__status} Rahmen: {akt_foto.rahmen_plus}')    
 
     def foto_speichern(self, p):
         '''5. Aktion je Foto: Beschnittenes Foto speichern und n. Seite bearbeiten.

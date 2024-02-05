@@ -18,7 +18,7 @@ class KE_Handler(logging.Handler):
 
     def emit(self, record):
         msg = self.format(record)
-        conf.mainframe.logpanel.Output(msg)
+        # conf.mainframe.logpanel.Output(msg)
 
 def init():
     #set level

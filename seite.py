@@ -40,8 +40,9 @@ class Seite():
 
     '''
 
-    #inneres panel
-    imagepanel = None
+    # zum Anzeigen von Bitmaps
+    mainframe = None
+    
     
     base_scale = conf.SCALE_SEITE
 
@@ -64,7 +65,7 @@ class Seite():
         self.fotos = [] # Liste der Fotos auf Seite Typ KEImage
         self.akt_foto = None
 
-        Foto.imagepanel = self.imagepanel
+        # Foto.imagepanel = self.imagepanel
 
     # Properties
     #############################################################################
@@ -114,7 +115,7 @@ class Seite():
     def seite_anzeigen(self):
         image_bmp = self.seitenbild.bitmap
         zeichenfabrik.zeichne_rahmen(image_bmp, self)
-        self.imagepanel.show_pic(image_bmp, zeichenfabrik.zbmp , conf.SCALE_SEITE)
+        self.mainframe.show_pic(image_bmp, zeichenfabrik.zbmp , conf.SCALE_SEITE)
 
     # Teilfoto in Liste aufnehmen
     def foto_dazu(self, p1, p2):
@@ -161,7 +162,7 @@ class Seite():
         if nr == 3:
             zeichenfabrik.zeichne_ecke(image_bmp, None, linie)
             zbmp = zeichenfabrik.zbmp
-        self.imagepanel.show_pic(image_bmp, zbmp , scale=conf.SCALE_ECKE)
+        self.mainframe.show_pic(image_bmp, zbmp , scale=conf.SCALE_ECKE)
 
     def speichere_ecke1(self, p):
         # p = self.unscale(p, conf.SCALE_ECKE)
@@ -218,7 +219,7 @@ class Seite():
         foto = self.akt_foto
         image_bmp = self.bild_gedreht.bitmap
         zeichenfabrik.zeichne_clip_rahmen(image_bmp, foto, conf.RAND, foto.rahmen_plus)
-        self.imagepanel.show_pic(image_bmp, zeichenfabrik.zbmp , scale=conf.SCALE_KONTROLLBILD)
+        self.mainframe.show_pic(image_bmp, zeichenfabrik.zbmp , scale=conf.SCALE_KONTROLLBILD)
 
     def foto_beschneiden(self, plusminus):
         foto = self.akt_foto
