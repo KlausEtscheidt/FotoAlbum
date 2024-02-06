@@ -34,10 +34,10 @@ Module des Projektes "Foto Album"
 .. automodule:: menu_file
     :members:
 
-.. automodule:: panel_imageview
+.. automodule:: mainframe
     :members:
 
-.. automodule:: panel_log
+.. automodule:: mainframe_evts
     :members:
 
 .. automodule:: seite

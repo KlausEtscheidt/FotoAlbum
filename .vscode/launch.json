@@ -4,6 +4,14 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+        {
+            "name": "PowerShell Launch Current File",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${file}",
+            "cwd": "${cwd}"
+        },
         {
             "name": "make doku",
             "type": "PowerShell",
@@ -13,16 +21,24 @@
         },
         
         {
+            "name": "make help",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}/doku_help/makeall.ps1",
+            "cwd": "${cwd}"
+        },
+        
+        {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        },
         {
             "name": "Python: FotoView",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${fileDirname}/FotoAlbum.pyw",
             "console": "integratedTerminal",

@@ -4,22 +4,20 @@ import_export.py
 
 Definierte Fotos im Toml-Format speichern oder einlesen.
 '''
+import os
 
 import tomlkit.toml_file
 import tomlkit.toml_document
 import tomlkit.items
-import os
 
 import wx
-
-from fotos import Foto
 
 def einlesen(seitenliste, pfad):
     tomlfilename = os.path.join(pfad, "ergebnis.toml")
     if not os.path.isfile(tomlfilename):
         #keine Datei gefunden
         return
-    
+
     # toml_document lesen
     tml = tomlkit.toml_file.TOMLFile(tomlfilename).read()
     for seite in tml['seite']:
@@ -45,7 +43,7 @@ def einlesen(seitenliste, pfad):
                     pyfoto.ecke1 = wx.Point(foto['x1'], foto['y1'])
                     pyfoto.ecke2 = wx.Point(foto['x2'], foto['y2'])
                     pyfoto.ecke3 = wx.Point(foto['x3'], foto['y3'])
-                    # Die ursprünglichen Koordinaten des Grobauswahl-Rahmens 
+                    # Die ursprünglichen Koordinaten des Grobauswahl-Rahmens
                     # wurden nicht in Toml gespeichert
                     # Wir nehmen stattdessen Ecke 1 und Ecke 3
                     pyfoto.p1 = pyfoto.ecke1
@@ -56,11 +54,11 @@ def einlesen(seitenliste, pfad):
 
 
 def ausgeben(seitenliste, pfad):
-    
+
     tomlfilename = os.path.join(pfad, "ergebnis.toml")
     tml = tomlkit.toml_document.TOMLDocument()
-    tml["title"] = "Seitenliste" 
-    
+    tml["title"] = "Seitenliste"
+
     seiten = tomlkit.aot()
     tml.add('seite', seiten)
 
@@ -75,7 +73,7 @@ def ausgeben(seitenliste, pfad):
         #neue toml Aot zur seite dazu
         fotos = tomlkit.aot()
         seite.add('foto',fotos)
-        
+
         for i in range(0, len(pyseite.fotos)):
 
             pyfoto = pyseite.fotos[i]
@@ -84,7 +82,7 @@ def ausgeben(seitenliste, pfad):
             foto = tomlkit.table()
             #neuer Eintrag in foto Aot
             fotos.append(foto)
-            
+
             # Daten des Fotos
             foto.add('nr', i)
             foto.add('pfad', pyfoto.saved_in)
@@ -97,8 +95,4 @@ def ausgeben(seitenliste, pfad):
             foto.add('rahmen_plus', pyfoto.rahmen_plus)
 
     # toml_document schreiben
-    tmlfile = tomlkit.toml_file.TOMLFile(tomlfilename).write(tml)
-
-# ausgeben()
-# einlesen()
-pass
+    tomlkit.toml_file.TOMLFile(tomlfilename).write(tml)

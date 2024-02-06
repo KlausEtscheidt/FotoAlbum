@@ -1,10 +1,12 @@
-# fotoview
+Zweck
+------
+
 Dient zum Extrahieren einzelner Fotos aus Scan's kompletter Seiten eines Foto-Albums.
 
 Der Ablauf wird vom Programm vorgegeben.
 
 Gesamtablauf
-============
+-------------
 Zuerst wird ein Verzeichnis mit tif-dateien des Scans eingelesen.
 
 Die erste Seite (Datei) wird angezeigt.
@@ -17,7 +19,7 @@ Die Defition der Fotos bleibt beim Wechsel erhalten
 und wird durch rote, durchkreuzte Rahmen auf der Seite markiert.
 
 Fotodefinition
-==============
+---------------
 
 Durch den ersten Klick ins Bild wird die linke obere Ecke eines Rahmens definiert.
 Der zweite Klick definiert die rechte untere Ecke.
@@ -60,18 +62,23 @@ Das Programm erwartet dann eine neue Definiton eines Fotos.
 Alternativ kann der Anwender die Seite wechseln.
 
 Foto löschen
-============
+--------------
 
 Die definierten Fotos werden auf den Seiten durch Rahmen mit diagonalen Linien markiert.
 Durch Drücken der Taste 'e' (entfernen) wird die Definition des Fotos, 
 in dem der Cursor steht, gelöscht. Evtl bereits exportierte Fotos bleiben erhalten.
 Das Foto kann neu definiert und neu exportiert werden.
 
+.. tastenbelegung:
+
 Tastenbelegung
-==============
+---------------
+
+.. _ohne-strg:
 
 ohne Strg:
-----------
+...........
+
 num +: zoomt das Bild um Faktor 2
 num -: zoomt das Bild um Faktor 0.5
 
@@ -83,8 +90,11 @@ ESC: Bricht die Definition eines Fotos ab
 
 Leer-Taste: wie Mausklick (geht auf nächsten Bearbeitungsschritt mit akt Cursorposition)
 
+.. _mit-strg:
+
 mit Strg:
----------
+...........
+
 num +: vergrößert den Rahmen zur Definition eines Fotos um 5 Pixel
 num -: verkleinert den Rahmen zur Definition eines Fotos um 5 Pixel
 

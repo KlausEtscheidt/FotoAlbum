@@ -15,13 +15,8 @@ import logging
 import alb_logging
 
 from mainframe import MainFrame
-#from panel_log import LogPanel
-# from panel_imageview import ImagePanelOuter
-# import menu_file
-# import menu_div
 from seiten import Seiten
 import import_export as impex
-# from filesaver import EVT_RESULT_ID
 
 logger = logging.getLogger('album')
 
@@ -35,14 +30,12 @@ class myApp(wx.App):
         mainframe.SetTransparent(254) #Soll flickern verhindern
         self.mainframe = mainframe
         conf.mainframe = mainframe
-        #conf.imagepanel = mainframe.imagepanel.innerpanel
         conf.thisapp = self
         #Noetig ????
         self.SetTopWindow(mainframe)
         mainframe.Show()
         logger.debug('Starte Programm')
         self.seiten_laden()
-        # conf.settings()
 
         return True
 
@@ -61,10 +54,10 @@ class myApp(wx.App):
 
         # Evtl bereits vorhandene Rahmen aus Toml einlesen
         impex.einlesen(self.mainframe.seiten, conf.pic_path)
-        
+
         # Erste Seite bearbeiten
         self.mainframe.seiten.seite_bearbeiten(0)
-    
+
     def OnExit(self):
         conf.config_write()
         impex.ausgeben(self.mainframe.seiten, conf.pic_path)
