@@ -6,6 +6,8 @@ Zur besseren Übersichtlichkeit hierhin ausgelagert.
 """
 import wx
 
+from config import conf
+
 class EvtHandler():
 
     def __init__(self, parent):
@@ -24,23 +26,28 @@ class EvtHandler():
             # Process results here
             self.p.SetStatusText(f'{event.data}')
         
-    def OnPaint(self, event=None):
-        self.p.overlay.Reset()
-        dc = wx.PaintDC(self.p.imagectrl)
-        self.p.dc = dc
-        erg = dc.SetTransformMatrix(self.p.dc_matrix)
-        dc.SetBackground(wx.Brush("light blue"))
-        dc.Clear()
-        if self.p.bitmap:
-            dc.DrawBitmap ( self.p.bitmap, 0, 0, useMask=False)
-        if self.p.zbmp:
-            dc.DrawBitmap ( self.p.zbmp, 0, 0, useMask=True)
+    def OnPaint(self, _event=None):
+        '''On-Paint Eventhandler von mainframe.imagectrl.
+
+        Wird durch u.A. durch imagectrl.Refresh() ausgelöst
+        und dient zur Darstellung von Bitmaps der gescannten Seiten oder Fotos.
+        '''
+        self.p.zeichne_alles()
 
     def OnPressMouse(self, event):
+        '''EVT_LEFT_DOWN-Handler von mainframe.imagectrl.
+
+        Der Mausklick wird an *mausklick_aktionen* weitergeleitet,
+        welches in Abhängigkeit vom Status des Programms reagiert 
+        und auch durch Tastatur-Events aktiviert wird.'''
         act_pos = event.GetPosition()
         self.mausklick_aktionen(act_pos)
-        
+
     def OnMouseMove(self, evt):
+        '''EVT_MOTION-Handler von mainframe.imagectrl.
+        
+        Je nach Status des Programms wird der Cursor zu einem Fadenkreuz 
+        bzw. wird mit der Maus ein Rahmen aufgezogen.'''
         act_pos = evt.GetPosition()
         if self.p.seiten.status == 'Start Seite/Foto':
             self.maus_zeigt_fadenkreuz(act_pos)
@@ -69,24 +76,25 @@ class EvtHandler():
             else:
                 self.p.rescale(.5)
 
+
         if keycode == 314: #links
             if event.GetModifiers() == wx.MOD_CONTROL:
-                self.p.translate('l')
+                self.p.translate('l', conf.delta)
             else:
                 self.p.imagectrl.WarpPointer(act_pos.x-1, act_pos.y)
         if keycode == 316: #rechts
             if event.GetModifiers() == wx.MOD_CONTROL:
-                self.p.translate('r')
+                self.p.translate('r', conf.delta)
             else:
                 self.p.imagectrl.WarpPointer(act_pos.x+1, act_pos.y)
         if keycode == 315: #hoch
             if event.GetModifiers() == wx.MOD_CONTROL:
-                self.p.translate('h')
+                self.p.translate('h', conf.delta)
             else:
                 self.p.imagectrl.WarpPointer(act_pos.x, act_pos.y-1)
         if keycode == 317: #tief
             if event.GetModifiers() == wx.MOD_CONTROL:
-                self.p.translate('t')
+                self.p.translate('t', conf.delta)
             else:
                 self.p.imagectrl.WarpPointer(act_pos.x, act_pos.y+1)
 

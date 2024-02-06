@@ -1,5 +1,5 @@
 """
-zeichenfabrik
+zeichenfabrik.py
 ====================================
 Funktionen zum Zeichnen in Bitmaps.
 
@@ -36,8 +36,8 @@ def zeichne_rahmen(image_bmp, akt_seite):
     __release_dc(dc, zbmp)
     return zbmp
 
-def zeichne_ecke(image_bmp, linie_hor=None, linie_vert=None):
-    '''Linie von der der Vorgänger-Ecke zu Ecke2 bzw Ecke3
+def zeichne_ecke(image_bmp, x1, y1, x2, y2):
+    '''Linie von der Vorgänger-Ecke zu Ecke2 bzw Ecke3
 
     Args:
         image_bmp (wx.Bitmap): Bitmap über die gezeichnet wird (nur zur Größenbestimmung)
@@ -50,18 +50,27 @@ def zeichne_ecke(image_bmp, linie_hor=None, linie_vert=None):
 
     dc, zbmp = __prepare_dc(image_bmp)
     dc.SetPen(wx.Pen(wx.RED, 3))
-    if linie_hor:
-        dc.DrawLine(0, linie_hor, 1600, linie_hor)
-    if linie_vert:
-        dc.DrawLine(linie_vert, 0, linie_vert, 1600)
+    dc.DrawLine(x1, y1, x2, y2)
     __release_dc(dc, zbmp)
     return zbmp
 
 def zeichne_clip_rahmen(image_bmp, foto, rand, rahmen_plus):
-    '''Rahmen in gedrehtem Bild einzeichnen.
+    '''Rahmen ins gedrehte Bild einzeichnen.
 
-    Definition entsprechend Ecke1, Breite und Höhe des Fotos.
     Dient zur Korrektur des Beschnitts.
+    Definition entsprechend Ecke1, Breite und Höhe des Fotos.
+    image_bmp wurde um *rand* größer erzeugt, als es die Ecken des Fotos vorgeben würden.
+    Der Beschnittrahmen der gezeichnet werden soll, 
+    ist um rahmen_plus grösser als die Ecken des Fotos.
+
+    Args:
+        image_bmp (wx.Bitmap): Bitmap eines Fotos
+        foto (Foto): Fotodaten bstimmen den Rahmen
+        rand (int): Die Bitmap ist um rand grösser als die Ecken des Fotos
+        rahmen_plus (int): Der Beschnitt ist um rahmen_plus grösser als die Ecken des Fotos
+
+    Returns:
+        wx.Bitmap: zbmp mit eingezeichnetem Beschnitt-Rahmen
     '''
     p1 = wx.Point(rand - rahmen_plus, rand - rahmen_plus)
     p2 = wx.Point(p1.x + foto.breite + 2*rahmen_plus, p1.y)
@@ -74,9 +83,6 @@ def zeichne_clip_rahmen(image_bmp, foto, rand, rahmen_plus):
     __release_dc(dc, zbmp)
     return zbmp
 
-# Hier wird direkt ins Bild und nicht darüber (in zbmp) gezeichnet
-# ------------------------------------------------------------------------------
-#
 def zeichne_clip_rahmen_ins_bild(image_bmp, foto, rand, rahmen_plus):
     '''Zeichnet Beschnittrahmen direkt in image_bmp.
 

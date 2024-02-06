@@ -8,9 +8,8 @@ Der Thread sendet per Event (ResultEvent) seinen Status und evtl. Fehler ans Hau
 """
 
 import logging
-import os
-import shutil
-from threading import *
+from threading import Thread
+
 import wx
 
 from wand.image import Image as wandImage
@@ -18,7 +17,7 @@ import zeichenfabrik
 
 from config import conf
 
-from fotos import KEImage, Foto
+from fotos import KEImage
 
 
 logger = logging.getLogger('album')
@@ -27,7 +26,8 @@ logger = logging.getLogger('album')
 EVT_RESULT_ID = wx.NewId()
 
 class ResultEvent(wx.PyEvent):
-    
+    '''Eventklasse'''
+
     def __init__(self, data, had_err = False):
         '''Event um den Status des Threads an das Hauptprogramm zu melden.
 
@@ -40,9 +40,9 @@ class ResultEvent(wx.PyEvent):
         self.data = data
         self.had_err = had_err
 
-# Thread class that executes processing
 class WorkerThread(Thread):
-    
+    '''Thread-Klasse zum Abspeichern von Images'''
+
     def __init__(self, notify_window, foto):
         '''Tread-Klasse zum Abspeichern
 
@@ -65,10 +65,11 @@ class WorkerThread(Thread):
 
         # Erst Kontrollbild
         wx.PostEvent(self._notify_window, ResultEvent('Speichere Kontrollbild'))
-        bmp = zeichenfabrik.zeichne_clip_rahmen_ins_bild(foto.parent.bild_gedreht.bitmap, foto, conf.RAND, foto.rahmen_plus)
-        aKEImage = KEImage(mybitmap=bmp)
+        bmp = zeichenfabrik.zeichne_clip_rahmen_ins_bild(foto.parent.bild_gedreht.bitmap,
+                                                         foto, conf.rand, foto.rahmen_plus)
+        my_ke_image = KEImage(mybitmap=bmp)
         fname = foto.get_targetname('.jpg')
-        aKEImage.SaveAsJpg(fname)
+        my_ke_image.SaveAsJpg(fname)
 
         _, grad = foto.drehung
 
@@ -79,7 +80,7 @@ class WorkerThread(Thread):
                 img = wandImage(filename=fname)
                 #Falls im Tiff Leerraum ums Bild ist (Kontrolle z.b in Gimp)
                 img.reset_coords()
-                if abs(grad) > conf.MIN_WINKEL:
+                if abs(grad) > conf.min_winkel:
                     img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
                 x0, y0, x1, y1 = foto.final_crop
                 img.crop(x0, y0, x1, y1)
@@ -87,8 +88,7 @@ class WorkerThread(Thread):
                 foto.saved_in = fname
                 img.save(filename=fname)
                 wx.PostEvent(self._notify_window, ResultEvent('Tiff gespeichert'))
-
-        except Exception as wand_err:
+        except Exception as wand_err: # pylint: disable=broad-exception-caught
             wx.PostEvent(self._notify_window, ResultEvent(str(wand_err), True))
 
     def abort(self):

@@ -1,9 +1,13 @@
 # Mein Kommentar
 
+# Um wie viele Pixel soll bei Strg-Cursor das Bild verschoben werden.
+delta_pfeiltasten = 50
+
 # Ab wieviel Grad Schrägstellung wird ein Bild zurückgedreht
 min_winkel = 0.25
 
-# Rand um Kontrollbilder
+# Wie viele Pixel soll der Rand um Kontrollbilder größer sein,
+# als es den gewählten Bild-Ecken entsprechen würde.
 rand = 20
 
 # Eingegebenen Rand um Wert vergrössern

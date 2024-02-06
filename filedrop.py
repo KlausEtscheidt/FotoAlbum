@@ -13,11 +13,12 @@ import wx
 from config import conf
 
 class MyFileDropTarget(wx.FileDropTarget):
+    '''Ermöglicht drop von Verzeichnissen oder Dateien.'''
     def __init__(self, parent):
         wx.FileDropTarget.__init__(self)
         self.parent = parent
 
-    def OnDropFiles(self, x, y, filenames):
+    def OnDropFiles(self, _x, _y, filenames): # pylint: disable=invalid-name, missing-function-docstring
         #x,y sind drop-koordinaten, filenames liste der gedroppten files
         myfile = filenames[0]
         if os.path.isdir(myfile):

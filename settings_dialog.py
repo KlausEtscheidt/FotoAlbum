@@ -33,8 +33,8 @@ class SettingsDlg(wx.Dialog):
         self.min_winkel = conf.min_winkel
         self.rahmen_plus = conf.rahmen_plus
         self.pic_output = conf.pic_output
-        self.scale_seite = conf.SCALE_SEITE
-        self.scale_kontrollbild = conf.SCALE_KONTROLLBILD
+        self.scale_seite = conf.scale_seite
+        self.scale_kontrollbild = conf.scale_kontrollbild
 
         #Panel für das Innere des Formulars (Inhalt ohne Buttons)
         self.pnl = wx.Panel(self)

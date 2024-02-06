@@ -41,7 +41,7 @@ class Seite():
     mainframe = None
 
 
-    base_scale = conf.SCALE_SEITE
+    base_scale = conf.scale_seite
 
     d_aussen = 200 # Rand zum Anzeigen der Ecken
     d_innen = 1400
@@ -113,7 +113,7 @@ class Seite():
         '''Stellt die Bitmap der Seite im mainframe dar'''
         image_bmp = self.seitenbild.bitmap
         zbmp = zeichenfabrik.zeichne_rahmen(image_bmp, self)
-        self.mainframe.show_pic(image_bmp, zbmp , conf.SCALE_SEITE)
+        self.mainframe.show_pic(image_bmp, zbmp , conf.scale_seite)
 
     def neues_foto_anlegen(self, pos):
         '''Legt neues unfertiges Foto an und legt es in self.fotos ab.'''
@@ -133,15 +133,15 @@ class Seite():
 
         # Verdrehung korrigieren wenn nötig.
         # Funktion verschiebt Bild um offset 0 => korrigieren
-        if abs(grad) > conf.MIN_WINKEL:
+        if abs(grad) > conf.min_winkel:
             neu_image, offset = orig.rotate(rad, foto.ecke1, False)
         else:
             neu_image = orig
             offset = wx.Point(0, 0)
 
         # Korrektur des Offsets und Rand dazu
-        p1 = wx.Point(foto.ecke1.x - offset.x - conf.RAND, foto.ecke1.y - offset.y - conf.RAND)
-        p2 = wx.Point(p1.x + foto.breite + 2*conf.RAND, p1.y + foto.hoehe + 2*conf.RAND)
+        p1 = wx.Point(foto.ecke1.x - offset.x - conf.rand, foto.ecke1.y - offset.y - conf.rand)
+        p2 = wx.Point(p1.x + foto.breite + 2*conf.rand, p1.y + foto.hoehe + 2*conf.rand)
         self.bild_gedreht = neu_image.crop(p1, p2)
 
         self.foto_anzeigen()
@@ -150,8 +150,8 @@ class Seite():
         '''Anzeige eines beschnittenen und gedrehten Fotos'''
         foto = self.akt_foto
         image_bmp = self.bild_gedreht.bitmap
-        zbmp = zeichenfabrik.zeichne_clip_rahmen(image_bmp, foto, conf.RAND, foto.rahmen_plus)
-        self.mainframe.show_pic(image_bmp, zbmp , scale=conf.SCALE_KONTROLLBILD)
+        zbmp = zeichenfabrik.zeichne_clip_rahmen(image_bmp, foto, conf.rand, foto.rahmen_plus)
+        self.mainframe.show_pic(image_bmp, zbmp , scale=conf.scale_kontrollbild)
 
     def foto_beschneiden(self, plusminus):
         '''Korrektur des Beschnitts mit neuer Anzeige.'''
