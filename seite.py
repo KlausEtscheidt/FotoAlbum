@@ -112,8 +112,8 @@ class Seite():
     def seite_anzeigen(self):
         '''Stellt die Bitmap der Seite im mainframe dar'''
         image_bmp = self.seitenbild.bitmap
-        zeichenfabrik.zeichne_rahmen(image_bmp, self)
-        self.mainframe.show_pic(image_bmp, zeichenfabrik.zbmp , conf.SCALE_SEITE)
+        zbmp = zeichenfabrik.zeichne_rahmen(image_bmp, self)
+        self.mainframe.show_pic(image_bmp, zbmp , conf.SCALE_SEITE)
 
     def neues_foto_anlegen(self, pos):
         '''Legt neues unfertiges Foto an und legt es in self.fotos ab.'''
@@ -150,8 +150,8 @@ class Seite():
         '''Anzeige eines beschnittenen und gedrehten Fotos'''
         foto = self.akt_foto
         image_bmp = self.bild_gedreht.bitmap
-        zeichenfabrik.zeichne_clip_rahmen(image_bmp, foto, conf.RAND, foto.rahmen_plus)
-        self.mainframe.show_pic(image_bmp, zeichenfabrik.zbmp , scale=conf.SCALE_KONTROLLBILD)
+        zbmp = zeichenfabrik.zeichne_clip_rahmen(image_bmp, foto, conf.RAND, foto.rahmen_plus)
+        self.mainframe.show_pic(image_bmp, zbmp , scale=conf.SCALE_KONTROLLBILD)
 
     def foto_beschneiden(self, plusminus):
         '''Korrektur des Beschnitts mit neuer Anzeige.'''

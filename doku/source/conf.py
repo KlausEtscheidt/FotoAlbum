@@ -11,7 +11,7 @@ import os
 import sys
 # sys.path.insert(0, os.path.abspath('.'))
 my_dir=os.path.abspath(os.path.join('.','..','..','..','FotoAlbum'))
-#print (my_dir)
+print (my_dir)
 sys.path.append(my_dir)
 
 
