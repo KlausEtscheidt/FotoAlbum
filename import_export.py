@@ -13,6 +13,21 @@ import tomlkit.items
 import wx
 
 def einlesen(seitenliste, pfad):
+    '''Liest bereits definierte Fotos aus Toml-Datei und erzeugt Foto-Instanzen
+
+    Die Funktion endet, wenn im Verzeichnis **pfad** keine Toml-Datei namens "ergebnis.toml" liegt.
+    Wenn es für eine in Toml vorhandene Seite, dort auch Fotodefinitoinen gibt,
+    wird zu dieser Toml-Seite die zugehörige Seite in der **seitenliste** gesucht.
+    Hierzu müssen die Pfade zur Tiff-Datei in Toml und seitenliste gleich sein.
+    Bei Übereinstimmung wird für jedes Toml-Foto ein Foto auf der zugehörigen Seite angelegt.
+    Die Daten für diese Foto-Instanzen werden aus den Toml-Daten übernommen.
+    Die Eigenschaft **saved_in** wird für das Auffinden eines per Drag'n-Drop übergebenen Fotos
+    in der Datenstruktur Seiten->Seite.fotos->Foto gebraucht.
+
+    Args:
+        seitenliste (Seiten): Liste der Seitenobjekte für die Tiffs existieren.
+        pfad (str): Verzeichnis, aus dem die Tiffs eingelesen wurden.
+    '''
     tomlfilename = os.path.join(pfad, "ergebnis.toml")
     if not os.path.isfile(tomlfilename):
         #keine Datei gefunden
@@ -27,6 +42,7 @@ def einlesen(seitenliste, pfad):
             # Es gibt schon Fotosdefinitionen für diese Seite
             # Zum Übertragen Seite in seitenliste suchen
             found = False
+            pyseite = None
             for pyseite in seitenliste:
                 if pyseite.fullpath2pic == seite['pfad'] :
                     found = True
@@ -54,6 +70,12 @@ def einlesen(seitenliste, pfad):
 
 
 def ausgeben(seitenliste, pfad):
+    '''Speichert die Datenstruktur Seiten->Seite.fotos->Foto im Toml-Format.
+
+    Args:
+        seitenliste (Seiten): Liste der Seitenobjekte.
+        pfad (str): Verzeichnis, in dem die Toml-Datei "ergebnis.toml" gespeichert wird.
+    '''
 
     tomlfilename = os.path.join(pfad, "ergebnis.toml")
     tml = tomlkit.toml_document.TOMLDocument()
@@ -74,9 +96,8 @@ def ausgeben(seitenliste, pfad):
         fotos = tomlkit.aot()
         seite.add('foto',fotos)
 
-        for i in range(0, len(pyseite.fotos)):
-
-            pyfoto = pyseite.fotos[i]
+        foto_nr = 0
+        for pyfoto in pyseite.fotos:
 
             #neue toml Tabelle
             foto = tomlkit.table()
@@ -84,7 +105,8 @@ def ausgeben(seitenliste, pfad):
             fotos.append(foto)
 
             # Daten des Fotos
-            foto.add('nr', i)
+            foto_nr += 1
+            foto.add('nr', foto_nr)
             foto.add('pfad', pyfoto.saved_in)
             foto.add('x1', pyfoto.ecke1.x)
             foto.add('y1', pyfoto.ecke1.y)
@@ -96,3 +118,6 @@ def ausgeben(seitenliste, pfad):
 
     # toml_document schreiben
     tomlkit.toml_file.TOMLFile(tomlfilename).write(tml)
+
+if __name__ == '__main__':
+    help(einlesen)

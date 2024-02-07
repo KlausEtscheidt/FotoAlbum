@@ -7,11 +7,11 @@ Hauptprogramm
 '''
 
 import os
+import logging
 
 import wx
 
 from config import conf
-import logging
 import alb_logging
 
 from mainframe import MainFrame
@@ -21,14 +21,20 @@ import import_export as impex
 logger = logging.getLogger('album')
 
 # Ermöglicht Auto-Start bei OnEventLoopEnter, also nach myApp.MainLoop()
-class myApp(wx.App):
-   
+class MyApp(wx.App):
+    '''Hauptprogramm
+
+        Eigene Klasse statt wx.App ermöglicht Initialisierungen nach Aufbau aller GUI-Elemente
+    '''
+
+    # pylint: disable=invalid-name
     def OnInit(self):
-        # self.leaving = False
+        '''Konstruktor'''
+
         #Erzeuge Basis-Frame
         mainframe = MainFrame(None, title='KE`s Alben-Zerleger', size=(800, 800), pos=(20, 20))
         mainframe.SetTransparent(254) #Soll flickern verhindern
-        self.mainframe = mainframe
+        self.mainframe = mainframe # pylint: disable=attribute-defined-outside-init
         conf.mainframe = mainframe
         conf.thisapp = self
         #Noetig ????
@@ -40,14 +46,19 @@ class myApp(wx.App):
         return True
 
     def seiten_laden(self):
+        '''Durchsucht Verzeichnis nach Tiff-Dateien und legt Instanzen der Klasse seite an.
+
+        Das Verzeichnis wird aus conf.pic_path ermittelt. 
+        Wenn dieses nicht existiert, wird es per Dialog erfragt.
+        '''
 
         # Gibt es das zu durchsuchende Verzeichnis "conf.pic_path"
         if not os.path.isdir(conf.pic_path):
             msg = 'Verzeichnis mit Scans wählen'
-            with wx.DirDialog(self.mainframe, message=msg, defaultPath=conf.pic_basispfad) as Dlg:
-                if Dlg.ShowModal() == wx.ID_CANCEL:
+            with wx.DirDialog(self.mainframe, message=msg, defaultPath=conf.pic_basispfad) as dlg:
+                if dlg.ShowModal() == wx.ID_CANCEL:
                     return
-                conf.pic_path = Dlg.GetPath()
+                conf.pic_path = dlg.GetPath()
 
         # Tiff dateien suchen
         self.mainframe.seiten = Seiten(self.mainframe)
@@ -59,17 +70,14 @@ class myApp(wx.App):
         self.mainframe.seiten.seite_bearbeiten(0)
 
     def OnExit(self):
+        '''Bei Programmende Konfiguration und bisher definierte Fotos in Toml-Dateien sichern.'''
         conf.config_write()
         impex.ausgeben(self.mainframe.seiten, conf.pic_path)
         return super().OnExit()
 
-def run_app():
+if __name__ == '__main__':
     alb_logging.init()
-    # app = wx.App()
-    app = myApp()
+    app = MyApp()
 
     #Endlos-Schleife
     app.MainLoop()
-
-if __name__ == '__main__':
-    run_app()

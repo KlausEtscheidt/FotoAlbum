@@ -1,0 +1,1 @@
+%SystemRoot%\syswow64\WindowsPowerShell\v1.0\powershell.exe -NonInteractive -ExecutionPolicy unrestricted -Command ".\lint_all.ps1"

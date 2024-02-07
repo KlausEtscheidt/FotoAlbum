@@ -1,9 +1,13 @@
 # Mein Kommentar
 
+# Um wie viele Pixel soll bei Strg-Cursor das Bild verschoben werden.
+delta_pfeiltasten = 50
+
 # Ab wieviel Grad Schrägstellung wird ein Bild zurückgedreht
 min_winkel = 0.25
 
-# Rand um Kontrollbilder
+# Wie viele Pixel soll der Rand um Kontrollbilder größer sein,
+# als es den gewählten Bild-Ecken entsprechen würde.
 rand = 20
 
 # Eingegebenen Rand um Wert vergrössern
@@ -12,7 +16,7 @@ rahmen_plus = -7
 [pfade]
 # Verzeichnis, das nach Seiten eines Fotoalbums (tiff-Dateien) durchsucht wird
 # Dieser Pfad hat Prio1 und wird verwendet, wenn er existiert
-pic_path = "C:\\Users\\Klaus\\Pictures\\testpics"
+pic_path = "C:\\Users\\Etscheidt\\Pictures\\testpics"
 
 # Platzhalter, wird von config mit dem User-Bildverzeichnis gefüllt
 pic_basispfad = ''
