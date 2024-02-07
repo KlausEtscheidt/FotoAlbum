@@ -33,7 +33,7 @@ class KEImage():
         elif mybitmap:
             self.__image = mybitmap.ConvertToImage()
         if not self.__image.IsOk:
-            raise Exception('image in KEImage fehlerhaft') # pylint: disable=broad-except
+            raise Exception('image in KEImage fehlerhaft') # pylint: disable=broad-exception-raised
 
     def crop(self, pos1, pos2):
         '''crop erzeugt Bildausschnitt

@@ -90,7 +90,7 @@ class WorkerThread(Thread):
                 foto.saved_in = fname
                 img.save(filename=fname)
                 wx.PostEvent(self._notify_window, ResultEvent('Tiff gespeichert'))
-        except Exception as wand_err:
+        except Exception as wand_err: # pylint: disable=broad-exception-caught
             wx.PostEvent(self._notify_window, ResultEvent(str(wand_err), True))
 
     def abort(self):

@@ -15,7 +15,9 @@
                 "showReuseMessage": false,
                 "clear": false
             },
-            "problemMatcher": [],
+            "problemMatcher": []
+        },
+        {
             "label": "lint all",
             "type": "shell",
             "command": "powershell",
@@ -36,7 +38,7 @@
                       "code": 4,
                       "message": 5
                     }
-                  }                
+                  }
         }
     ]
 }

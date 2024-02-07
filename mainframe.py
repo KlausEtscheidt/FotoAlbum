@@ -24,13 +24,13 @@ from filesaver import EVT_RESULT_ID
 
 logger = logging.getLogger('album')
 
-# pylint: disable=R0901
+# pylint: disable=too-many-ancestors
 class MainFrame(wx.Frame):
     '''Mainframe zur Darstellung und Steuerung des Ablaufs'''
 
     def __init__(self, *args, **kw):
 
-        super(MainFrame, self).__init__(*args, **kw)
+        super().__init__(*args, **kw)
 
         self.BackgroundColour = "light blue" # pylint: disable=invalid-name
         self.seiten = None
