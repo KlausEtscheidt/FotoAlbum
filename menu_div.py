@@ -1,27 +1,31 @@
+"""
+menu_div.py
+------------
+Erzeugt Menus u.a. zum Anzeigen der Hilfe
+"""
+
 import wx
 import wx.html
 from config import conf
 
-# Menu-Items zum Menu erzeugen und Handler registrieren
-def init(parent, pMenu):
+
+def init(parent, parent_menu):
+    '''Menu-Items zum Menu erzeugen und Handler registrieren'''
     men_items = (
-        (OnAbout, "Über", "Bla Bla Dummy"),
+        (on_show_help, "Hilfe", "Hilfe anzeigen"),
     )
-    for mItem in men_items:
-        m = pMenu.Append(-1, mItem[1], mItem[2])
-        parent.Bind(wx.EVT_MENU, mItem[0], m)
+    for myitem in men_items:
+        m = parent_menu.Append(-1, myitem[1], myitem[2])
+        parent.Bind(wx.EVT_MENU, myitem[0], m)
 
 ## Help-Menu
-def OnAbout(_event):
+def on_show_help(_event):
+    '''Zeigt Html-Hilfe an'''
 
     helpctlr = wx.html.HtmlHelpController()
-    # fname = r"C:\Users\Klaus\Documents\_m\FotoAlbum\doktest\testing.hhp"
-    # erg = helpctlr.AddBook(fname)
-    # fname = r"C:\Users\Klaus\Documents\_m\FotoAlbum\doktest\another.hhp"
-    # erg = helpctlr.AddBook(fname)
     fname = r"C:\Users\Klaus\Documents\_m\FotoAlbum\doku_help\build\htmlhelp\fotoalbumhilfedoc.hhp"
-    erg = helpctlr.AddBook(fname)
-    # print(erg)
+    if not helpctlr.AddBook(fname):
+        wx.MessageBox('Konnte Hilfedatei nicht einlesen', 'Fehler')
     helpctlr.DisplayContents()
 
     conf.help = helpctlr

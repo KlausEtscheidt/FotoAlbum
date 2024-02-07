@@ -28,6 +28,7 @@ class Seiten(list):
         Args:
             imagepanel (ImagePanel): widget zur Darstellung einer Seite (Bitmap)
         '''
+        super().__init__()
         self.mainframe = parent
         self.imagectrl = parent.imagectrl
 

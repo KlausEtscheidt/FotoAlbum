@@ -60,7 +60,7 @@ def zeichne_clip_rahmen(image_bmp, foto, rand, rahmen_plus):
     Dient zur Korrektur des Beschnitts.
     Definition entsprechend Ecke1, Breite und Höhe des Fotos.
     image_bmp wurde um *rand* größer erzeugt, als es die Ecken des Fotos vorgeben würden.
-    Der Beschnittrahmen der gezeichnet werden soll, 
+    Der Beschnittrahmen der gezeichnet werden soll,
     ist um rahmen_plus grösser als die Ecken des Fotos.
 
     Args:
@@ -89,7 +89,7 @@ def zeichne_clip_rahmen_ins_bild(image_bmp, foto, rand, rahmen_plus):
     Wird beim Speichern des Kontrollbilds verwendet um den Beschnitt anzuzeigen.
     Es wird direkt ins Bild gezeichnet und nicht in eine Overlay-Bitmap (z.B zbmp).
     image_bmp wurde um *rand* größer erzeugt, als es die Ecken des Fotos vorgeben würden.
-    Der Beschnittrahmen der gezeichnet werden soll, 
+    Der Beschnittrahmen der gezeichnet werden soll,
     ist um rahmen_plus grösser als die Ecken des Fotos.
 
     Args:
@@ -124,7 +124,7 @@ def zeichne_clip_rahmen_ins_bild(image_bmp, foto, rand, rahmen_plus):
 
 def __prepare_dc(image_bmp):
     '''Bereitet das Zeichnen vor.
-    
+
     Erzeugt einen Memory-Device-Context und eine Bitmap der Größe von image_bmp.
     Setzt Background, Brush und Pen und löscht dann den DC
 
@@ -151,7 +151,7 @@ def __release_dc(dc, zbmp):
     '''Bendet das Zeichnen
 
     Setzt die Transparenzfabe der Bitmap auf black.
-    Gibt den DC frei. 
+    Gibt den DC frei.
 
     Args:
         dc (wx.MemoryDC): Device Context zum Zeichnen

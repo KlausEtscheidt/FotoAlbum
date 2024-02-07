@@ -30,24 +30,21 @@ class KEImage():
             self.__image = wx.Image(fullpath2pic, wx.BITMAP_TYPE_ANY)
         elif myimage:
             self.__image = myimage
-            # self = aKEImage.Copy()
         elif mybitmap:
             self.__image = mybitmap.ConvertToImage()
-        # else:
-        #     wx.Image.__init__(self)
         if not self.__image.IsOk:
-            raise Exception('image in KEImage fehlerhaft')
+            raise Exception('image in KEImage fehlerhaft') # pylint: disable=broad-except
 
     def crop(self, pos1, pos2):
-        """crop erzeugt Bildausschnitt
+        '''crop erzeugt Bildausschnitt
 
-        :param pos1: linke obere Ecke
-        :type pos1: wx.Point
-        :param pos2: rechte untere Ecke
-        :type pos2: wx.Point
-        :return: gecropptes Image
-        :rtype: wx.Image
-        """
+        Args:
+            pos1 (wx.Point): linke obere Ecke
+            pos2 (wx.Point): rechte untere Ecke
+
+        Returns:
+            wx.Image: gecropptes Image
+        '''
         #logger.debug(f'crop x1 {pos1.x} y1 {pos1.y} x2 { pos2.x} y2 { pos2.y}')
         w = pos2.x - pos1.x
         h = pos2.y - pos1.y
@@ -64,17 +61,17 @@ class KEImage():
         newimg = self.__image.Rotate(winkel, p0, interpol, offset)
         return KEImage(myimage=newimg), offset
 
-    def Rotate90(self):
+    def rotate90(self):
         '''Dreht Bild um 90°'''
         newimg = self.__image.Rotate90()
         return KEImage(myimage=newimg)
 
-    def SaveFile(self, fullpath):
-        '''Speichert Bild'''
+    def save_file(self, fullpath):
+        '''Speichert Bild unter fullpath'''
         self.__image.SaveFile(fullpath)
-    
-    def SaveAsJpg(self, fullpath):
-        '''Speichert Bild las JPG'''
+
+    def save_as_jpg(self, fullpath):
+        '''Speichert Bild als JPG unter fullpath'''
         self.bitmap.SaveFile(fullpath, wx.BITMAP_TYPE_JPEG)
 
     @property
@@ -83,12 +80,12 @@ class KEImage():
         return self.__image.ConvertToBitmap()
 
     @property
-    def Width(self):
+    def width(self):
         '''breite des Bildes'''
         return self.__image.Width
 
     @property
-    def Height(self):
+    def height(self):
         '''Höhe des Bildes'''
         return self.__image.Height
 
@@ -98,9 +95,9 @@ class KEImage():
 class Foto():
     '''Foto alle Daten um ein Teilfoto zu definieren'''
 
-    def __init__(self, parent, nr, p1):
+    def __init__(self, seite, nr, p1):
 
-        self.parent = parent # umgebenden Seite
+        self.seite = seite # umgebenden Seite
         self.nr = nr # laufende Nr auf der Seite
         self.p1 = p1 # äußerer Rahmen links oben
         self.p2 = None # äußerer Rahmen rechts unten
@@ -112,22 +109,21 @@ class Foto():
         self.fertig = False # wird True wenn Foto vollständig definiert
         self.saved_in = '' # Pfad zur Ausgabedatei
 
-        # Bildausschnitt aus Origbild entsprechend des Grob-Rahmens ums Foto
-        # Wird nach Definition des Rahmens erzeugt und behalten
-        # Muss nach Abspeichern der Seite entfernt werden               
-        # self.__image = None
-
     def setze_rahmen_ecke_ru(self, pos):
         '''Speichert die rechte untere Ecke des Grobrahmens'''
         self.p2 = pos
 
     def pos_ist_innen(self, x, y):
         '''Testet ob ein Punkt innerhalb eines Bildes liegt'''
-        return x>=self.p1.x and x<=self.p2.x and y>=self.p1.y and y<=self.p2.y
+        return self.p1.x <= x <= self.p2.x and self.p1.y <= y <= self.p2.y
 
     def get_targetname(self, typ, appendix=''):
-        new_name = self.parent.basename + f'_{self.nr:02d}{appendix}' + typ
-        path = os.path.join(self.parent.path, conf.pic_output)
+        '''Ermittelt den Zielnamen zum Speichern des Fotos
+
+        An den Namen des Quellfotos (Seite) wird die laufende Nr des Fotos
+        und ein evtl Appendix angehängt.'''
+        new_name = self.seite.basename + f'_{self.nr:02d}{appendix}' + typ
+        path = os.path.join(self.seite.path, conf.pic_output)
         fname = os.path.join(path, new_name)
         #Pfad anlegen, wenn nicht vorhanden
         Path(path).mkdir(parents=True, exist_ok=True)
@@ -135,6 +131,7 @@ class Foto():
 
     @property
     def drehung(self):
+        '''Ermittelt die Drehlage eines Fotos aus dem Vektor von Ecke1->Ecke2'''
         dy = self.ecke2.y - self.ecke1.y
         dx = self.ecke2.x - self.ecke1.x
         rad = math.atan2(dy, dx)
@@ -142,34 +139,47 @@ class Foto():
 
     @property
     def breite(self):
+        '''Breite des Image'''
         dy = self.ecke2.y - self.ecke1.y
         dx = self.ecke2.x - self.ecke1.x
         return int(math.sqrt(dx*dx + dy*dy))
 
     @property
     def hoehe(self):
+        '''Höhe des Image'''
         dy = self.ecke2.y - self.ecke3.y
         dx = self.ecke2.x - self.ecke3.x
         return int(math.sqrt(dx*dx + dy*dy))
 
-    @property
-    def x0(self):
-        return self.ecke1.x
+    # @property
+    # def x0(self):
+    #     return self.ecke1.x
+
+    # @property
+    # def y0(self):
+    #     return self.ecke1.y
 
     @property
-    def y0(self):
-        return self.ecke1.y
+    def final_crop_frame(self):
 
-    @property
-    def final_crop(self):
+        '''Finaler Beschnitt zum Speichern des Fotos als Tiff.
+
+        Berücksichtigt die gewünschte Änderung des Beschnitts (**self.rahmen_plus**)
+        die jedoch in den Grenzen der zugrunde liegenden Seite liegen müssen.
+
+        Returns:
+            int: x0, y0, x1, y1 linke obere und rechte untere Ecke des beschnittenen Fotos.
+        '''
+
+        # Den gewünschten Beschnitt auf die zugrunde liegenden Seite begrenzen
         x0 = max(0, self.ecke1.x - self.rahmen_plus)
         y0 = max(0, self.ecke1.y - self.rahmen_plus) # nie <0
-        x1 = min(self.parent.seitenbild.Width, x0 + self.breite + 2*self.rahmen_plus)
-        y1 = min(self.parent.seitenbild.Height, y0 + self.hoehe + 2*self.rahmen_plus)
-        return x0, y0, x1, y1
+        x1 = min(self.seite.seitenbild.width, x0 + self.breite + 2*self.rahmen_plus)
+        y1 = min(self.seite.seitenbild.height, y0 + self.hoehe + 2*self.rahmen_plus)
+        return (x0, y0, x1, y1)
 
     def __str__(self):
         _, grad = self.drehung
-        txt = f'x0 {self.x0} y0 {self.y0} breit {self.breite} hoch {self.hoehe}'
+        txt = f'x0 {self.ecke1.x} y0 {self.ecke1.y} breit {self.breite} hoch {self.hoehe}'
         txt += f' winkel {grad:5.4f}° rahmen plus {self.rahmen_plus}'
         return txt

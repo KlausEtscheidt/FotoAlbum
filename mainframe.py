@@ -24,6 +24,7 @@ from filesaver import EVT_RESULT_ID
 
 logger = logging.getLogger('album')
 
+# pylint: disable=R0901
 class MainFrame(wx.Frame):
     '''Mainframe zur Darstellung und Steuerung des Ablaufs'''
 
@@ -81,15 +82,15 @@ class MainFrame(wx.Frame):
 
         # Events binden
         evh = EvtHandler(self)
-        self.next_btn.Bind(wx.EVT_BUTTON, evh.OnNextBtn)
-        self.prev_btn.Bind(wx.EVT_BUTTON, evh.OnPrevBtn)
-        self.imagectrl.Bind(wx.EVT_PAINT, evh.OnPaint)
-        self.imagectrl.Bind(wx.EVT_LEFT_DOWN, evh.OnPressMouse)
-        self.imagectrl.Bind(wx.EVT_CHAR_HOOK, evh.OnKeyPress)
-        self.imagectrl.Bind(wx.EVT_MOTION, evh.OnMouseMove)
+        self.next_btn.Bind(wx.EVT_BUTTON, evh.on_next_btn)
+        self.prev_btn.Bind(wx.EVT_BUTTON, evh.on_prev_btn)
+        self.imagectrl.Bind(wx.EVT_PAINT, evh.on_paint)
+        self.imagectrl.Bind(wx.EVT_LEFT_DOWN, evh.on_press_mouse)
+        self.imagectrl.Bind(wx.EVT_CHAR_HOOK, evh.on_key_press)
+        self.imagectrl.Bind(wx.EVT_MOTION, evh.on_mouse_move)
 
         # Verbinde Event handler für Rückmeldungen aus worker thread
-        self.Connect(-1, -1, EVT_RESULT_ID, evh.OnThreadResult)
+        self.Connect(-1, -1, EVT_RESULT_ID, evh.on_thread_result)
 
     @property
     def bitmap(self):
@@ -140,11 +141,11 @@ class MainFrame(wx.Frame):
     # ------------------------------------------------------
 
     def show_pic(self, image_bmp, zeichen_bmp=None, scale=1):
-        ''' Zeigt eine image_bmp evtl mit überlagerter zeichen_bmp an. 
+        ''' Zeigt eine image_bmp evtl mit überlagerter zeichen_bmp an.
 
         Die Bitmaps werden in self.imagectrl angezeigt.
         Das eigentliche Zeichnen wird von dessen OnPaint-Event erledigt.
-        Der Event wird durch self.imagectrl.Refresh() ausgelöst. 
+        Der Event wird durch self.imagectrl.Refresh() ausgelöst.
         Lage und Größe des Bild werden durch self.dc_matrix definiert.
         '''
         # Bitmaps merken für nachfolgende Operationen (OnPaint)
@@ -285,8 +286,8 @@ class MainFrame(wx.Frame):
     # ------------------------------------------------------
     def zeichne_alles(self):
         '''Stellt die Bitmap einer Seite oder eines Fotos dar.
-         
-        Die Bitmap *self.bitmap* wird von einer Bitmap *self.zbmp* 
+
+        Die Bitmap *self.bitmap* wird von einer Bitmap *self.zbmp*
         transparent überlagert, in der Linien gezeichnet wurden.'''
         self.overlay.Reset()
         dc = wx.PaintDC(self.imagectrl)

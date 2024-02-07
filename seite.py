@@ -33,7 +33,7 @@ class Seite():
     '''Verwaltet die Daten einer Seite.
 
     Speichert das Image der Gesamtseite und des aktuellen Fotos.
-    Bearbeitet 
+    Bearbeitet
 
     '''
 
@@ -80,7 +80,7 @@ class Seite():
     def seite_drehen(self):
         '''Dreht die Gesamtseite um 90° und zeigt die Seite neu an.'''
         if self.seitenbild:
-            self.seitenbild = KEImage(myimage=self.seitenbild).Rotate90()
+            self.seitenbild = KEImage(myimage=self.seitenbild).rotate90()
             self.seite_anzeigen()
 
     def seite_speichern(self):
@@ -91,7 +91,7 @@ class Seite():
 
     def __seite_speichern(self):
         '''Speichern im thread'''
-        self.seitenbild.SaveFile(self.fullpath2pic)
+        self.seitenbild.save_file(self.fullpath2pic)
 
 
     #############################################################################

@@ -101,7 +101,7 @@ class Config():
     def config2toml(self):
         '''Überträgt Daten aus dem conf-Objekt in die interne Toml-Struktur.
 
-        Die Funktion muss per Menu aufgerufen werden, 
+        Die Funktion muss per Menu aufgerufen werden,
         da nicht generell alle Änderungen permanent sein sollen.'''
         self.tml['scale']['seite'] = self.scale_seite
         self.tml['scale']['kontrollbild'] = self.scale_kontrollbild

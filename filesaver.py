@@ -65,33 +65,36 @@ class WorkerThread(Thread):
 
         # Erst Kontrollbild
         wx.PostEvent(self._notify_window, ResultEvent('Speichere Kontrollbild'))
-        bmp = zeichenfabrik.zeichne_clip_rahmen_ins_bild(foto.parent.bild_gedreht.bitmap,
+        bmp = zeichenfabrik.zeichne_clip_rahmen_ins_bild(foto.seite.bild_gedreht.bitmap,
                                                          foto, conf.rand, foto.rahmen_plus)
         my_ke_image = KEImage(mybitmap=bmp)
         fname = foto.get_targetname('.jpg')
-        my_ke_image.SaveAsJpg(fname)
+        my_ke_image.save_as_jpg(fname)
 
         _, grad = foto.drehung
 
         wx.PostEvent(self._notify_window, ResultEvent('Speichere Tiff'))
         try:
-            fname = foto.parent.fullpath2pic
+            fname = foto.seite.fullpath2pic
             with wandImage(filename=fname) as img:
                 img = wandImage(filename=fname)
                 #Falls im Tiff Leerraum ums Bild ist (Kontrolle z.b in Gimp)
                 img.reset_coords()
                 if abs(grad) > conf.min_winkel:
                     img.distort('scale_rotate_translate', (foto.ecke1.x, foto.ecke1.y, -grad,))
-                x0, y0, x1, y1 = foto.final_crop
-                img.crop(x0, y0, x1, y1)
+                # x0, y0, x1, y1 = foto.final_crop_frame
+                crop_frame = foto.final_crop_frame
+                # img.crop(x0, y0, x1, y1)
+                img.crop(*crop_frame)
                 fname = foto.get_targetname('.tif')
                 foto.saved_in = fname
                 img.save(filename=fname)
                 wx.PostEvent(self._notify_window, ResultEvent('Tiff gespeichert'))
-        except Exception as wand_err: # pylint: disable=broad-exception-caught
+        except Exception as wand_err:
             wx.PostEvent(self._notify_window, ResultEvent(str(wand_err), True))
 
     def abort(self):
-        """abort worker thread."""
+        """abort worker thread.
+        Wird nicht benutzt und erfordert eine Abfrage von self._want_abort in run."""
         # Method for use by main thread to signal an abort
         self._want_abort = 1

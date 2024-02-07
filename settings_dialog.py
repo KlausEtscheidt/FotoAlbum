@@ -8,7 +8,7 @@ import wx
 
 #from config import conf
 
-class SettingsDlg(wx.Dialog):
+class SettingsDlg(wx.Dialog): # pylint: disable=too-many-ancestors
     '''Dialog'''
 
     def __init__(self, parent, titel, conf):
@@ -24,7 +24,7 @@ class SettingsDlg(wx.Dialog):
         '''
         size = (500, 400)
         style = wx.RESIZE_BORDER|wx.MAXIMIZE_BOX|wx.DEFAULT_DIALOG_STYLE
-        super(SettingsDlg, self).__init__(parent=parent, size=size, title=titel, style=style)
+        super().__init__(parent=parent, size=size, title=titel, style=style)
         self.BackgroundColour = (200, 230, 250) # pylint: disable=invalid-name
 
         self.conf = conf

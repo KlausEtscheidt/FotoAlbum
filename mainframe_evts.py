@@ -9,24 +9,33 @@ import wx
 from config import conf
 
 class EvtHandler():
+    '''Klasse fürs Event-Handling des mainframes'''
 
     def __init__(self, parent):
+        '''Konstruktor
+
+        Args:
+            parent (wx.Window): Vaterklasse des Objekts (hier mainframe)
+        '''
         self.p = parent
 
-    def OnNextBtn(self, _):
+    def on_next_btn(self, _):
+        '''Bearbeite nächste Seite'''
         self.p.seiten.seite_bearbeiten_next()
 
-    def OnPrevBtn(self, _):
+    def on_prev_btn(self, _):
+        '''Bearbeite vorhergehende Seite'''
         self.p.seiten.seite_bearbeiten_prev()
 
-    def OnThreadResult(self, event):
+    def on_thread_result(self, event):
+        '''Behandelt die Nachrichten aus dem Thread zum Speichern der Bilder'''
         if event.had_err:
             wx.MessageBox(f'{event.data}','Fehler beim Speichern')
         else:
             # Process results here
             self.p.SetStatusText(f'{event.data}')
-        
-    def OnPaint(self, _event=None):
+
+    def on_paint(self, _event=None):
         '''On-Paint Eventhandler von mainframe.imagectrl.
 
         Wird durch u.A. durch imagectrl.Refresh() ausgelöst
@@ -34,19 +43,19 @@ class EvtHandler():
         '''
         self.p.zeichne_alles()
 
-    def OnPressMouse(self, event):
+    def on_press_mouse(self, event):
         '''EVT_LEFT_DOWN-Handler von mainframe.imagectrl.
 
         Der Mausklick wird an *mausklick_aktionen* weitergeleitet,
-        welches in Abhängigkeit vom Status des Programms reagiert 
+        welches in Abhängigkeit vom Status des Programms reagiert
         und auch durch Tastatur-Events aktiviert wird.'''
         act_pos = event.GetPosition()
         self.mausklick_aktionen(act_pos)
 
-    def OnMouseMove(self, evt):
+    def on_mouse_move(self, evt):
         '''EVT_MOTION-Handler von mainframe.imagectrl.
-        
-        Je nach Status des Programms wird der Cursor zu einem Fadenkreuz 
+
+        Je nach Status des Programms wird der Cursor zu einem Fadenkreuz
         bzw. wird mit der Maus ein Rahmen aufgezogen.'''
         act_pos = evt.GetPosition()
         if self.p.seiten.status == 'Start Seite/Foto':
@@ -57,12 +66,13 @@ class EvtHandler():
         elif self.p.seiten.status in ('Ecke1', 'Ecke2', 'Ecke3'):
             self.maus_zeigt_fadenkreuz(act_pos)
 
-    def OnKeyPress(self, event):
+    def on_key_press(self, event):
+        '''Tastatur-handler'''
         act_pos = event.GetPosition()
         keycode = event.GetKeyCode()
         # print(keycode)
         # conf.mainframe.SetStatusText(str(keycode))
-        
+
         if keycode == 388:  #num+
             if event.GetModifiers() == wx.MOD_CONTROL:
                 if self.p.seiten.status == 'Foto Kontrolle':
@@ -75,7 +85,6 @@ class EvtHandler():
                     self.p.seiten.akt_seite.foto_beschneiden('-')
             else:
                 self.p.rescale(.5)
-
 
         if keycode == 314: #links
             if event.GetModifiers() == wx.MOD_CONTROL:
@@ -123,44 +132,44 @@ class EvtHandler():
 
     def mausklick_aktionen(self, act_pos):
         '''Wird durch Klick mit linker Maustaste oder Leertaste ausgelöst'''
-
+        seiten = self.p.seiten
         pos = self.p.get_pos_in_bitmap(act_pos)
-        if self.p.seiten.status == 'Start Seite/Foto':
+        if seiten.status == 'Start Seite/Foto':
             self.p.mausanker_rechteck = act_pos
-            self.p.seiten.akt_seite.neues_foto_anlegen(pos)
-            self.p.seiten.status = 'Rahmen ru'
+            seiten.akt_seite.neues_foto_anlegen(pos)
+            seiten.status = 'Rahmen ru'
 
-        elif self.p.seiten.status == 'Rahmen ru':
-            self.p.seiten.akt_seite.akt_foto.setze_rahmen_ecke_ru(pos)
-            self.p.seiten.status = 'Ecke1'
-            self.p.label_re.SetLabel(f'   {self.p.seiten.status}')
+        elif seiten.status == 'Rahmen ru':
+            seiten.akt_seite.akt_foto.setze_rahmen_ecke_ru(pos)
+            seiten.status = 'Ecke1'
+            self.p.label_re.SetLabel(f'   {seiten.status}')
             self.p.zeige_ecke(1)
 
-        elif self.p.seiten.status == 'Ecke1':
-            self.p.seiten.akt_seite.akt_foto.ecke1 = pos
-            self.p.seiten.status = 'Ecke2'
-            self.p.label_re.SetLabel(f'   {self.p.seiten.status}')
+        elif seiten.status == 'Ecke1':
+            seiten.akt_seite.akt_foto.ecke1 = pos
+            seiten.status = 'Ecke2'
+            self.p.label_re.SetLabel(f'   {seiten.status}')
             self.p.zeige_ecke(2)
 
-        elif self.p.seiten.status == 'Ecke2':
-            self.p.seiten.akt_seite.akt_foto.ecke2 = pos
-            self.p.seiten.status = 'Ecke3'
-            self.p.label_re.SetLabel(f'   {self.p.seiten.status}')
+        elif seiten.status == 'Ecke2':
+            seiten.akt_seite.akt_foto.ecke2 = pos
+            seiten.status = 'Ecke3'
+            self.p.label_re.SetLabel(f'   {seiten.status}')
             self.p.zeige_ecke(3)
 
-        elif self.p.seiten.status == 'Ecke3':
-            self.p.seiten.akt_seite.akt_foto.ecke3 = pos
-            self.p.seiten.status = 'Foto Kontrolle'
-            msg = f'   {self.p.seiten.status} Rahmen: {self.p.seiten.akt_seite.akt_foto.rahmen_plus}'
+        elif seiten.status == 'Ecke3':
+            seiten.akt_seite.akt_foto.ecke3 = pos
+            seiten.status = 'Foto Kontrolle'
+            msg = f'   {seiten.status} Rahmen: {seiten.akt_seite.akt_foto.rahmen_plus}'
             self.p.label_re.SetLabel(msg)
-            self.p.seiten.akt_seite.foto_drehen()
+            seiten.akt_seite.foto_drehen()
             # Hier nach weiter mit keypress + -
 
-        elif self.p.seiten.status == 'Foto Kontrolle':
-            self.p.seiten.akt_seite.foto_speichern()
-            self.p.seiten.status = 'Foto fertig'
+        elif seiten.status == 'Foto Kontrolle':
+            seiten.akt_seite.foto_speichern()
+            seiten.status = 'Foto fertig'
             self.p.label_re.SetLabel('Foto gespeichert')
-            self.p.seiten.seite_bearbeiten(self.p.seiten.id_aktseite)
+            seiten.seite_bearbeiten(seiten.id_aktseite)
 
         # conf.mainframe.SetStatusText(f'n: {self.__mouseclicks} x:{pos.x} y:{pos.y}')
         #logger.debug(f'Mausklick bei x:{p.x} y:{p.y}\n')
@@ -169,8 +178,9 @@ class EvtHandler():
     #---------------------------------------------------------------------------
     # Cursor zeichnen
     #---------------------------------------------------------------------------
-        
+
     def maus_zeigt_fadenkreuz(self, pos):
+        '''Zeigt an der Mausposition ein CrossHair-Fadenkreuz über den ganzen Bildschirm'''
 
         if not self.p.dc:
             return
@@ -186,6 +196,8 @@ class EvtHandler():
                 # sure the odc is destroyed before the dc is.
 
     def maus_zeigt_rahmen(self, pos):
+        '''Zeigt einen Rahmen von der gespeicherten Start-Position **self.p.mausanker_rechteck**
+        zur aktuellen Maus-Position'''
         if not self.p.dc:
             return
         # dc=self.dc
