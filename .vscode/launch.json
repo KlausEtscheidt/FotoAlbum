@@ -40,7 +40,7 @@
             "name": "Python: FotoView",
             "type": "debugpy",
             "request": "launch",
-            "program": "${fileDirname}/FotoAlbum.pyw",
+            "program": "${workspaceFolder}/fotoalbum.pyw",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {"PYDEVD_WARN_SLOW_RESOLVE_TIMEOUT": "2"}
