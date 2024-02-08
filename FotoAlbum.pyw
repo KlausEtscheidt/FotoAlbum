@@ -52,7 +52,7 @@ class MyApp(wx.App):
         Wenn dieses nicht existiert, wird es per Dialog erfragt.
         '''
 
-        # Gibt es das zu durchsuchende Verzeichnis "conf.pic_path"
+        # Gibt es das zuletzt benutzte Verzeichnis "conf.pic_path" noch
         if not os.path.isdir(conf.pic_path):
             msg = 'Verzeichnis mit Scans wählen'
             with wx.DirDialog(self.mainframe, message=msg, defaultPath=conf.pic_basispfad) as dlg:

@@ -1,4 +1,0 @@
-Hilfe
-======
-
-.. include:: ../../README.md

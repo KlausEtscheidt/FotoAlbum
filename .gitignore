@@ -3,7 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-*.chm/
+doku/*.chm
+doku_help/*.chm
 
 # Sphinx documentation
 build

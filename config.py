@@ -35,7 +35,7 @@ class Config():
         tml = self.tml
 
         # Pfade
-        self.pic_subdir = tml['pfade']['pic_subdir']
+        # self.pic_subdir = tml['pfade']['pic_subdir']
         self.pic_output = tml['pfade']['pic_output']
         self.pic_type = tml['pfade']['pic_type']
 
@@ -67,19 +67,19 @@ class Config():
         # --------- Bestimme pic_path: Das Verzeichnis mit den zu bearbeitenden Bildern (Seiten)
         #
 
-        # User-Bilderverzeichnis als Basis des zu durchsuchenden LW
+        # User-Bilderverzeichnis als Basis zur Auswahl von Bildern
         if rechner == 'PC21-0018':
             self.pic_basispfad = r'C:\Users\Etscheidt\Pictures'
         else:
             self.pic_basispfad = r'C:\Users\Klaus\Pictures'
 
-        # Zunächst prüfen, ob es das zuletzt benutzte Verzeichnis noch gibt
+        # Das zuletzt benutzte Verzeichnis
         self.pic_path = tml['pfade']['pic_path']
 
-        # Wenn nicht, versuchen wir das Unterverzeichnis self.pic_subdir
-        # von self.pic_basispfad (Bilderverzeichnis des Users)
-        if not os.path.isdir(self.pic_path):
-            self.pic_path = os.path.join(self.pic_basispfad, self.pic_subdir)
+        # # Wenn nicht, versuchen wir das Unterverzeichnis self.pic_subdir
+        # # von self.pic_basispfad (Bilderverzeichnis des Users)
+        # if not os.path.isdir(self.pic_path):
+        #     self.pic_path = os.path.join(self.pic_basispfad, self.pic_subdir)
 
         # ----------------- globals
         # Hauptframe, wird vom Hauptprogramm gefüllt
