@@ -82,20 +82,20 @@ class SettingsDlg(wx.Dialog): # pylint: disable=too-many-ancestors
         self.pic_output_ctrl = ctrl
 
         label = wx.StaticText(self.pnl, label='Maßstab zur Anzeige der kompletten Seite: ')
-        ctrl = wx.TextCtrl(self.pnl, value=str(conf.SCALE_SEITE), size=(40, 20))
+        ctrl = wx.TextCtrl(self.pnl, value=str(conf.scale_seite), size=(40, 20))
         self.vbox_inner.Add(label, flag=wx.LEFT|wx.TOP, border=5)
         self.vbox_inner.Add(ctrl, flag=wx.LEFT|wx.TOP|wx.BOTTOM, border=5)
         self.scale_seite_ctrl = ctrl
 
         label = wx.StaticText(self.pnl, label='Maßstab zur finalen Kontrollanzeige: ')
-        ctrl = wx.TextCtrl(self.pnl, value=str(conf.SCALE_KONTROLLBILD), size=(40, 20))
+        ctrl = wx.TextCtrl(self.pnl, value=str(conf.scale_kontrollbild), size=(40, 20))
         self.vbox_inner.Add(label, flag=wx.LEFT|wx.TOP, border=5)
         self.vbox_inner.Add(ctrl, flag=wx.LEFT|wx.TOP|wx.BOTTOM, border=5)
         self.scale_kontrollbild_ctrl = ctrl
 
         label_txt ='minimaler Winkel, ab dem ein Bild zurück gedreht wird: '
-        label = wx.StaticText(self.pnl, label_txt)
-        ctrl = wx.TextCtrl(self.pnl, value=str(conf.MIN_WINKEL), size=(40, 20))
+        label = wx.StaticText(self.pnl, label=label_txt)
+        ctrl = wx.TextCtrl(self.pnl, value=str(conf.min_winkel), size=(40, 20))
         self.vbox_inner.Add(label, flag=wx.LEFT|wx.TOP, border=5)
         self.vbox_inner.Add(ctrl, flag=wx.LEFT|wx.TOP|wx.BOTTOM, border=5)
         self.min_winkel_ctrl = ctrl

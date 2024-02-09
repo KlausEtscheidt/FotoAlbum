@@ -124,12 +124,12 @@ class MainFrame(wx.Frame):
         #------------------------------------------------------------
         # File menu
         menu = wx.Menu()
-        menubar.Append(menu, "&File")
+        menubar.Append(menu, "&Datei")
         menu_file.init(self, menu) # Menu-Items und Handler dazu
 
         # help menu
         menu = wx.Menu()
-        menubar.Append(menu, "&Help")
+        menubar.Append(menu, "&Hilfe")
         menu_div.init(self, menu) # Menu-Items und Handler dazu
 
         # Give the menu bar to the frame
