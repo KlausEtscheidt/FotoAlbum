@@ -7,7 +7,7 @@ Module des Projektes "Foto Album"
    modul fotos <modul_fotos>
 
 
-.. automodule:: fotoalbum
+.. automodule:: FotoAlbum
     :members:
 
 .. automodule:: config

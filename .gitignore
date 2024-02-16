@@ -7,8 +7,14 @@ doku/*.chm
 doku_help/*.chm
 
 # Sphinx documentation
-build
-docs/_build/
+#build
+doku/fotoalbumdoc.chm
+doku/build/doctrees
+doku/build/htmlhelp
+doku_help/fotoalbumhilfedoc.chm
+doku_help/build/doctrees
+doku_help/build/htmlhelp
+
 
 # PyBuilder
 .pybuilder/
@@ -89,5 +95,3 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
-doku/fotoalbumdoc.chm
-doku_help/fotoalbumhilfedoc.chm

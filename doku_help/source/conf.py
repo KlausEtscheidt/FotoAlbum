@@ -19,6 +19,7 @@ sys.path.append(my_dir)
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'FotoAlbumHilfe'
+htmlhelp_basename = project
 copyright = '2024, Klaus Etscheidt'
 author = 'Klaus Etscheidt'
 release = '1.0'

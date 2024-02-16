@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+
+<html lang="de" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>FotoAlbum 1.0 Dokumentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=cb25574f" />
+    <script src="_static/documentation_options.js?v=d7fac754"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/translations.js?v=70a09b52"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="genindex.html" />
+    <link rel="search" title="Suche" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="software-doku-des-projekts-album-zerlegen">
+<h1>Software-Doku des Projekts „Album zerlegen“<a class="headerlink" href="#software-doku-des-projekts-album-zerlegen" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<span id="document-Ueberblick"></span><section id="uberblick-uber-die-software-struktur">
+<h2>Überblick über die Software-Struktur<a class="headerlink" href="#uberblick-uber-die-software-struktur" title="Link to this heading">¶</a></h2>
+<section id="ziel-des-programms">
+<h3>Ziel des Programms<a class="headerlink" href="#ziel-des-programms" title="Link to this heading">¶</a></h3>
+<p>Ziel ist es aus Scans von Seiten eines Foto-Albums
+die einzelnen Fotos zu extrahieren.</p>
+</section>
+<section id="aufbau-der-gui">
+<h3>Aufbau der GUI<a class="headerlink" href="#aufbau-der-gui" title="Link to this heading">¶</a></h3>
+<p>Die GUI besteht im Wesentlichen aus der von wx.Frame abgeleiteten Klasse <a class="reference internal" href="index.html#mainframe.MainFrame" title="mainframe.MainFrame"><code class="xref py py-class docutils literal notranslate"><span class="pre">mainframe.MainFrame</span></code></a>
+und dem darin enthaltenen wx.Window, welches zur Anzeige der Bilder genutzt wird
+und als Eigenschaft <strong>imagectrl</strong> der Klasse gespeichert ist.</p>
+<p>Der Ablauf des Programms wird hauptsächlich durch Maus- und Tastatur-Events,
+die von mainframe bzw imagectrl empfangen werden, gesteuert.</p>
+<p>Die Event-Handler wurden in die Klasse <a class="reference internal" href="index.html#mainframe_evts.EvtHandler" title="mainframe_evts.EvtHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">mainframe_evts.EvtHandler</span></code></a> ausgelagert.</p>
+</section>
+<section id="programmstart">
+<h3>Programmstart<a class="headerlink" href="#programmstart" title="Link to this heading">¶</a></h3>
+<p>Beim Start wird durch die <code class="xref py py-class docutils literal notranslate"><span class="pre">fotoalbum.MyApp.OnInit</span></code>-Methode der abgeleiteten App-Klasse <code class="xref py py-class docutils literal notranslate"><span class="pre">fotoalbum.MyApp</span></code>
+nach dem Anlegen der GUI die Methode <code class="xref py py-meth docutils literal notranslate"><span class="pre">fotoalbum.MyApp.seiten_laden()</span></code> aufgerufen.</p>
+<p>Hier wird das Arbeitsverzeichnis festgelegt, dessen Tiff-Dateien eingelesen
+und die erste Datei (Seite des Albums) zur Bearbeitung angeboten.</p>
+<section id="bestimmen-des-arbeitsverzeichnis">
+<h4>Bestimmen des Arbeitsverzeichnis<a class="headerlink" href="#bestimmen-des-arbeitsverzeichnis" title="Link to this heading">¶</a></h4>
+<p>Beim Programmstart wird zunächst geprüft, ob es das zuletzt benutzte Verzeichnis noch gibt.
+In diesem Fall wird dieses Verzeichnis zunächst als Arbeitsverzeichnis gesetzt.
+Wenn nicht öffnet sich ein Dialog zur Verzeichnisauswahl.</p>
+<p>Das Arbeitsverzeichnis kann per Drag and Drop oder <strong>Menüauswahl ToDO noch programmieren</strong> jederzeit geändert werden.</p>
+<p>Die Definition des Arbeitsverzeichnis startet den Ablauf der Bearbeitung
+mit dem Einlesen der dort vorhandenen Scans neu.</p>
+</section>
+<section id="einlesen-der-scans">
+<h4>Einlesen der Scans<a class="headerlink" href="#einlesen-der-scans" title="Link to this heading">¶</a></h4>
+<p>Die Definition des Arbeitsverzeichnisses startet das Einlesen der Tiff-Dateien in diesem Verzeichnis.
+Dies geschieht durch den Konstruktor der Klasse <a class="reference internal" href="index.html#seiten.Seiten" title="seiten.Seiten"><code class="xref py py-class docutils literal notranslate"><span class="pre">seiten.Seiten</span></code></a>, die von pyhon-list abgeleitet ist.
+Dabei wird für jede Datei eine Instanz von <a class="reference internal" href="index.html#seite.Seite" title="seite.Seite"><code class="xref py py-class docutils literal notranslate"><span class="pre">seite.Seite</span></code></a> erzeugt und in Seiten abgelegt.
+Für die neue Seite wird als Eigenschaft zunächst nur der Name der Tiff-Datei abgelegt.
+Diese Daten werden im weiteren Verlauf durch eine Liste der auf der Seite enthaltenen Fotos <em>Seite.fotos</em> ergänzt.</p>
+<p>Die erste eingelesene Seite wird angezeigt und dem Benutzer zur Bearbeitung angeboten.</p>
+<p>Mit den Buttons <strong>Todo Screenshot</strong> kann jedoch die vorhergehende oder folgende Seite angezeigt werden.
+Eine evtl.bereits begonnene Bearbeitung einer Seite wird dadurch abgebrochen und der Bearbeitungstatus
+<strong>ToDO Verwei auf Status</strong> zurückgesetzt.</p>
+</section>
+</section>
+<section id="bearbeitung-einer-seite">
+<h3>Bearbeitung einer Seite<a class="headerlink" href="#bearbeitung-einer-seite" title="Link to this heading">¶</a></h3>
+<p>Beim jedem Anzeigen der Seite kann diese bei Bedarf (falsch gescannt)
+mehrfach um 90° gedreht und dann in korrekter Drehlage gespeichert werden. <strong>ToDO Tasten hierfür</strong></p>
+<p>Die Bearbeitung einer Seite besteht dann aus der Defintion der Lage, der auf ihr enthaltenen Fotos.
+Der Ablauf ist hierbei für jedes Foto gleich und wird so oft wie nötig wiederholt.</p>
+<p>Die Bearbeitung einer Seite wird nie abgeschlossen.
+Sie kann aber jederzeit durch Wechseln auf eine andere Seite unterbrochen und später weiter geführt werden.
+Eine Fotodefinition, die beim Verlassen der Seite unvollständig ist, wird komplett gelöscht.</p>
+<section id="definition-eines-fotos">
+<h4>Definition eines Fotos<a class="headerlink" href="#definition-eines-fotos" title="Link to this heading">¶</a></h4>
+<p>Im ersten Schritt muss der Anwender einen Rahmen (im Folgenden Grobrahmen genannt) definieren,
+der ein Foto auf der Seite grob umgibt. Er kann dabei größer als das Foto sein,
+seine Ecken können aber auch ein wenig innerhalb des Fotos liegen.</p>
+<p>Durch diesen Grobrahmen ist nun die ungefähre Lage des Fotos auf der Seite bekannt.
+Nun werden nacheinander vergrößerte Ausschnitte der Umgebung der linken oberen (Ecke1),
+rechten oberen (Ecke2) und rechten unteren (Ecke3) des Grobrahmens angezeigt.
+In diesen Vergrößerungen werden die Ecken des Fotos exakt definiert.
+Mit Ecke1 ist der Nullpunkt des Fotos bekannt. Aus dem Vektor von Ecke1 zu Ecke2 werden
+die Drehlage und die Breite exakt bestimmt. Die Länge des Vektors von Ecke2 zu Ecke3 bestimmt die Höhe des Fotos.</p>
+<p>Der Fortschritt bei der Definition eines Fotos wird in der property <code class="xref py py-class docutils literal notranslate"><span class="pre">status</span></code> der Klasse Seiten festgehalten.
+Da zu einer Zeit immer nur ein Foto definiert wird, gilt dieser Status für die gesamte Anwendung
+und nicht nur für ein Foto bzw eine Seite.</p>
+<p>Der Status wird beim Wechsel auf eine neue Seite und nach dem Abschluss einer Foto-Definition auf ‚Start Seite/Foto‘ gesetzt.
+Mit diesem Status beginnt der Ablauf der Definition.</p>
+<p>Wird bei diesem Status von <a class="reference internal" href="index.html#mainframe_evts.EvtHandler" title="mainframe_evts.EvtHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">mainframe_evts.EvtHandler</span></code></a> ein Mausklick oder das Drücken der Leertaste entdeckt,
+wird die aktuelle Mausposition gespeichert.</p>
+<p>Mit diesem Punkt wird außerdem mittels <a class="reference internal" href="index.html#seite.Seite.neues_foto_anlegen" title="seite.Seite.neues_foto_anlegen"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seite.Seite.neues_foto_anlegen()</span></code></a>
+eine neue Instanz der Klasse <a class="reference internal" href="index.html#fotos.Foto" title="fotos.Foto"><code class="xref py py-class docutils literal notranslate"><span class="pre">fotos.Foto</span></code></a> angelegt.
+Der Punkt definiert die linke obere Ecke des Grob-Rahmens.
+Der Status wird auf ‚Rahmen ru‘ gesetzt, weil als nächstes die Angabe der rechten unteren Ecke des Rahmens erwartet wird.</p>
+<p>In diesem Status wird bei Mausbewegungen ein rotes Rechteck von der gespeicherten zur aktuellen Mausposition gezeichnet.
+Beim nächsten Mausklick wird der gewählte Punkt mit <code class="xref py py-meth docutils literal notranslate"><span class="pre">foto.Foto.setze_rahmen_ecke_ru()</span></code>
+als Eigenschaft der Foto-Instanz gespeichert.
+Der Status wird auf ‚Ecke1‘ gesetzt.
+Mittels <a class="reference internal" href="index.html#mainframe.MainFrame.zeige_ecke" title="mainframe.MainFrame.zeige_ecke"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mainframe.MainFrame.zeige_ecke()</span></code></a> wird die Umgebung der linken oberen Ecke des Gron´brahmens angezeigt.</p>
+<p>Beim nächsten Mausklick wird die Mausposition als Eigenschaft <code class="xref py py-attr docutils literal notranslate"><span class="pre">fotos.Foto.ecke1</span></code> der aktuellen Fotoinstanz abgelegt.
+Der Status wird auf ‚Ecke2‘ gesetzt und der Ablauf wiederholt sich für Ecke2 und Ecke3.
+Alle Positionen werden vor dem Abspeichern von Bildschirm- bzw Mauskoordinaten in die Bitmapkoordinaten
+des angezeigten Scans umgerechnet.</p>
+<p>Mit dieser Info werden jetzt nacheinander die Umgebungen
+der linken oberen, der rechten oberen und der rechten unteren Ecke
+dieses Rahmen vergrößert angezeigt.</p>
+<p>Per Mausklick definiert der Benutzer die exakte Lage der jeweiligen Foto-Ecke.</p>
+<p>Hieraus ergibt sich die exakte Lage eines Fotos.</p>
+<p>Das Foto wird noch mal angezeigt und der Anwender kann den Beschnitt noch mal verkleinern
+oder vergrößern.</p>
+<p>Abschließend werden ein Kontrollbild als (jpg) und das beschnittene Foto als Tiff gespeichert.
+Das Kontrollbild zeigt auch etwas von der Umgebung des beschnittenes Fotos
+und den eingezeichneten Beschnitt-Rahmen.</p>
+<p>Die ermittelten Daten können als Toml-Dateien gespeichert uns aus diesem gelesen werden.</p>
+</section>
+</section>
+<section id="software-struktur">
+<h3>Software-Struktur<a class="headerlink" href="#software-struktur" title="Link to this heading">¶</a></h3>
+<p>Das Hauptprogramm liegt in FotoAlbum.pyw</p>
+</section>
+</section>
+<span id="document-modules"></span><section id="module-des-projektes-foto-album">
+<h2>Module des Projektes „Foto Album“<a class="headerlink" href="#module-des-projektes-foto-album" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<span id="document-modul_fotos"></span><p>lalalal</p>
+<section id="fotos-py">
+<span id="module-fotos"></span><h3>fotos.py<a class="headerlink" href="#fotos-py" title="Link to this heading">¶</a></h3>
+<p>KEImage und FOTO-Klasse</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="fotos.Foto">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fotos.</span></span><span class="sig-name descname"><span class="pre">Foto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.Foto" title="Link to this definition">¶</a></dt>
+<dd><p>Foto alle Daten um ein Teilfoto zu definieren</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="fotos.Foto.breite">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">breite</span></span><a class="headerlink" href="#fotos.Foto.breite" title="Link to this definition">¶</a></dt>
+<dd><p>Breite des Image</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fotos.Foto.drehung">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">drehung</span></span><a class="headerlink" href="#fotos.Foto.drehung" title="Link to this definition">¶</a></dt>
+<dd><p>Ermittelt die Drehlage eines Fotos aus dem Vektor von Ecke1-&gt;Ecke2</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fotos.Foto.final_crop_frame">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">final_crop_frame</span></span><a class="headerlink" href="#fotos.Foto.final_crop_frame" title="Link to this definition">¶</a></dt>
+<dd><p>Finaler Beschnitt zum Speichern des Fotos als Tiff.</p>
+<p>Berücksichtigt die gewünschte Änderung des Beschnitts (<strong>self.rahmen_plus</strong>)
+die jedoch in den Grenzen der zugrunde liegenden Seite liegen müssen.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rückgabe<span class="colon">:</span></dt>
+<dd class="field-odd"><p>x0, y0, x1, y1 linke obere und rechte untere Ecke des beschnittenen Fotos.</p>
+</dd>
+<dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.Foto.get_targetname">
+<span class="sig-name descname"><span class="pre">get_targetname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appendix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.Foto.get_targetname" title="Link to this definition">¶</a></dt>
+<dd><p>Ermittelt den Zielnamen zum Speichern des Fotos</p>
+<p>An den Namen des Quellfotos (Seite) wird die laufende Nr des Fotos
+und ein evtl Appendix angehängt.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fotos.Foto.hoehe">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hoehe</span></span><a class="headerlink" href="#fotos.Foto.hoehe" title="Link to this definition">¶</a></dt>
+<dd><p>Höhe des Image</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.Foto.pos_ist_innen">
+<span class="sig-name descname"><span class="pre">pos_ist_innen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.Foto.pos_ist_innen" title="Link to this definition">¶</a></dt>
+<dd><p>Testet ob ein Punkt innerhalb eines Bildes liegt</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.Foto.setze_rahmen_ecke_ru">
+<span class="sig-name descname"><span class="pre">setze_rahmen_ecke_ru</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.Foto.setze_rahmen_ecke_ru" title="Link to this definition">¶</a></dt>
+<dd><p>Speichert die rechte untere Ecke des Grobrahmens</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fotos.KEImage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fotos.</span></span><span class="sig-name descname"><span class="pre">KEImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullpath2pic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myimage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mybitmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.KEImage" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper um wx.Image</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="fotos.KEImage.bitmap">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bitmap</span></span><a class="headerlink" href="#fotos.KEImage.bitmap" title="Link to this definition">¶</a></dt>
+<dd><p>bitmap zum wx.Image</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.KEImage.crop">
+<span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.KEImage.crop" title="Link to this definition">¶</a></dt>
+<dd><p>crop erzeugt Bildausschnitt</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos1</strong> (<em>wx.Point</em>) – linke obere Ecke</p></li>
+<li><p><strong>pos2</strong> (<em>wx.Point</em>) – rechte untere Ecke</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabe<span class="colon">:</span></dt>
+<dd class="field-even"><p>gecropptes Image</p>
+</dd>
+<dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-odd"><p>wx.Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fotos.KEImage.height">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#fotos.KEImage.height" title="Link to this definition">¶</a></dt>
+<dd><p>Höhe des Bildes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.KEImage.load_from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullpath2pic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.KEImage.load_from_file" title="Link to this definition">¶</a></dt>
+<dd><p>Image von Platte laden</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.KEImage.rotate">
+<span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">winkel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.KEImage.rotate" title="Link to this definition">¶</a></dt>
+<dd><p>Bild wird beim Drehen umm offset verschoben =&gt; offset zurück liefern und beachten</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.KEImage.rotate90">
+<span class="sig-name descname"><span class="pre">rotate90</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fotos.KEImage.rotate90" title="Link to this definition">¶</a></dt>
+<dd><p>Dreht Bild um 90°</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.KEImage.save_as_jpg">
+<span class="sig-name descname"><span class="pre">save_as_jpg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.KEImage.save_as_jpg" title="Link to this definition">¶</a></dt>
+<dd><p>Speichert Bild als JPG unter fullpath</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fotos.KEImage.save_file">
+<span class="sig-name descname"><span class="pre">save_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fotos.KEImage.save_file" title="Link to this definition">¶</a></dt>
+<dd><p>Speichert Bild unter fullpath</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fotos.KEImage.width">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#fotos.KEImage.width" title="Link to this definition">¶</a></dt>
+<dd><p>breite des Bildes</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<section id="fotoalbum-py">
+<span id="module-FotoAlbum"></span><h3>FotoAlbum.py<a class="headerlink" href="#fotoalbum-py" title="Link to this heading">¶</a></h3>
+<p>Hauptprogramm</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="FotoAlbum.MyApp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">FotoAlbum.</span></span><span class="sig-name descname"><span class="pre">MyApp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">useBestVisual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clearSigInt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#FotoAlbum.MyApp" title="Link to this definition">¶</a></dt>
+<dd><p>Hauptprogramm</p>
+<p>Eigene Klasse statt wx.App ermöglicht Initialisierungen nach Aufbau aller GUI-Elemente</p>
+<p>Construct a <code class="docutils literal notranslate"><span class="pre">wx.App</span></code> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>redirect</strong> – Should <code class="docutils literal notranslate"><span class="pre">sys.stdout</span></code> and <code class="docutils literal notranslate"><span class="pre">sys.stderr</span></code> be
+redirected?  Defaults to False. If <code class="docutils literal notranslate"><span class="pre">filename</span></code> is None
+then output will be redirected to a window that pops up
+as needed.  (You can control what kind of window is created
+for the output by resetting the class variable
+<code class="docutils literal notranslate"><span class="pre">outputWindowClass</span></code> to a class of your choosing.)</p></li>
+<li><p><strong>filename</strong> – The name of a file to redirect output to, if
+redirect is True.</p></li>
+<li><p><strong>useBestVisual</strong> – Should the app try to use the best
+available visual provided by the system (only relevant on
+systems that have more than one visual.)  This parameter
+must be used instead of calling <cite>SetUseBestVisual</cite> later
+on because it must be set before the underlying GUI
+toolkit is initialized.</p></li>
+<li><p><strong>clearSigInt</strong> – Should SIGINT be cleared?  This allows the
+app to terminate upon a Ctrl-C in the console like other
+GUI apps will.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Note<span class="colon">:</span></dt>
+<dd class="field-even"><p>You should override OnInit to do application
+initialization to ensure that the system, toolkit and
+wxWidgets are fully initialized.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="FotoAlbum.MyApp.OnExit">
+<span class="sig-name descname"><span class="pre">OnExit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FotoAlbum.MyApp.OnExit" title="Link to this definition">¶</a></dt>
+<dd><p>Bei Programmende Konfiguration und bisher definierte Fotos in Toml-Dateien sichern.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="FotoAlbum.MyApp.OnInit">
+<span class="sig-name descname"><span class="pre">OnInit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FotoAlbum.MyApp.OnInit" title="Link to this definition">¶</a></dt>
+<dd><p>Konstruktor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="FotoAlbum.MyApp.seiten_laden">
+<span class="sig-name descname"><span class="pre">seiten_laden</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FotoAlbum.MyApp.seiten_laden" title="Link to this definition">¶</a></dt>
+<dd><p>Durchsucht Verzeichnis nach Tiff-Dateien und legt Instanzen der Klasse seite an.</p>
+<p>Das Verzeichnis wird aus conf.pic_path ermittelt.
+Wenn dieses nicht existiert, wird es per Dialog erfragt.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="config-py">
+<span id="module-config"></span><h3>config.py<a class="headerlink" href="#config-py" title="Link to this heading">¶</a></h3>
+<p>Konfigurationsparameter und globale Variable speichern</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="config.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#config.Config" title="Link to this definition">¶</a></dt>
+<dd><p>Klasse zum Bereitstellen globaler Daten</p>
+<p>Konstruktor</p>
+<p>Konfigurationsdaten werden z.T. aus einem toml-file eingelesen.
+Weitere Daten werden hier bestimmt, oder von externen Modulen gesetzt.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="config.Config.config2toml">
+<span class="sig-name descname"><span class="pre">config2toml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#config.Config.config2toml" title="Link to this definition">¶</a></dt>
+<dd><p>Überträgt Daten aus dem conf-Objekt in die interne Toml-Struktur.</p>
+<p>Die Funktion muss per Menu aufgerufen werden,
+da nicht generell alle Änderungen permanent sein sollen.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="config.Config.config_write">
+<span class="sig-name descname"><span class="pre">config_write</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#config.Config.config_write" title="Link to this definition">¶</a></dt>
+<dd><p>Speichert Konfigurationsdaten im toml-Format in Datei ab.</p>
+<p>Die Funktion wird automatisch beim Beenden des Programms ausgeführt.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="config.Config.settings">
+<span class="sig-name descname"><span class="pre">settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#config.Config.settings" title="Link to this definition">¶</a></dt>
+<dd><p>Abfrage von Einstellungen beim Benutzer über Dialog</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="alb-logging-py">
+<span id="module-alb_logging"></span><h3>alb_logging.py<a class="headerlink" href="#alb-logging-py" title="Link to this heading">¶</a></h3>
+<p>Logging in ein wx.Panel</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="alb_logging.init">
+<span class="sig-prename descclassname"><span class="pre">alb_logging.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#alb_logging.init" title="Link to this definition">¶</a></dt>
+<dd><p>Setzt logging-level und Ausgabe ins Terminal</p>
+</dd></dl>
+
+<section id="filedrop-py">
+<span id="module-filedrop"></span><h3>filedrop.py<a class="headerlink" href="#filedrop-py" title="Link to this heading">¶</a></h3>
+<p>Ermöglicht drop von Verzeichnissen oder Dateien</p>
+<p>Bei Verzeichnissen werden die vorhandenen Tiffs  eingelesen und angezeigt.
+Bei Dateien wird die Ursprungsseite gesucht und das Foto wird zum resize angeboten.</p>
+</section>
+<section id="filesaver-py">
+<span id="module-filesaver"></span><h3>filesaver.py<a class="headerlink" href="#filesaver-py" title="Link to this heading">¶</a></h3>
+<p>Abspeichern von Bild-Dateien im thread.</p>
+<p>Im Workerthread werden das Kontrollbild (jpg) und das Tiff abgespeichert.
+Der Thread sendet per Event (ResultEvent) seinen Status und evtl. Fehler ans Hauptprogramm.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="filesaver.ResultEvent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">filesaver.</span></span><span class="sig-name descname"><span class="pre">ResultEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">had_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#filesaver.ResultEvent" title="Link to this definition">¶</a></dt>
+<dd><p>Eventklasse</p>
+<p>Event um den Status des Threads an das Hauptprogramm zu melden.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>str</em>) – Meldung, die zurück gesendet werden soll</p></li>
+<li><p><strong>had_err</strong> (<em>bool</em><em>, </em><em>optional</em>) – True wenn ein Fehler auftrat. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="filesaver.WorkerThread">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">filesaver.</span></span><span class="sig-name descname"><span class="pre">WorkerThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">notify_window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">foto</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#filesaver.WorkerThread" title="Link to this definition">¶</a></dt>
+<dd><p>Thread-Klasse zum Abspeichern von Images</p>
+<p>Tread-Klasse zum Abspeichern</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>notify_window</strong> (<em>wx.window</em>) – Window, das die Events erhält.</p></li>
+<li><p><strong>foto</strong> (<a class="reference internal" href="index.html#fotos.Foto" title="fotos.Foto"><em>Foto</em></a>) – Foto-Objekt, das gespeichert werden soll.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="filesaver.WorkerThread.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#filesaver.WorkerThread.run" title="Link to this definition">¶</a></dt>
+<dd><p>Führt das Abspeichern aus.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="import-export-py">
+<span id="module-import_export"></span><h3>import_export.py<a class="headerlink" href="#import-export-py" title="Link to this heading">¶</a></h3>
+<p>Definierte Fotos im Toml-Format speichern oder einlesen.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="import_export.ausgeben">
+<span class="sig-prename descclassname"><span class="pre">import_export.</span></span><span class="sig-name descname"><span class="pre">ausgeben</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seitenliste</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#import_export.ausgeben" title="Link to this definition">¶</a></dt>
+<dd><p>Speichert die Datenstruktur Seiten-&gt;Seite.fotos-&gt;Foto im Toml-Format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seitenliste</strong> (<a class="reference internal" href="index.html#seiten.Seiten" title="seiten.Seiten"><em>Seiten</em></a>) – Liste der Seitenobjekte.</p></li>
+<li><p><strong>pfad</strong> (<em>str</em>) – Verzeichnis, in dem die Toml-Datei „ergebnis.toml“ gespeichert wird.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="import_export.einlesen">
+<span class="sig-prename descclassname"><span class="pre">import_export.</span></span><span class="sig-name descname"><span class="pre">einlesen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seitenliste</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#import_export.einlesen" title="Link to this definition">¶</a></dt>
+<dd><p>Liest bereits definierte Fotos aus Toml-Datei und erzeugt Foto-Instanzen</p>
+<p>Die Funktion endet, wenn im Verzeichnis <strong>pfad</strong> keine Toml-Datei namens „ergebnis.toml“ liegt.
+Wenn es für eine in Toml vorhandene Seite, dort auch Fotodefinitoinen gibt,
+wird zu dieser Toml-Seite die zugehörige Seite in der <strong>seitenliste</strong> gesucht.
+Hierzu müssen die Pfade zur Tiff-Datei in Toml und seitenliste gleich sein.
+Bei Übereinstimmung wird für jedes Toml-Foto ein Foto auf der zugehörigen Seite angelegt.
+Die Daten für diese Foto-Instanzen werden aus den Toml-Daten übernommen.
+Die Eigenschaft <strong>saved_in</strong> wird für das Auffinden eines per Drag’n-Drop übergebenen Fotos
+in der Datenstruktur Seiten-&gt;Seite.fotos-&gt;Foto gebraucht.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seitenliste</strong> (<a class="reference internal" href="index.html#seiten.Seiten" title="seiten.Seiten"><em>Seiten</em></a>) – Liste der Seitenobjekte für die Tiffs existieren.</p></li>
+<li><p><strong>pfad</strong> (<em>str</em>) – Verzeichnis, aus dem die Tiffs eingelesen wurden.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="menu-div-py">
+<span id="module-menu_div"></span><h3>menu_div.py<a class="headerlink" href="#menu-div-py" title="Link to this heading">¶</a></h3>
+<p>Erzeugt Menus u.a. zum Anzeigen der Hilfe</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="menu_div.init">
+<span class="sig-prename descclassname"><span class="pre">menu_div.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_menu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#menu_div.init" title="Link to this definition">¶</a></dt>
+<dd><p>Menu-Items zum Menu erzeugen und Handler registrieren</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="menu_div.on_show_help">
+<span class="sig-prename descclassname"><span class="pre">menu_div.</span></span><span class="sig-name descname"><span class="pre">on_show_help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#menu_div.on_show_help" title="Link to this definition">¶</a></dt>
+<dd><p>Zeigt Html-Hilfe an</p>
+</dd></dl>
+
+<section id="menu-file">
+<span id="module-menu_file"></span><h3>menu_file<a class="headerlink" href="#menu-file" title="Link to this heading">¶</a></h3>
+<p>Definiert Untermenues des File-Menu</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="menu_file.init">
+<span class="sig-prename descclassname"><span class="pre">menu_file.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_menu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#menu_file.init" title="Link to this definition">¶</a></dt>
+<dd><p>Menu-Items zum Menu erzeugen und Handler registrieren</p>
+</dd></dl>
+
+<section id="mainframe-py">
+<span id="module-mainframe"></span><h3>mainframe.py<a class="headerlink" href="#mainframe-py" title="Link to this heading">¶</a></h3>
+<p>Hauptpanel</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="mainframe.MainFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mainframe.</span></span><span class="sig-name descname"><span class="pre">MainFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame" title="Link to this definition">¶</a></dt>
+<dd><p>Mainframe zur Darstellung und Steuerung des Ablaufs</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mainframe.MainFrame.bitmap">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bitmap</span></span><a class="headerlink" href="#mainframe.MainFrame.bitmap" title="Link to this definition">¶</a></dt>
+<dd><p>Bitmap zum Anzeigen der Seite oder eines Fotos.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe.MainFrame.get_pos_in_bitmap">
+<span class="sig-name descname"><span class="pre">get_pos_in_bitmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame.get_pos_in_bitmap" title="Link to this definition">¶</a></dt>
+<dd><p>Ermittelt Bitmap-Koordinaten aus Bildschirm-Koordinaten.</p>
+<p>Hiermit kann z.B. berechnet werden, welches Pixel einer Bitmap per Maus geklickt wurde.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe.MainFrame.make_menubar">
+<span class="sig-name descname"><span class="pre">make_menubar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame.make_menubar" title="Link to this definition">¶</a></dt>
+<dd><p>Definiert Menubar für mainframe</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mainframe.MainFrame.mausanker_rechteck">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mausanker_rechteck</span></span><a class="headerlink" href="#mainframe.MainFrame.mausanker_rechteck" title="Link to this definition">¶</a></dt>
+<dd><p>Nullpunkt zum Aufziehen eines Rechtecks per Maus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe.MainFrame.rescale">
+<span class="sig-name descname"><span class="pre">rescale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">faktor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame.rescale" title="Link to this definition">¶</a></dt>
+<dd><p>Dient zum Zoomen und den Faktor ‚<em>faktor</em>‘</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>faktor</strong> (<em>float</em>) – Zoom-Faktor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe.MainFrame.show_pic">
+<span class="sig-name descname"><span class="pre">show_pic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_bmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zeichen_bmp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame.show_pic" title="Link to this definition">¶</a></dt>
+<dd><p>Zeigt eine image_bmp evtl mit überlagerter zeichen_bmp an.</p>
+<p>Die Bitmaps werden in self.imagectrl angezeigt.
+Das eigentliche Zeichnen wird von dessen OnPaint-Event erledigt.
+Der Event wird durch self.imagectrl.Refresh() ausgelöst.
+Lage und Größe des Bild werden durch self.dc_matrix definiert.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe.MainFrame.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">richtung</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame.translate" title="Link to this definition">¶</a></dt>
+<dd><p>Dient zum Verschieben der Grafik.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>richtung</strong> (<em>str</em>) – Richtung der Verschiebung („l“,“r“,“h“,“t“)</p></li>
+<li><p><strong>delta</strong> (<em>int</em>) – Betrag der Verschiebung in Pixel (Bildschirm-Koordinaten)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mainframe.MainFrame.zbmp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zbmp</span></span><a class="headerlink" href="#mainframe.MainFrame.zbmp" title="Link to this definition">¶</a></dt>
+<dd><p>Bitmap zum Zeichnen. Wird über <strong>self.bitmap</strong> gelegt.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe.MainFrame.zeichne_alles">
+<span class="sig-name descname"><span class="pre">zeichne_alles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame.zeichne_alles" title="Link to this definition">¶</a></dt>
+<dd><p>Stellt die Bitmap einer Seite oder eines Fotos dar.</p>
+<p>Die Bitmap <em>self.bitmap</em> wird von einer Bitmap <em>self.zbmp</em>
+transparent überlagert, in der Linien gezeichnet wurden.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe.MainFrame.zeige_ecke">
+<span class="sig-name descname"><span class="pre">zeige_ecke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe.MainFrame.zeige_ecke" title="Link to this definition">¶</a></dt>
+<dd><p>Zeigt eine Ecke gezoomed an.</p>
+<p>Die Anzeige ermöglicht die exakte Auswahl der Ecke eines Fotos.
+Die Koordinaten werden aus dem vorher definierten Grobrahmen ermittelt.
+Der angezeigte Ausschnitt zeigt die linke obere Ecke des Grobrahmens
+in X- und Y-Richtung bei jeweils 25% der Zeichenfläche.
+Ecke 2 (rechts oben) liegt bei 75% X und 25% Y.
+Ecke 3 (rechts unten) liegt bei 75% X und 75% Y.
+Dadurch wird jeweils möglichst viel des Fotos gezeigt.
+Bei Ecke 2 wird eine horizontale Linie in rot angezeigt, welche y von Ecke 1 übernimmt.
+Analog wird für Ecke 3 eine Vertikale mit x von Ecke 2 angezeigt.
+Diese Linien verdeutlichen eine evtl Schrägstellung des Fotos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nr</strong> (<em>int</em>) – Nr der Ecke, deren Umfeld gezeigt werden soll.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="mainframe-evts-py">
+<span id="module-mainframe_evts"></span><h3>mainframe_evts.py<a class="headerlink" href="#mainframe-evts-py" title="Link to this heading">¶</a></h3>
+<p>Definiert das Event handling für den mainframe.
+Zur besseren Übersichtlichkeit hierhin ausgelagert.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mainframe_evts.</span></span><span class="sig-name descname"><span class="pre">EvtHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler" title="Link to this definition">¶</a></dt>
+<dd><p>Klasse fürs Event-Handling des mainframes</p>
+<p>Konstruktor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parent</strong> (<em>wx.Window</em>) – Vaterklasse des Objekts (hier mainframe)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.maus_zeigt_fadenkreuz">
+<span class="sig-name descname"><span class="pre">maus_zeigt_fadenkreuz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.maus_zeigt_fadenkreuz" title="Link to this definition">¶</a></dt>
+<dd><p>Zeigt an der Mausposition ein CrossHair-Fadenkreuz über den ganzen Bildschirm</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.maus_zeigt_rahmen">
+<span class="sig-name descname"><span class="pre">maus_zeigt_rahmen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.maus_zeigt_rahmen" title="Link to this definition">¶</a></dt>
+<dd><p>Zeigt einen Rahmen von der gespeicherten Start-Position <strong>self.p.mausanker_rechteck</strong>
+zur aktuellen Maus-Position</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.mausklick_aktionen">
+<span class="sig-name descname"><span class="pre">mausklick_aktionen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">act_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.mausklick_aktionen" title="Link to this definition">¶</a></dt>
+<dd><p>Wird durch Klick mit linker Maustaste oder Leertaste ausgelöst</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.on_key_press">
+<span class="sig-name descname"><span class="pre">on_key_press</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.on_key_press" title="Link to this definition">¶</a></dt>
+<dd><p>Tastatur-handler</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.on_mouse_move">
+<span class="sig-name descname"><span class="pre">on_mouse_move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.on_mouse_move" title="Link to this definition">¶</a></dt>
+<dd><p>EVT_MOTION-Handler von mainframe.imagectrl.</p>
+<p>Je nach Status des Programms wird der Cursor zu einem Fadenkreuz
+bzw. wird mit der Maus ein Rahmen aufgezogen.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.on_next_btn">
+<span class="sig-name descname"><span class="pre">on_next_btn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.on_next_btn" title="Link to this definition">¶</a></dt>
+<dd><p>Bearbeite nächste Seite</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.on_paint">
+<span class="sig-name descname"><span class="pre">on_paint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.on_paint" title="Link to this definition">¶</a></dt>
+<dd><p>On-Paint Eventhandler von mainframe.imagectrl.</p>
+<p>Wird durch u.A. durch imagectrl.Refresh() ausgelöst
+und dient zur Darstellung von Bitmaps der gescannten Seiten oder Fotos.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.on_press_mouse">
+<span class="sig-name descname"><span class="pre">on_press_mouse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.on_press_mouse" title="Link to this definition">¶</a></dt>
+<dd><p>EVT_LEFT_DOWN-Handler von mainframe.imagectrl.</p>
+<p>Der Mausklick wird an <em>mausklick_aktionen</em> weitergeleitet,
+welches in Abhängigkeit vom Status des Programms reagiert
+und auch durch Tastatur-Events aktiviert wird.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.on_prev_btn">
+<span class="sig-name descname"><span class="pre">on_prev_btn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.on_prev_btn" title="Link to this definition">¶</a></dt>
+<dd><p>Bearbeite vorhergehende Seite</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mainframe_evts.EvtHandler.on_thread_result">
+<span class="sig-name descname"><span class="pre">on_thread_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mainframe_evts.EvtHandler.on_thread_result" title="Link to this definition">¶</a></dt>
+<dd><p>Behandelt die Nachrichten aus dem Thread zum Speichern der Bilder</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="seite-py">
+<span id="module-seite"></span><h3>seite.py<a class="headerlink" href="#seite-py" title="Link to this heading">¶</a></h3>
+<p>Hält die bitmap einer Seite des Fotoalbums.</p>
+<p>Dient zur Steuerung des Ablaufs (Div. Funktionen werden von den Evt-Handlern gerufen)</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="seite.Seite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seite.</span></span><span class="sig-name descname"><span class="pre">Seite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fullpath2pic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite" title="Link to this definition">¶</a></dt>
+<dd><p>Verwaltet die Daten einer Seite.</p>
+<p>Speichert das Image der Gesamtseite und des aktuellen Fotos.
+Bearbeitet</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.foto_anzeigen">
+<span class="sig-name descname"><span class="pre">foto_anzeigen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.foto_anzeigen" title="Link to this definition">¶</a></dt>
+<dd><p>Anzeige eines beschnittenen und gedrehten Fotos</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.foto_beschneiden">
+<span class="sig-name descname"><span class="pre">foto_beschneiden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plusminus</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.foto_beschneiden" title="Link to this definition">¶</a></dt>
+<dd><p>Korrektur des Beschnitts mit neuer Anzeige.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.foto_drehen">
+<span class="sig-name descname"><span class="pre">foto_drehen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.foto_drehen" title="Link to this definition">¶</a></dt>
+<dd><p>foto drehen, wenn nötig und neue Bitmap self.bild_gedreht erzeugen</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.foto_speichern">
+<span class="sig-name descname"><span class="pre">foto_speichern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.foto_speichern" title="Link to this definition">¶</a></dt>
+<dd><p>Abspeichern des Ergebnisses im Thread</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.neues_foto_anlegen">
+<span class="sig-name descname"><span class="pre">neues_foto_anlegen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.neues_foto_anlegen" title="Link to this definition">¶</a></dt>
+<dd><p>Legt neues unfertiges Foto an und legt es in self.fotos ab.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.seite_anzeigen">
+<span class="sig-name descname"><span class="pre">seite_anzeigen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.seite_anzeigen" title="Link to this definition">¶</a></dt>
+<dd><p>Stellt die Bitmap der Seite im mainframe dar</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.seite_drehen">
+<span class="sig-name descname"><span class="pre">seite_drehen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.seite_drehen" title="Link to this definition">¶</a></dt>
+<dd><p>Dreht die Gesamtseite um 90° und zeigt die Seite neu an.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.seite_laden">
+<span class="sig-name descname"><span class="pre">seite_laden</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.seite_laden" title="Link to this definition">¶</a></dt>
+<dd><p>Lädt Tif einer Seite und zeigt sie an</p>
+<p>KEImage des Seiten-Tiffs erzeugen und als Klassenvariable merken</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seite.Seite.seite_speichern">
+<span class="sig-name descname"><span class="pre">seite_speichern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seite.Seite.seite_speichern" title="Link to this definition">¶</a></dt>
+<dd><p>Speichert die Seite auf Platte.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seite.Seite.targetname">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">targetname</span></span><a class="headerlink" href="#seite.Seite.targetname" title="Link to this definition">¶</a></dt>
+<dd><p>Zielpfad zum Speichern eines Bildes</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="seiten-py">
+<span id="module-seiten"></span><h3>seiten.py<a class="headerlink" href="#seiten-py" title="Link to this heading">¶</a></h3>
+<p>Speichert alle Seiten.
+Dient zur Steuerung des Ablaufs (Div. Funktionen werden von den Evt-Handlern gerufen)</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="seiten.Seiten">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seiten.</span></span><span class="sig-name descname"><span class="pre">Seiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten" title="Link to this definition">¶</a></dt>
+<dd><p>Liste aller Seiten eines Fotoalbums (Tiff-Dateien)</p>
+<p>Nimmt alle Seiten auf und wird von Events gesteuert</p>
+<p>Durchsucht Verzeichnis nach tif-Dateien und erzeugt eine Seite je Tiff</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>imagepanel</strong> (<em>ImagePanel</em>) – widget zur Darstellung einer Seite (Bitmap)</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="seiten.Seiten.akt_seite">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">akt_seite</span></span><a class="headerlink" href="#seiten.Seiten.akt_seite" title="Link to this definition">¶</a></dt>
+<dd><p>Instanz der aktuell bearbeiteten Seite</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.alle_speichern">
+<span class="sig-name descname"><span class="pre">alle_speichern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.alle_speichern" title="Link to this definition">¶</a></dt>
+<dd><p>Alle definierten Fotos exportieren</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.foto_entfernen">
+<span class="sig-name descname"><span class="pre">foto_entfernen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mauspos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.foto_entfernen" title="Link to this definition">¶</a></dt>
+<dd><p>Entfernt die Definition eines Fotos</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.foto_neu_beschneiden">
+<span class="sig-name descname"><span class="pre">foto_neu_beschneiden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pfad_zum_foto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mauspos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.foto_neu_beschneiden" title="Link to this definition">¶</a></dt>
+<dd><p>Benutzer kann Beschnittrahmen ändern</p>
+<p>Aufruf durch droppen des zu korrigierenden Tif-Files oder Strg-s über Foto
+:param pfad_zum_foto: filename des berits gespeicherten Fotos, defaults to None
+:type pfad_zum_foto: string, optional
+:param mauspos: Mauspos in Bitmap-Koord beim Drücken von Strg-s, defaults to None
+:type mauspos: wx.Point, optional</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seiten.Seiten.id_aktseite">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id_aktseite</span></span><a class="headerlink" href="#seiten.Seiten.id_aktseite" title="Link to this definition">¶</a></dt>
+<dd><p>id der aktuell bearbeiteten Seite (in der Liste aller Seiten)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.reset" title="Link to this definition">¶</a></dt>
+<dd><p>reset Bearbeitung abbrechen</p>
+<p>Status auf Start Seite/Foto setzen
+Fragmente der Eingabe loeschen</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.seite_bearbeiten">
+<span class="sig-name descname"><span class="pre">seite_bearbeiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seiten_nr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.seite_bearbeiten" title="Link to this definition">¶</a></dt>
+<dd><p>Seite eines Fotoalbums bearbeiten.</p>
+<p>Fragt vom Benutzer die Daten (Ecken) aller Fotos auf der Seite ab
+und speichert die Fotos als tiff-Datei.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seiten_nr</strong> (<em>int</em>) – index der zu bearbeitenden Seite in self.__seiten</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.seite_bearbeiten_next">
+<span class="sig-name descname"><span class="pre">seite_bearbeiten_next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.seite_bearbeiten_next" title="Link to this definition">¶</a></dt>
+<dd><p>Nächste Seite anwählen und bearbeiten</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.seite_bearbeiten_prev">
+<span class="sig-name descname"><span class="pre">seite_bearbeiten_prev</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.seite_bearbeiten_prev" title="Link to this definition">¶</a></dt>
+<dd><p>Vorhergehende Seite anwählen und bearbeiten</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seiten.Seiten.seitenliste_erstellen">
+<span class="sig-name descname"><span class="pre">seitenliste_erstellen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seiten.Seiten.seitenliste_erstellen" title="Link to this definition">¶</a></dt>
+<dd><p>Filenamen der Seiten-Tiffs einlesen</p>
+<p>Seiten erzeugen (ohne image) und in Liste merken</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seiten.Seiten.status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#seiten.Seiten.status" title="Link to this definition">¶</a></dt>
+<dd><p>Aktueller Stand der Bearbeitung</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="settings-dialog-py">
+<span id="module-settings_dialog"></span><h3>settings_dialog.py<a class="headerlink" href="#settings-dialog-py" title="Link to this heading">¶</a></h3>
+<p>Dialog zum Abfragen der Einstellungen des Programms</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="settings_dialog.SettingsDlg">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">settings_dialog.</span></span><span class="sig-name descname"><span class="pre">SettingsDlg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">titel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#settings_dialog.SettingsDlg" title="Link to this definition">¶</a></dt>
+<dd><p>Erfragt Einstellungen vom Benutzer</p>
+<p>Speichert die abgefragten Werte im conf-Objekt</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent</strong> (<em>window</em>) – Vater-Fenster</p></li>
+<li><p><strong>titel</strong> (<em>str</em>) – Titel</p></li>
+<li><p><strong>conf</strong> (<a class="reference internal" href="index.html#config.Config" title="config.Config"><em>Config</em></a>) – Konfigurations-Objekt, welches die Werte aufnimmt</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="settings_dialog.SettingsDlg.OnCancel">
+<span class="sig-name descname"><span class="pre">OnCancel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_e</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#settings_dialog.SettingsDlg.OnCancel" title="Link to this definition">¶</a></dt>
+<dd><p>Wird bei Abbruch aufgerufen. Schließt Dialog und liefert wx.ID_CANCEL</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="settings_dialog.SettingsDlg.Validate">
+<span class="sig-name descname"><span class="pre">Validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#settings_dialog.SettingsDlg.Validate" title="Link to this definition">¶</a></dt>
+<dd><p>Prüft die Eingaben.</p>
+<p>Wird vom Ok-Button des Standarddialogs aufgerufen.
+Dialog schließ erst, wenn alle Werte i.O. (return True)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="settings_dialog.SettingsDlg.inner">
+<span class="sig-name descname"><span class="pre">inner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#settings_dialog.SettingsDlg.inner" title="Link to this definition">¶</a></dt>
+<dd><p>Definiert die widgets im Inneren (self.pnl) des Dialogs</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="zeichenfabrik-py">
+<span id="module-zeichenfabrik"></span><h3>zeichenfabrik.py<a class="headerlink" href="#zeichenfabrik-py" title="Link to this heading">¶</a></h3>
+<p>Funktionen zum Zeichnen in Bitmaps.</p>
+<p>Die Funktionen liefern meist eine eigene Bitmap (zbmp) zurück,
+die als Overlay über die angezeigten Bitmaps gelegt wird.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="zeichenfabrik.zeichne_clip_rahmen">
+<span class="sig-prename descclassname"><span class="pre">zeichenfabrik.</span></span><span class="sig-name descname"><span class="pre">zeichne_clip_rahmen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_bmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">foto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rahmen_plus</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#zeichenfabrik.zeichne_clip_rahmen" title="Link to this definition">¶</a></dt>
+<dd><p>Rahmen ins gedrehte Bild einzeichnen.</p>
+<p>Dient zur Korrektur des Beschnitts.
+Definition entsprechend Ecke1, Breite und Höhe des Fotos.
+image_bmp wurde um <em>rand</em> größer erzeugt, als es die Ecken des Fotos vorgeben würden.
+Der Beschnittrahmen der gezeichnet werden soll,
+ist um rahmen_plus grösser als die Ecken des Fotos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_bmp</strong> (<em>wx.Bitmap</em>) – Bitmap eines Fotos</p></li>
+<li><p><strong>foto</strong> (<a class="reference internal" href="index.html#fotos.Foto" title="fotos.Foto"><em>Foto</em></a>) – Fotodaten bstimmen den Rahmen</p></li>
+<li><p><strong>rand</strong> (<em>int</em>) – Die Bitmap ist um rand grösser als die Ecken des Fotos</p></li>
+<li><p><strong>rahmen_plus</strong> (<em>int</em>) – Der Beschnitt ist um rahmen_plus grösser als die Ecken des Fotos</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabe<span class="colon">:</span></dt>
+<dd class="field-even"><p>zbmp mit eingezeichnetem Beschnitt-Rahmen</p>
+</dd>
+<dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-odd"><p>wx.Bitmap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="zeichenfabrik.zeichne_clip_rahmen_ins_bild">
+<span class="sig-prename descclassname"><span class="pre">zeichenfabrik.</span></span><span class="sig-name descname"><span class="pre">zeichne_clip_rahmen_ins_bild</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_bmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">foto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rahmen_plus</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#zeichenfabrik.zeichne_clip_rahmen_ins_bild" title="Link to this definition">¶</a></dt>
+<dd><p>Zeichnet Beschnittrahmen direkt in image_bmp.</p>
+<p>Wird beim Speichern des Kontrollbilds verwendet um den Beschnitt anzuzeigen.
+Es wird direkt ins Bild gezeichnet und nicht in eine Overlay-Bitmap (z.B zbmp).
+image_bmp wurde um <em>rand</em> größer erzeugt, als es die Ecken des Fotos vorgeben würden.
+Der Beschnittrahmen der gezeichnet werden soll,
+ist um rahmen_plus grösser als die Ecken des Fotos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_bmp</strong> (<em>wx.Bitmap</em>) – Bitmap eines Fotos</p></li>
+<li><p><strong>foto</strong> (<a class="reference internal" href="index.html#fotos.Foto" title="fotos.Foto"><em>Foto</em></a>) – Fotodaten bstimmen den Rahmen</p></li>
+<li><p><strong>rand</strong> (<em>int</em>) – Die Bitmap ist um rand grösser als die Ecken des Fotos</p></li>
+<li><p><strong>rahmen_plus</strong> (<em>int</em>) – Der Beschnitt ist um rahmen_plus grösser als die Ecken des Fotos</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabe<span class="colon">:</span></dt>
+<dd class="field-even"><p>image_bmp mit eingezeichnetem Beschnitt-Rahmen</p>
+</dd>
+<dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-odd"><p>wx.Bitmap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="zeichenfabrik.zeichne_ecke">
+<span class="sig-prename descclassname"><span class="pre">zeichenfabrik.</span></span><span class="sig-name descname"><span class="pre">zeichne_ecke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_bmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#zeichenfabrik.zeichne_ecke" title="Link to this definition">¶</a></dt>
+<dd><p>Linie von der Vorgänger-Ecke zu Ecke2 bzw Ecke3</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_bmp</strong> (<em>wx.Bitmap</em>) – Bitmap über die gezeichnet wird (nur zur Größenbestimmung)</p></li>
+<li><p><strong>linie_hor</strong> (<em>Bool</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>linie_vert</strong> (<em>Bool</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabe<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bitmap mit Linien</p>
+</dd>
+<dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-odd"><p>wx.Bitmap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="zeichenfabrik.zeichne_rahmen">
+<span class="sig-prename descclassname"><span class="pre">zeichenfabrik.</span></span><span class="sig-name descname"><span class="pre">zeichne_rahmen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_bmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">akt_seite</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#zeichenfabrik.zeichne_rahmen" title="Link to this definition">¶</a></dt>
+<dd><p>Zeichnet Rahmen für alle definierten Fotos einer Seite.</p>
+<p>Der Rahmen wird aus den gewählten Ecken der Fotos erzeugt und mit Diagonalen gezeichnet.
+Die Rahmen dienen zur Kennzeichnung bereits definierter Fotos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_bmp</strong> (<em>wx.Bitmap</em>) – Bitmap über die gezeichnet wird (nur zur Größenbestimmung).</p></li>
+<li><p><strong>akt_seite</strong> (<em>seite</em>) – seite deren Fotos markiert werden sollen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabe<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bitmap mit Rahmen.</p>
+</dd>
+<dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-odd"><p>wx.Bitmap</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Stichwortverzeichnis</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Modulindex</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Suche</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">FotoAlbum</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Inhalt:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-Ueberblick">Überblick</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-modules">Module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Klaus Etscheidt.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -16,7 +16,7 @@
             "name": "make doku",
             "type": "PowerShell",
             "request": "launch",
-            "script": "${workspaceFolder}/doku/makeall.ps1",
+            "script": "${workspaceFolder}/doku/makeall_singlehtml.ps1",
             "cwd": "${cwd}"
         },
         
@@ -24,7 +24,7 @@
             "name": "make help",
             "type": "PowerShell",
             "request": "launch",
-            "script": "${workspaceFolder}/doku_help/makeall.ps1",
+            "script": "${workspaceFolder}/doku_help/makeall_chm.ps1",
             "cwd": "${cwd}"
         },
         
