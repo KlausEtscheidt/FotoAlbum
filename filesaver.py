@@ -71,7 +71,7 @@ class WorkerThread(Thread):
         fname = foto.get_targetname('.jpg')
         my_ke_image.save_as_jpg(fname)
 
-        _, grad = foto.drehung
+        _, grad = foto.drehung  
 
         wx.PostEvent(self._notify_window, ResultEvent('Speichere Tiff'))
         try:
